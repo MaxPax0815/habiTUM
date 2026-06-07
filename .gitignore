@@ -1,0 +1,9 @@
+# installed packages — recreated via npm install, too large to track
+
+node_modules
+
+# generated build output — recreated via npm run build
+build
+
+# macOS folder metadata
+.DS_Store
