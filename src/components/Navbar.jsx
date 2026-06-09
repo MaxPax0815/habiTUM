@@ -7,7 +7,7 @@ const Navbar = () => {
       <div className="container">
         <Link to="/" className="brand">
           <img
-            src={process.env.PUBLIC_URL + '/logo.png'}
+            src="/logo.png"
             alt="HabiTUM logo"
             className="brand-logo"
           />
