@@ -1,15 +1,39 @@
 import { Outlet } from 'react-router-dom'
+import { Box } from '@mui/material'
+
 import Sidebar from '../components/Sidebar'
+import { colors } from '../theme'
+
 
 const AppLayout = () => {
-  return (
-    <div className="app-layout">
-      <Sidebar />
+  // user will be replaced later on throug the user login state once the authentication is implemented. 
+  const user = {
+    name: "Tom MÜller", 
+    plan: "Premium",
+    role: "Student",
+  }
 
-      <main className="app-content">
+  return (
+    <Box 
+      sx={{
+        display: 'flex', 
+        minHeight: '100vh', 
+        backgroundColor: colors.background,
+      }}
+    > 
+      <Sidebar user={user}/>
+      <Box 
+        component="main" 
+        sx={{
+          flex: 1, 
+          minHeight: '100vh',
+          px: { xs: 3, md: 8},
+          py: { xs: 3, md: 4},
+        }}
+      > 
         <Outlet />
-      </main>
-    </div>
+      </Box>
+    </Box>
   )
 }
 

@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { ThemeProvider, CssBaseline } from '@mui/material'
+import { theme } from './theme'
 
 // layouts & pages & components 
 import AppLayout from './layouts/AppLayout'
@@ -15,7 +17,9 @@ function App() {
 
   return (
     <div className="App">
-      <BrowserRouter>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <BrowserRouter>
           <Routes>
             <Route element={<AppLayout />}>
             <Route path="/" element={<Home />} />
@@ -24,7 +28,8 @@ function App() {
             <Route path="/profile" element={<Profile />} />
           </Route>
           </Routes>
-      </BrowserRouter>
+        </BrowserRouter>
+      </ThemeProvider>
     </div>
   );
 }
