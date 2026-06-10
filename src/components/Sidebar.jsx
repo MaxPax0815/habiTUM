@@ -22,7 +22,7 @@ const navItems = [
   { 
     label: "Today", 
     icon: <HomeOutlinedIcon />, 
-    path: "/" 
+    path: "/today" 
   },
   { 
     label: "Communities", 
@@ -103,7 +103,7 @@ const Sidebar = ({ user }) => {
             key={item.path}
             component={NavLink}
             to={item.path}
-            end={item.path === "/"}
+            end={item.path === "/today"}
             sx={{
               mb: 1,
               borderRadius: 2,
