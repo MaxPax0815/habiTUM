@@ -42,7 +42,6 @@ const Sidebar = ({ user }) => {
         .split(" ")
         .map((part) => part[0])
         .join("")
-        .join("")
         .slice(0, 2)
     : "U";
 

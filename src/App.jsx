@@ -8,7 +8,7 @@ import AppLayout from './layouts/AppLayout'
 import LandingPage from './pages/LandingPage'
 import Home from './pages/Home'
 import Communities from './pages/Communities'
-import Analytics from './pages/Analytics'
+import Progress from './pages/Progress'
 import Profile from './pages/Profile'
 
 function App() {
@@ -23,7 +23,7 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path="/today" element={<Home />} />
             <Route path="/communities" element={<Communities />} />
-            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/progress" element={<Progress />} />
             <Route path="/profile" element={<Profile />} />
           </Route>
         </Routes>

@@ -4,33 +4,32 @@ import { Box } from '@mui/material'
 import Sidebar from '../components/Sidebar'
 import { colors } from '../theme'
 
-
 const AppLayout = () => {
-  // user will be replaced later on throug the user login state once the authentication is implemented. 
   const user = {
-    name: "Tom MÜller", 
-    plan: "Premium",
-    role: "Student",
+    name: 'Tom Müller',
+    plan: 'Premium',
+    role: 'Student',
   }
 
   return (
-    <Box 
+    <Box
       sx={{
-        display: 'flex', 
-        minHeight: '100vh', 
+        display: 'flex',
+        minHeight: '100vh',
         backgroundColor: colors.background,
       }}
-    > 
-      <Sidebar user={user}/>
-      <Box 
-        component="main" 
+    >
+      <Sidebar user={user} />
+
+      <Box
+        component="main"
         sx={{
-          flex: 1, 
+          flex: 1,
           minHeight: '100vh',
-          px: { xs: 3, md: 8},
-          py: { xs: 3, md: 4},
+          px: { xs: 3, md: 8 },
+          py: { xs: 3, md: 4 },
         }}
-      > 
+      >
         <Outlet />
       </Box>
     </Box>
