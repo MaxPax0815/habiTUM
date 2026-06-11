@@ -1,0 +1,53 @@
+/* =========================================================================
+   habits.css — layout for the habit dashboard (/dashboard) and its Navbar.
+   Scoped to the feature's own class names so it does not affect LandingPage.
+   The cards/form/buttons themselves are styled by MUI; this only handles the
+   page scaffolding (header, page width, dashboard grid).
+   ========================================================================= */
+
+/* Navbar */
+header {
+  background: #fff;
+  border-bottom: 1px solid #e5e4e7;
+}
+header .container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+header a {
+  color: #333;
+  text-decoration: none;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand-logo {
+  height: 48px;
+  width: auto;
+}
+
+/* page container */
+.pages {
+  max-width: 1400px;
+  padding: 20px;
+  margin: 0 auto;
+}
+
+/* dashboard: habit list + create form side by side */
+.home {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 100px;
+}
+@media (max-width: 900px) {
+  .home {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}

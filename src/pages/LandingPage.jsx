@@ -1,4 +1,5 @@
 import React from "react";
+import { Link as RouterLink } from "react-router-dom";
 import {
   Box,
   Button,
@@ -280,6 +281,8 @@ export default function LandingPage() {
                 justifyContent={{ xs: "center", md: "flex-start" }}
               >
                 <Button
+                  component={RouterLink}
+                  to="/dashboard"
                   variant="contained"
                   size="large"
                   endIcon={<ArrowForwardIcon />}
