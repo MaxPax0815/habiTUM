@@ -1,22 +1,24 @@
+import { useAuthContext } from '../auth/useAuthContext'
 import { useHabitsContext } from '../hooks/useHabitsContext'
 
 // date-fns — used to decide whether this habit is already done for the current period
-import isToday from 'date-fns/isToday'
 import isThisWeek from 'date-fns/isThisWeek'
+import isToday from 'date-fns/isToday'
 
 // MUI
-import Paper from '@mui/material/Paper'
-import Stack from '@mui/material/Stack'
 import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
+import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
 import Chip from '@mui/material/Chip'
-import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import LinearProgress from '@mui/material/LinearProgress'
+import Paper from '@mui/material/Paper'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 
 const HabitDetails = ({ habit }) => {
   const { dispatch } = useHabitsContext()
+  const { user } = useAuthContext()
 
   // "done this period" = the last checkin falls in the current day (daily) or week (weekly)
   const done = !!habit.lastCheckin && (
@@ -28,7 +30,10 @@ const HabitDetails = ({ habit }) => {
   // shared helper: POST to a habit sub-route, then swap the updated habit into context.
   // both /checkin and /undo respond with { message, habit }.
   const post = async (action) => {
-    const response = await fetch(`/api/habits/${habit._id}/${action}`, { method: 'POST' })
+    const response = await fetch(`/api/habits/${habit._id}/${action}`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${user.token}` } // include the JWT in the Authorization header so the backend knows which user is marking this habit done or undoing it
+    })
     const json = await response.json()
     if (response.ok) {
       dispatch({ type: 'UPDATE_HABIT', payload: json.habit })
@@ -39,7 +44,10 @@ const HabitDetails = ({ habit }) => {
   const handleUndo     = () => post('undo')
 
   const handleDelete = async () => {
-    const response = await fetch(`/api/habits/${habit._id}`, { method: 'DELETE' })
+    const response = await fetch(`/api/habits/${habit._id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${user.token}` } // include the JWT in the Authorization header so the backend knows which user is deleting this habit
+    })
     const json = await response.json()
     if (response.ok) {
       dispatch({ type: 'DELETE_HABIT', payload: json })
@@ -48,8 +56,7 @@ const HabitDetails = ({ habit }) => {
 
   return (
     <Paper sx={{ p: 2, mb: 1.5 }}>
-      <Stack direction="row" alignItems="center" spacing={1.5}>
-
+      <Stack direction="row" sx={{ alignItems: 'center' }} spacing={1.5}>
         {/* circle that toggles done / not done */}
         <Checkbox
           checked={done}

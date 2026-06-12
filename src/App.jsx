@@ -1,33 +1,42 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom'
+import { useAuthContext } from './auth/useAuthContext'
 
 // pages & components
-import LandingPage from './pages/LandingPage'
-import Home from './pages/Home'
 import Navbar from './components/Navbar'
+import Home from './pages/Home'
+import LandingPage from './pages/LandingPage'
+// auth pages
+import Login from './auth/Login.jsx'
+import Signup from './auth/Signup.jsx'
 
 // styles for the habit feature (Navbar / dashboard layout)
 import './habits.css'
 
 function App() {
+  const { user } = useAuthContext()
+
   return (
     <div className="App">
       <BrowserRouter>
         <Routes>
-          {/* public marketing page — the new structural shell pulled from dev */}
           <Route path="/" element={<LandingPage />} />
 
-          {/* the habit dashboard (yesterday's feature work) */}
           <Route
             path="/dashboard"
-            element={
+            element={user ? (
               <>
                 <Navbar />
                 <div className="pages">
                   <Home />
                 </div>
               </>
-            }
+            ) : (
+              <Navigate to="/login" />
+            )}
           />
+
+          <Route path="/login" element={<><Navbar /><Login /></>} />
+          <Route path="/signup" element={<><Navbar /><Signup /></>} />
         </Routes>
       </BrowserRouter>
     </div>

@@ -1,21 +1,23 @@
 import { useState } from 'react'
+import { useAuthContext } from '../auth/useAuthContext'
 import { useHabitsContext } from '../hooks/useHabitsContext'
 
 // MUI specific imports
+import Button from '@mui/material/Button'
 import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
-import Typography from '@mui/material/Typography'
+import TextField from '@mui/material/TextField'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
-import TextField from '@mui/material/TextField'
-import Button from '@mui/material/Button'
+import Typography from '@mui/material/Typography'
 
 // allowed categories — must match the enum in the backend habitModel.js
 const CATEGORIES = ['Nutrition', 'Fitness', 'Learning', 'Wellness', 'Productivity', 'Other']
 
 const HabitForm = () => {
   const { dispatch } = useHabitsContext()
-
+  // get the current user from the auth context, so we can include their token in the API request to create a new habit
+  const { user } = useAuthContext()
   // Step 1: set up state for all the form fields, plus error handling
   const [habitType, setHabitType] = useState('build') // default to 'build' since most habits are positive routines
   const [title, setTitle] = useState('')
@@ -33,14 +35,15 @@ const HabitForm = () => {
       method: 'POST',
       body: JSON.stringify(habit),
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${user.token}` // include the JWT in the Authorization header so the backend knows which user is creating this habit
+      } //MongoDB stores the user id from the token in the habit's "user" field, so we can later query habits by user and show each user only their own habits on the frontend
     })
     const json = await response.json()
-
+    
     if (!response.ok) {
       setError(json.error)
-      setEmptyFields(json.emptyFields)
+      setEmptyFields(json.emptyFields || [])
     }
     if (response.ok) {
       setEmptyFields([])
