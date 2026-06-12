@@ -1,73 +1,71 @@
-import { Box, Button, Stack, Typography } from '@mui/material'
-import { NavLink } from 'react-router-dom'
+import { Box, Button, Typography } from '@mui/material'
+import { Link as RouterLink, useLocation } from 'react-router-dom'
 import { colors } from '../theme'
 
 const AuthHeader = ({ title, subtitle }) => {
+  const location = useLocation()
+
+  const isSignupPage = location.pathname === '/signup'
+  const targetPath = isSignupPage ? '/login' : '/signup'
+  const buttonText = isSignupPage ? 'Login' : 'Sign up'
+
   return (
-    <Box sx={{ width: '100%', maxWidth: 420, mb: 3 }}>
-      <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>
+    <Box
+      sx={{
+        position: 'relative',
+        width: '100%',
+        pt: 6,
+        mb: 5,
+        textAlign: 'center',
+      }}
+    >
+      <Button
+        component={RouterLink}
+        to={targetPath}
+        variant="outlined"
+        sx={{
+          position: 'absolute',
+          top: 24,
+          right: 32,
+          borderRadius: 999,
+          px: 3,
+          py: 1,
+          fontWeight: 800,
+          color: colors.textPrimary,
+          borderColor: colors.border,
+          backgroundColor: colors.surface,
+
+          '&:hover': {
+            borderColor: colors.primary,
+            backgroundColor: colors.softBlue,
+          },
+        }}
+      >
+        {buttonText}
+      </Button>
+
+      <Typography
+        variant="h4"
+        sx={{
+          fontWeight: 900,
+          color: colors.textPrimary,
+          mb: 1,
+        }}
+      >
         {title}
       </Typography>
 
       {subtitle && (
-        <Typography color="text.secondary" sx={{ mb: 3 }}>
+        <Typography
+          variant="body1"
+          sx={{
+            color: colors.textSecondary,
+            lineHeight: 1.6,
+          }}
+        >
           {subtitle}
         </Typography>
       )}
-
-      <Stack direction="row" spacing={1}>
-        <Button
-          component={NavLink}
-          to="/login"
-          end
-          fullWidth
-          sx={{
-            borderRadius: 2,
-            fontWeight: 800,
-            color: 'text.secondary',
-            border: '1px solid',
-            borderColor: 'divider',
-
-            '&.active': {
-              backgroundColor: colors.primary,
-              color: colors.surface,
-              borderColor: colors.primary,
-            },
-
-            '&.active:hover': {
-              backgroundColor: colors.primary,
-            },
-          }}
-        >
-          Login
-        </Button>
-
-        <Button
-          component={NavLink}
-          to="/signup"
-          end
-          fullWidth
-          sx={{
-            borderRadius: 2,
-            fontWeight: 800,
-            color: 'text.secondary',
-            border: '1px solid',
-            borderColor: 'divider',
-
-            '&.active': {
-              backgroundColor: colors.primary,
-              color: colors.surface,
-              borderColor: colors.primary,
-            },
-
-            '&.active:hover': {
-              backgroundColor: colors.primary,
-            },
-          }}
-        >
-          Sign up
-        </Button>
-      </Stack>
     </Box>
   )
 }

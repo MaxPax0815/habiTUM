@@ -1,10 +1,10 @@
 import { useEffect } from "react"
-import { useAuthContext } from "../auth/useAuthContext"
-import { useHabitsContext } from "../hooks/useHabitsContext"
+import { useAuthContext } from "../../auth/useAuthContext"
+import { useHabitsContext } from "../../hooks/useHabitsContext"
 
 // components
-import HabitDetails from "../components/HabitDetails"
-import HabitForm from "../components/HabitForm"
+import HabitDetails from "../../components/HabitDetails"
+import HabitForm from "../../components/HabitForm"
 
 const Home = () => {
   const { habits, dispatch } = useHabitsContext()
