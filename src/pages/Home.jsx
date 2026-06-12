@@ -8,7 +8,7 @@ import HabitForm from "../components/HabitForm"
 
 const Home = () => {
   const { habits, dispatch } = useHabitsContext()
-  const { user } = useAuthContext() // get the current user from the auth context
+  const { user } = useAuthContext() // get the current user from the auth context hook
 
   useEffect(() => {
     const fetchHabits = async () => {
@@ -26,6 +26,7 @@ const Home = () => {
     if (user) fetchHabits() // only fetch habits if user is logged in (i.e. we have a valid token)
 
   }, [dispatch, user]) // re-run this effect whenever the user changes (e.g. log in or log out).
+  // user addes as a dependency to ensure that if the user logs in or out, the habits will be fetched or cleared accordingly.
   //dispatch updates the global habits state, which causes the component to re-render and show the latest habits.
 
   return (

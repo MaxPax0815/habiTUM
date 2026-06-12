@@ -9,7 +9,7 @@ const Navbar = () => {
   return (
     <header>
       <div className="container">
-        <Link to="/" className="brand">
+        <Link to={user ? "/dashboard" : "/"} className="brand">
           <img src="/logo.png" alt="HabiTUM logo" className="brand-logo" />
           <h1>HabiTUM</h1>
         </Link>
