@@ -35,8 +35,8 @@ function App() {
             )}
           />
 
-          <Route path="/login" element={<><Navbar /><Login /></>} />
-          <Route path="/signup" element={<><Navbar /><Signup /></>} />
+          <Route path="/login" element={!user ? <><Navbar /><Login /></> : <Navigate to="/dashboard" />} />
+          <Route path="/signup" element={!user ? <><Navbar /><Signup /></> : <Navigate to="/dashboard" />} />
         </Routes>
       </BrowserRouter>
     </div>

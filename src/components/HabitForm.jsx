@@ -29,6 +29,12 @@ const HabitForm = () => {
   // Step 2: handle form submission — POST the new habit to the backend
   const handleSubmit = async (e) => {
     e.preventDefault()
+
+    if (!user) { // if there's no user, we can't create a habit, so show an error message
+      setError('You must be logged in to create a habit')
+      return
+    }
+
     const habit = {title, frequency, motivation, habitType}
 
     const response = await fetch('/api/habits', {
