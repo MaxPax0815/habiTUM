@@ -52,15 +52,22 @@ const Sidebar = ({ user }) => {
   const initials = user?.name 
   // erstellt einen String-Array aus dem Namen des Users, greift sich dann von dem Vor- u. Nachnamen jeweils den ersten Buchstaben
   // und joined diese zusammen, dabei werden max. zwei Buchstaben verwendet 
-    ? user.name
+     ? (() => {
+      const nameParts = String(user.name)
         .trim()
         .split(" ")
         .filter(Boolean)
-        .map((part) => part[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase()
-    : "U";
+
+      const firstName = nameParts[0]
+      const lastName = nameParts[nameParts.length - 1]
+
+      if (nameParts.length === 1) {
+        return firstName[0].toUpperCase()
+      }
+
+      return `${firstName[0]}${lastName[0]}`.toUpperCase()
+    })()
+  : "U";
 
   return (
     <Box
