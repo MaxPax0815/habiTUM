@@ -1,4 +1,5 @@
 import React from "react";
+import { Link as RouterLink } from "react-router-dom";
 import {
   Box,
   Button,
@@ -22,7 +23,7 @@ import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import MilitaryTechIcon from "@mui/icons-material/MilitaryTech";
 
-import mockupDashboard from "../assets/mockup_dashboard.png";
+import mockupDashboard from '../../assets/mockup_dashboard.png';
 
 // ------------------------------------------------------
 // Global color variables
@@ -255,7 +256,7 @@ export default function LandingPage() {
               >
                 Turn goals into{" "}
                 <Box component="span" sx={{ color: "primary.main" }}>
-                  lasting routines.
+                  Lasting Routines.
                 </Box>
               </Typography>
 
@@ -280,6 +281,8 @@ export default function LandingPage() {
                 justifyContent={{ xs: "center", md: "flex-start" }}
               >
                 <Button
+                  component={RouterLink}
+                  to="/signup"
                   variant="contained"
                   size="large"
                   endIcon={<ArrowForwardIcon />}
@@ -294,6 +297,8 @@ export default function LandingPage() {
                 </Button>
 
                 <Button
+                  component={RouterLink}
+                  to='/login'
                   variant="outlined"
                   size="large"
                   sx={{

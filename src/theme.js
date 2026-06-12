@@ -49,3 +49,5 @@ export const theme = createTheme({
         borderRadius: 14,
     },
 }); 
+
+export default theme
