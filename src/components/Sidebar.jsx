@@ -1,15 +1,26 @@
 import { NavLink } from 'react-router-dom'
+
+// UI components
 import {
+  // runder Profil-Kreis
   Avatar,
+  // flexibler container
   Box,
+  // Trennlinie
   Divider,
+  // Lister für Navigation
   List,
+  // klickbarer Listeneintrag
   ListItemButton,
+  // Breich für Icon 
   ListItemIcon,
+  // Breich für Text
   ListItemText,
+  // Text-Komponente
   Typography,
 } from '@mui/material'
 
+// ICONS 
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
@@ -37,12 +48,18 @@ const navItems = [
 ];
 
 const Sidebar = ({ user }) => {
+  // ternary opreator: checks if user.name exists
   const initials = user?.name 
+  // erstellt einen String-Array aus dem Namen des Users, greift sich dann von dem Vor- u. Nachnamen jeweils den ersten Buchstaben
+  // und joined diese zusammen, dabei werden max. zwei Buchstaben verwendet 
     ? user.name
+        .trim()
         .split(" ")
+        .filter(Boolean)
         .map((part) => part[0])
         .join("")
         .slice(0, 2)
+        .toUpperCase()
     : "U";
 
   return (
@@ -146,6 +163,9 @@ const Sidebar = ({ user }) => {
 
       <Box sx={{ p: 1.5 }}>
         <Box
+          component={NavLink}
+          to="/profile"
+          aria-label="Go to profile"
           sx={{
             display: "flex",
             alignItems: "center",
@@ -153,6 +173,17 @@ const Sidebar = ({ user }) => {
             p: 1.5,
             borderRadius: 2,
             backgroundColor: "rgba(255,255,255,0.06)",
+            textDecoration: "none",
+            color: "inherit",
+            cursor: "pointer",
+
+            "&:hover": {
+              backgroundColor: "rgba(255,255,255,0.10)",
+            },
+
+            "&.active": {
+              backgroundColor: "rgba(255,255,255,0.12)",
+            },
           }}
         >
           <Avatar

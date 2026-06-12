@@ -5,6 +5,7 @@ import Sidebar from '../components/Sidebar'
 import { colors } from '../theme'
 
 const AppLayout = () => {
+  // sobald auth steht kommt hier der user aus MongoDB rein, aktuell hardcoded für die sidebar
   const user = {
     name: 'Tom Müller',
     plan: 'Premium',
