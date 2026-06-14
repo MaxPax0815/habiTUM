@@ -282,7 +282,7 @@ export default function LandingPage() {
               >
                 <Button
                   component={RouterLink}
-                  to="/dashboard"
+                  to="/signup"
                   variant="contained"
                   size="large"
                   endIcon={<ArrowForwardIcon />}
@@ -297,6 +297,8 @@ export default function LandingPage() {
                 </Button>
 
                 <Button
+                  component={RouterLink}
+                  to="/login"
                   variant="outlined"
                   size="large"
                   sx={{
