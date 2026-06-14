@@ -54,8 +54,6 @@ const Sidebar = ({ user }) => {
     ? user.email[0].toUpperCase()
     : "U";
 
-  console.log("Sidebar user: ", user)
-
   // ternary opreator: checks if user.name exists
    /* const initials = user?.name */
 
