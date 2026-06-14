@@ -1,22 +1,14 @@
-import { NavLink } from 'react-router-dom'
-
+import { NavLink, useNavigate } from 'react-router-dom'
 // UI components
 import {
-  // runder Profil-Kreis
   Avatar,
-  // flexibler container
   Box,
-  // Trennlinie
+  Button,
   Divider,
-  // Lister für Navigation
   List,
-  // klickbarer Listeneintrag
   ListItemButton,
-  // Breich für Icon 
   ListItemIcon,
-  // Breich für Text
   ListItemText,
-  // Text-Komponente
   Typography,
 } from '@mui/material'
 
@@ -25,9 +17,10 @@ import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 
 import { colors } from "../theme";
-
+import { useLogout } from '../auth/useLogout'
 
 const navItems = [
   { 
@@ -47,12 +40,26 @@ const navItems = [
   },
 ];
 
+// user als prop nutzbar, da const { user } = useAuthContext() in App.jsx an AppLayout weitergegeben wird 
 const Sidebar = ({ user }) => {
+  const { logout } = useLogout() 
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/')
+  }
+
+  const initials = user?.email 
+    ? user.email[0].toUpperCase()
+    : "U";
+
   // ternary opreator: checks if user.name exists
-  const initials = user?.name 
+   /* const initials = user?.name */
+
   // erstellt einen String-Array aus dem Namen des Users, greift sich dann von dem Vor- u. Nachnamen jeweils den ersten Buchstaben
   // und joined diese zusammen, dabei werden max. zwei Buchstaben verwendet 
-     ? (() => {
+  /*   ? (() => {
       const nameParts = String(user.name)
         .trim()
         .split(" ")
@@ -67,7 +74,7 @@ const Sidebar = ({ user }) => {
 
       return `${firstName[0]}${lastName[0]}`.toUpperCase()
     })()
-  : "U";
+  : "U";*/
 
   return (
     <Box
@@ -86,18 +93,25 @@ const Sidebar = ({ user }) => {
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Box
             sx={{
-              width: 28,
-              height: 28,
-              borderRadius: 1,
-              backgroundColor: colors.primary,
+              width: 52,
+              height: 52,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: 16,
-              fontWeight: 800,
+              flexShrink: 0,
             }}
           >
-            ▰
+            <Box
+              component="img"
+              src="/logo.png"
+              alt="HabiTUM logo"
+              sx={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                display: "block",
+              }}
+            />
           </Box>
 
           <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1 }}>
@@ -112,7 +126,7 @@ const Sidebar = ({ user }) => {
           variant="body2"
           sx={{
             mt: 1,
-            color: "rgba(255,255,255,0.35)",
+            color: "rgba(255,255,255,0.55)",
             lineHeight: 1.35,
           }}
         >
@@ -130,7 +144,7 @@ const Sidebar = ({ user }) => {
             sx={{
               mb: 1,
               borderRadius: 2,
-              color: "rgba(255,255,255,0.45)",
+              color: "rgba(255,255,255,0.65)",
               minHeight: 48,
               px: 1.5,
 
@@ -150,7 +164,7 @@ const Sidebar = ({ user }) => {
               },
 
               "&:hover": {
-                backgroundColor: "rgba(255,255,255,0.08)",
+                backgroundColor: "rgba(255,255,255,0.10)",
               },
 
               "&.active:hover": {
@@ -166,7 +180,7 @@ const Sidebar = ({ user }) => {
 
       <Box sx={{ flexGrow: 1 }} />
 
-      <Divider sx={{ borderColor: "rgba(255,255,255,0.08)" }} />
+      <Divider sx={{ borderColor: "rgba(255,255,255,0.14)" }} />
 
       <Box sx={{ p: 1.5 }}>
         <Box
@@ -179,17 +193,17 @@ const Sidebar = ({ user }) => {
             gap: 1.5,
             p: 1.5,
             borderRadius: 2,
-            backgroundColor: "rgba(255,255,255,0.06)",
+            backgroundColor: "rgba(255,255,255,0.10)",
             textDecoration: "none",
             color: "inherit",
             cursor: "pointer",
 
             "&:hover": {
-              backgroundColor: "rgba(255,255,255,0.10)",
+              backgroundColor: "rgba(255,255,255,0.15)",
             },
 
             "&.active": {
-              backgroundColor: "rgba(255,255,255,0.12)",
+              backgroundColor: "rgba(255,255,255,0.15)",
             },
           }}
         >
@@ -204,7 +218,7 @@ const Sidebar = ({ user }) => {
           >
             {initials}
           </Avatar>
-
+        
           <Box sx={{ minWidth: 0 }}>
             <Typography
               variant="body2"
@@ -212,9 +226,12 @@ const Sidebar = ({ user }) => {
                 fontWeight: 800,
                 color: colors.surface,
                 whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: 120,
               }}
             >
-              {user?.name || "User"}
+              {user?.email || "User"}
             </Typography>
 
             <Typography
@@ -227,10 +244,36 @@ const Sidebar = ({ user }) => {
               }}
             >
               <AutoAwesomeIcon sx={{ fontSize: 12 }} />
-              {user?.plan || "Free"} · {user?.role || "Member"}
-            </Typography>
+              {user?.plan || "Free"} 
+            </Typography>           
           </Box>
         </Box>
+
+        <Button
+          fullWidth
+          onClick={handleLogout}
+          startIcon={<LogoutOutlinedIcon />}
+          sx={{
+            mt: 1,
+            py: 1,
+            borderRadius: 2,
+            justifyContent: "center",
+            color: "rgba(255,255,255,0.65)",
+            backgroundColor: "transparent",
+            border: "1px solid rgba(255,255,255,0.20)",
+            fontWeight: 800,
+            textTransform: "none",
+
+            "&:hover": {
+              color: "#F43F5E",
+              backgroundColor: "rgba(244,63,94,0.08)",
+              borderColor: "rgba(244,63,94,0.55)",
+            },
+          }}
+        >
+          Logout
+        </Button>
+
       </Box>
     </Box>
   )

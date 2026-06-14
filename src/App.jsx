@@ -15,6 +15,7 @@ import Signup from './pages/public/Signup.jsx'
 
 // styles for the habit feature (Navbar / dashboard layout)
 import './habits.css'
+import { useRadioGroup } from '@mui/material'
 
 function App() {
   const { user } = useAuthContext()
@@ -33,7 +34,7 @@ function App() {
           />
 
           <Route
-            element={user ? <AppLayout /> : <Navigate to="/login" />}
+            element={user ? <AppLayout user={user} /> : <Navigate to="/login" />}
           />
           <Route element={<AppLayout />}>
             <Route path="/today" element={<Home />} />
