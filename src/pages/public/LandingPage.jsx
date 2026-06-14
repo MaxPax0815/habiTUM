@@ -298,7 +298,7 @@ export default function LandingPage() {
 
                 <Button
                   component={RouterLink}
-                  to='/login'
+                  to="/login"
                   variant="outlined"
                   size="large"
                   sx={{
