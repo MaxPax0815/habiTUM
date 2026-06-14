@@ -40,7 +40,7 @@ const navItems = [
   },
 ];
 
-// user als prop nutzbar, da const { user } = useAuthContext() in App.jsx an AppLayout weitergegeben wird 
+// user als prop nutzbar, da const { user } = useAuthContext() in AppLayout.jsx 
 const Sidebar = ({ user }) => {
   const { logout } = useLogout() 
   const navigate = useNavigate()
@@ -53,6 +53,8 @@ const Sidebar = ({ user }) => {
   const initials = user?.email 
     ? user.email[0].toUpperCase()
     : "U";
+
+  console.log("Sidebar user: ", user)
 
   // ternary opreator: checks if user.name exists
    /* const initials = user?.name */

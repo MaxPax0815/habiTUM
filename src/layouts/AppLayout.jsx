@@ -3,8 +3,10 @@ import { Box } from '@mui/material'
 
 import Sidebar from '../components/Sidebar'
 import { colors } from '../theme'
+import { useAuthContext } from '../auth/useAuthContext'
 
-const AppLayout = ({ user }) => {
+const AppLayout = () => {
+  const { user } = useAuthContext() 
 
   return (
     <Box
