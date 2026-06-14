@@ -1,5 +1,7 @@
-import { Box, Button, Typography } from '@mui/material'
+import { Box, Button, IconButton, Typography } from '@mui/material'
 import { Link as RouterLink, useLocation } from 'react-router-dom'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+
 import { colors } from '../theme'
 
 const AuthHeader = ({ title, subtitle }) => {
@@ -14,11 +16,34 @@ const AuthHeader = ({ title, subtitle }) => {
       sx={{
         position: 'relative',
         width: '100%',
-        pt: 6,
+        pt: 7,
         mb: 5,
         textAlign: 'center',
       }}
     >
+
+      <IconButton
+        component={RouterLink}
+        to="/"
+        aria-label="Back to landing page"
+        sx={{
+          position: 'absolute',
+          top: 28,
+          left: 32,
+          color: colors.textPrimary,
+          backgroundColor: 'transparent',
+          border: 'none',
+          boxShadow: 'none',
+
+          '&:hover': {
+            color: colors.primary,
+            backgroundColor: 'transparent',
+          },
+        }}
+      >
+        <ArrowBackIcon />
+      </IconButton>
+
       <Button
         component={RouterLink}
         to={targetPath}
@@ -48,7 +73,7 @@ const AuthHeader = ({ title, subtitle }) => {
         variant="h4"
         sx={{
           fontWeight: 900,
-          color: colors.textPrimary,
+          color: colors.primary,
           mb: 1,
         }}
       >
