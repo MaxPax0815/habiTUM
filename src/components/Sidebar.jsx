@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom';
 // UI components
 import {
   Avatar,
@@ -10,17 +10,17 @@ import {
   ListItemIcon,
   ListItemText,
   Typography,
-} from '@mui/material'
+} from '@mui/material';
 
 // ICONS 
-import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
-import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
+import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 
+import { useLogout } from '../auth/useLogout';
 import { colors } from "../theme";
-import { useLogout } from '../auth/useLogout'
 
 const navItems = [
   { 
@@ -50,31 +50,12 @@ const Sidebar = ({ user }) => {
     navigate('/')
   }
 
-  const initials = user?.email 
-    ? user.email[0].toUpperCase()
-    : "U";
-
-  // ternary opreator: checks if user.name exists
-   /* const initials = user?.name */
-
-  // erstellt einen String-Array aus dem Namen des Users, greift sich dann von dem Vor- u. Nachnamen jeweils den ersten Buchstaben
-  // und joined diese zusammen, dabei werden max. zwei Buchstaben verwendet 
-  /*   ? (() => {
-      const nameParts = String(user.name)
-        .trim()
-        .split(" ")
-        .filter(Boolean)
-
-      const firstName = nameParts[0]
-      const lastName = nameParts[nameParts.length - 1]
-
-      if (nameParts.length === 1) {
-        return firstName[0].toUpperCase()
-      }
-
-      return `${firstName[0]}${lastName[0]}`.toUpperCase()
-    })()
-  : "U";*/
+  // Generate user initials for the avatar; fallback to "U" if no name info is available
+  const initials = user?.firstName && user?.lastName
+  ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+  : user?.firstName
+  ? user.firstName[0].toUpperCase()
+  : "U";
 
   return (
     <Box
@@ -231,7 +212,7 @@ const Sidebar = ({ user }) => {
                 maxWidth: 120,
               }}
             >
-              {user?.email || "User"}
+              {user?.username || "User"}
             </Typography>
 
             <Typography
@@ -244,7 +225,7 @@ const Sidebar = ({ user }) => {
               }}
             >
               <AutoAwesomeIcon sx={{ fontSize: 12 }} />
-              {user?.plan || "Free"} 
+              {user?.subscription || "free"} 
             </Typography>           
           </Box>
         </Box>
