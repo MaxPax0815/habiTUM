@@ -347,7 +347,7 @@ export default function LandingPage() {
 
         {/* Why HabiTUM */}
         <Container maxWidth="lg" sx={{ pb: { xs: 7, md: 10 } }}>
-          <Box textAlign="center" mb={5}>
+          <Box textAlign="center" sx={{ mb: 1 }}>
             <Typography
               variant="overline"
               sx={{
@@ -370,15 +370,19 @@ export default function LandingPage() {
             </Typography>
           </Box>
 
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={4}>
+          <Grid container spacing={3} sx={{ mt: 3}}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <GrayCard>
                 <IconBadge>
                   <TrackChangesIcon fontSize="small" />
                 </IconBadge>
 
-                <Typography fontWeight={900} mb={1}>
-                  Build better habits
+                <Typography sx={{ color: colors.muted,
+                      fontWeight: 900,
+                      letterSpacing: "0.18em",
+                 }} 
+                 fontWeight={900} mb={1}>
+                  BUILD BETTER HABITS
                 </Typography>
 
                 <Typography color="text.secondary" lineHeight={1.7}>
@@ -388,14 +392,18 @@ export default function LandingPage() {
               </GrayCard>
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <GrayCard>
                 <IconBadge bg={colors.softOrange} color={colors.orange}>
                   <WhatshotIcon fontSize="small" />
                 </IconBadge>
 
-                <Typography fontWeight={900} mb={1}>
-                  Break bad habits
+                <Typography sx={{ color: colors.muted,
+                      fontWeight: 900,
+                      letterSpacing: "0.18em",
+                 }}
+                  fontWeight={900} mb={1}>
+                  BREAK BAD HABITS
                 </Typography>
 
                 <Typography color="text.secondary" lineHeight={1.7}>
@@ -405,14 +413,19 @@ export default function LandingPage() {
               </GrayCard>
             </Grid>
 
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <GrayCard>
                 <IconBadge bg={colors.softGreen} color={colors.green}>
                   <GroupsIcon fontSize="small" />
                 </IconBadge>
 
-                <Typography fontWeight={900} mb={1}>
-                  Stay accountable
+                <Typography 
+                sx={{ color: colors.muted,
+                      fontWeight: 900,
+                      letterSpacing: "0.18em",
+                 }}
+                fontWeight={900} mb={1}>
+                  STAY ACCOUNTABLE
                 </Typography>
 
                 <Typography color="text.secondary" lineHeight={1.7}>
@@ -431,11 +444,20 @@ export default function LandingPage() {
               bgcolor: colors.primaryDark,
               color: "#fff",
               borderRadius: 3,
-              p: { xs: 3, sm: 4, md: 5 },
+              p: { xs: 3, sm: 4, md: 5 }
             }}
+            
           >
-            <Grid container spacing={4} alignItems="center">
-              <Grid item xs={12} md={5}>
+            <Grid container spacing={4} alignItems="center" justifyContent="center">
+              <Grid
+                size={{ xs: 12, md: 5 }}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  textAlign: "center",
+                }}
+              >
                 <Typography
                   variant="overline"
                   sx={{
@@ -464,9 +486,15 @@ export default function LandingPage() {
                 </Typography>
               </Grid>
 
-              <Grid item xs={12} md={7}>
-                <Stack spacing={2}>
-                  <GrayCard sx={{ boxShadow: "none" }}>
+              <Grid
+                size={{ xs: 12, md: 7 }}
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              >
+                <Stack spacing={2} sx={{ width: "100%", maxWidth: 560 }}>
+                  <GrayCard sx={{ boxShadow: "none", textAlign: "center" }}>
                     <Typography sx={{ fontSize: 34, mb: 1 }}>👥</Typography>
 
                     <Typography
@@ -480,17 +508,13 @@ export default function LandingPage() {
                       Communities
                     </Typography>
 
-                    <Typography fontWeight={900} mb={1}>
-                      Communities
-                    </Typography>
-
                     <Typography color="text.secondary" lineHeight={1.7}>
                       Find your people and build routines together — from fitness groups to
                       study accountability circles.
                     </Typography>
                   </GrayCard>
 
-                  <GrayCard sx={{ boxShadow: "none" }}>
+                  <GrayCard sx={{ boxShadow: "none", textAlign: "center" }}>
                     <Typography sx={{ fontSize: 34, mb: 1 }}>🏆</Typography>
 
                     <Typography
@@ -502,10 +526,6 @@ export default function LandingPage() {
                       }}
                     >
                       Challenges
-                    </Typography>
-
-                    <Typography fontWeight={900} mb={1}>
-                      Active Challenges
                     </Typography>
 
                     <Typography color="text.secondary" lineHeight={1.7}>
@@ -522,7 +542,10 @@ export default function LandingPage() {
         {/* Stats Section */}
         <Container maxWidth="lg" sx={{ pb: { xs: 5, md: 7 } }}>
           <GrayCard>
-            <Grid container spacing={3}>
+            <Grid container spacing={3}
+            sx={{
+              justifyContent: "space-around",
+            }}>
               <Grid item xs={12} sm={4}>
                 <MiniStat
                   value="820+"
@@ -554,6 +577,89 @@ export default function LandingPage() {
               </Grid>
             </Grid>
           </GrayCard>
+        </Container>
+
+        {/* Call to Action Section */}
+        <Container maxWidth="lg" sx={{ pb: { xs: 7, md: 10 } }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              textAlign: "center",
+            }}
+          >
+            <Typography
+            variant="overline"
+            sx={{
+              color: colors.muted,
+              fontWeight: 900,
+              letterSpacing: "0.18em",
+            }}
+            >
+              READY TO START?
+            </Typography>
+            <Typography              variant="h2"
+              sx={{
+                fontSize: { xs: 30, md: 38 },
+                letterSpacing: "-0.035em",
+                textAlign: "center",
+              }}
+            >
+              Your first habit starts today.
+            </Typography>
+            <Typography
+                sx={{
+                  mt: 3,
+                  maxWidth: 500,
+                  fontSize: { xs: 16, md: 18 },
+                  color: "text.secondary",
+                  lineHeight: 1.7,
+                }}
+              >
+                Free to use no credit card required.
+              </Typography>
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={2}
+                sx={{ mt: 4 }}
+                alignItems={{ xs: "stretch", sm: "center" }}
+                justifyContent="center"
+              >
+                <Button
+                  component={RouterLink}
+                  to="/signup"
+                  variant="contained"
+                  size="large"
+                  endIcon={<ArrowForwardIcon />}
+                  sx={{
+                    px: 3,
+                    py: 1.4,
+                    borderRadius: 2,
+                    boxShadow: "0 12px 24px rgba(0, 102, 255, 0.28)",
+                  }}
+                >
+                  Get started — it’s free
+                </Button>
+
+                <Button
+                  component={RouterLink}
+                  to="/login"
+                  variant="outlined"
+                  size="large"
+                  sx={{
+                    px: 3,
+                    py: 1.4,
+                    borderRadius: 2,
+                    borderColor: colors.border,
+                    color: "text.primary",
+                    bgcolor: colors.surface,
+                  }}
+                >
+                  Login
+                </Button>
+              </Stack>
+          </Box>
         </Container>
       </Box>
     </ThemeProvider>
