@@ -12,9 +12,11 @@ import {
   Typography,
 } from '@mui/material';
 
-// ICONS 
+// ICONS
+import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
+import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
@@ -22,28 +24,27 @@ import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import { useLogout } from '../auth/useLogout';
 import { colors } from "../theme";
 
-const navItems = [
-  { 
-    label: "Today", 
-    icon: <HomeOutlinedIcon />, 
-    path: "/today" 
-  },
-  { 
-    label: "Communities", 
-    icon: <GroupsOutlinedIcon />, 
-    path: "/communities" 
-  },
-  { 
-    label: "Progress", 
-    icon: <BarChartOutlinedIcon />, 
-    path: "/progress" 
-  },
-];
-
-// user als prop nutzbar, da const { user } = useAuthContext() in AppLayout.jsx 
+// user is passed down from AppLayout, which reads it from AuthContext (set on login, persisted in localStorage)
 const Sidebar = ({ user }) => {
-  const { logout } = useLogout() 
+  const { logout } = useLogout()
   const navigate = useNavigate()
+
+  // pages visible to all logged-in users
+  const baseNavItems = [
+    { label: "Today",       icon: <HomeOutlinedIcon />,    path: "/today" },
+    { label: "Communities", icon: <GroupsOutlinedIcon />,  path: "/communities" },
+    { label: "Progress",    icon: <BarChartOutlinedIcon />, path: "/progress" },
+  ]
+
+  // extra pages only shown when accountType === 'manager'; prepended so Dashboard appears first
+  const managerNavItems = [
+    { label: "Dashboard", icon: <DashboardOutlinedIcon />, path: "/manager" },
+  ]
+
+  // accountType comes from the login response (userController) → stored in AuthContext → passed via AppLayout
+  const navItems = user?.accountType === 'manager'
+    ? [...managerNavItems, ...baseNavItems]
+    : baseNavItems
 
   const handleLogout = () => {
     logout()
@@ -52,7 +53,7 @@ const Sidebar = ({ user }) => {
 
   // Generate user initials for the avatar; fallback to "U" if no name info is available
   const initials = user?.firstName && user?.lastName
-  ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+  ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() // $
   : user?.firstName
   ? user.firstName[0].toUpperCase()
   : "U";
@@ -224,8 +225,11 @@ const Sidebar = ({ user }) => {
                 color: "rgba(255,255,255,0.35)",
               }}
             >
-              <AutoAwesomeIcon sx={{ fontSize: 12 }} />
-              {user?.subscription || "free"} 
+              {/* managers show a role badge instead of their subscription tier, since free/premium doesn't apply to them */}
+              {user?.accountType === 'manager'
+                ? <AdminPanelSettingsOutlinedIcon sx={{ fontSize: 12 }} />
+                : <AutoAwesomeIcon sx={{ fontSize: 12 }} />}
+              {user?.accountType === 'manager' ? 'Manager' : (user?.subscription || 'free')}
             </Typography>           
           </Box>
         </Box>
