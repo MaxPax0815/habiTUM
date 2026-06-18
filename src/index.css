@@ -17,7 +17,7 @@
 
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
-  color-scheme: light dark;
+  color-scheme: light;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -30,6 +30,7 @@
   }
 }
 
+/* Dark mode block for now — we can later add a toggle and store the preference in localStorage or so, but for now this is good enough since most OSes have a dark mode setting that will trigger this
 @media (prefers-color-scheme: dark) {
   :root {
     --text: #9ca3af;
@@ -49,14 +50,14 @@
     filter: invert(1) brightness(2);
   }
 }
-
+*/
 body {
   margin: 0;
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
+  width: 100%;
+  /* max-width: 100%; */
   margin: 0 auto;
   text-align: center;
   border-inline: 1px solid var(--border);
