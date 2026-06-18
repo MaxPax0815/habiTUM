@@ -3,8 +3,8 @@ import { useAuthContext } from '../auth/useAuthContext'
 import { useHabitsContext } from '../hooks/useHabitsContext'
 
 // MUI specific imports
+import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import ToggleButton from '@mui/material/ToggleButton'
@@ -14,7 +14,7 @@ import Typography from '@mui/material/Typography'
 // allowed categories — must match the enum in the backend habitModel.js
 const CATEGORIES = ['Nutrition', 'Fitness', 'Learning', 'Wellness', 'Productivity', 'Other']
 
-const HabitForm = () => {
+const HabitForm = ({ onClose }) => {
   const { dispatch } = useHabitsContext()
   // get the current user from the auth context, so we can include their token in the API request to create a new habit
   const { user } = useAuthContext()
@@ -58,13 +58,14 @@ const HabitForm = () => {
       setFrequency('')
       setMotivation('')
       dispatch({type: 'CREATE_HABIT', payload: json})
+      onClose?.() // call the onClose callback to close the form after successful habit creation
     }
 
   }
 
   // Step 3: render the form with MUI components, showing error messages and highlighting empty fields
 return (
-    <Paper component="form" onSubmit={handleSubmit} sx={{ p: 3, maxWidth: 420 }}>
+    <Box component="form" onSubmit={handleSubmit} sx={{ p: 1 }}>
       <Stack spacing={2}>
 
         {/* STEP 2a toggle: habit type toggle */}
@@ -115,13 +116,13 @@ return (
         {/* create / cancel */}
         <Stack direction="row" spacing={1}>
           <Button type="submit" variant="contained" fullWidth>Create Habit →</Button>
-          <Button variant="outlined">Cancel</Button>
+          <Button variant="outlined" onClick={onClose}>Cancel</Button>
         </Stack>
 
         {error && <Typography color="error">{error}</Typography>}
 
       </Stack>
-    </Paper>
+    </Box>
   )
 }
 
