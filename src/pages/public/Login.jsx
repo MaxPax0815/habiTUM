@@ -63,13 +63,14 @@ const Login = () => {
             {/* Card */}
             <Box
                 sx={{
+                    width: "100%",
                     maxWidth: 440,
                     mx: 'auto',
                     mb: 6,
                     bgcolor: colors.surface,
                     borderRadius: 3,
                     boxShadow: '0 4px 32px rgba(7,29,53,0.08)',
-                    p: { xs: 3, sm: 4 },
+                    p: { xs: 4, sm: 6 },
                 }}
             >
                 <Box
