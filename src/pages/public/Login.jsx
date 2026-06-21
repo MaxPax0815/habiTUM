@@ -18,9 +18,6 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff'
 
 import { useLogin } from '../../auth/useLogin'
 import Header from '../../components/Header'
-
-
-import { useLogin } from '../../auth/useLogin'
 import { colors } from '../../theme'
 
 const FieldLabel = ({ children }) => (
@@ -42,7 +39,7 @@ const fieldSx = {
     },
     '& .MuiInputLabel-root.Mui-focused': { color: colors.primary },
 }
->>>>>>> dev
+
 
 const Login = () => {
     const [email, setEmail] = useState('')
@@ -66,12 +63,7 @@ const Login = () => {
     <Box> 
         <Header />
 
-            <label>Email:</label>
-            <input
-                type="email"
-                onChange={(e) => setEmail(e.target.value)}
-                value={email}
-
+            
             {/* Card */}
             <Box
                 sx={{

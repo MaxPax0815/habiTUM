@@ -91,6 +91,36 @@ const Signup = () => {
                     p: { xs: 3, sm: 4 },
                 }}
             >
+                <Box
+                    sx={{
+                        textAlign: "center",
+                        pb: 3,
+                        mb: 3,
+                        borderBottom: `1px solid ${colors.border}`,
+                    }}
+                    >
+                    <Typography
+                        variant="h4"
+                        sx={{
+                        fontWeight: 900,
+                        color: colors.primary,
+                        mb: 1,
+                        }}
+                    >
+                        Create your account
+                    </Typography>
+
+                    <Typography
+                        variant="body1"
+                        sx={{
+                        color: colors.textSecondary,
+                        lineHeight: 1.6,
+                        }}
+                    >
+                        Start building better routines today.
+                    </Typography>
+                </Box>
+
                 {/* Benefits */}
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 3 }}>
                     {BENEFITS.map((text) => (
