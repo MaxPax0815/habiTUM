@@ -2,8 +2,8 @@ import { Box } from '@mui/material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import AuthHeader from '../../auth/AuthHeader'
 import { useSignup } from '../../auth/useSignup'
+import Header from '../../components/Header'
 
 const Signup = () => {
     const [firstName, setFirstName] = useState('')
@@ -26,10 +26,7 @@ const Signup = () => {
 
     return (
         <Box>
-            <AuthHeader
-                title="Create your account"
-                subtitle="Start building better routines today."
-                />  
+            <Header />  
             <form className="signup" onSubmit={handleSubmit}>
                 <h3>Sign Up</h3>
 

@@ -1,15 +1,9 @@
 import { NavLink, useNavigate } from 'react-router-dom';
+
 // UI components
-import {
-  Avatar,
-  Box,
-  Button,
-  Divider,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Typography,
+import { 
+  Avatar, Box, Button, Divider, List, ListItemButton, 
+  ListItemIcon, ListItemText, Typography,
 } from '@mui/material';
 
 // ICONS
@@ -23,6 +17,7 @@ import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 
 import { useLogout } from '../auth/useLogout';
 import { colors } from "../theme";
+
 
 // user is passed down from AppLayout, which reads it from AuthContext (set on login, persisted in localStorage)
 const Sidebar = ({ user }) => {

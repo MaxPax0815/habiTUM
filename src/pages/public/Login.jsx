@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Box } from '@mui/material'
 
 import { useLogin } from '../../auth/useLogin'
-import AuthHeader from '../../auth/AuthHeader'
+import Header from '../../components/Header'
 
 const Login = () => {
     const [email, setEmail] = useState('')
@@ -23,10 +23,7 @@ const Login = () => {
 
     return (
     <Box> 
-        <AuthHeader
-            title="Welcome back"
-            subtitle="Log in to continue building your habits"
-        />
+        <Header />
         <form className="login" onSubmit={handleSubmit}>
             <h3>Log In</h3>
 

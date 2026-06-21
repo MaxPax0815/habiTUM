@@ -34,6 +34,7 @@ export const theme = createTheme({
             primary: colors.textPrimary,
             secondary: colors.textSecondary,
         },
+        divider: colors.border,
     },
     typography: {
         fontFamily: `"Inter", "Roboto", "Helvetica", "Arial", sans-serif`,
@@ -48,6 +49,34 @@ export const theme = createTheme({
     shape: {
         borderRadius: 14,
     },
+    components: {
+        MuiButton: {
+            defaultProps: {
+            disableElevation: true,
+            },
+            styleOverrides: {
+            root: {
+                borderRadius: 12,
+                textTransform: "none",
+                fontWeight: 700,
+            },
+            sizeSmall: {
+                padding: "8px 18px",
+                fontSize: "0.875rem",
+            },
+            sizeLarge: {
+                padding: "14px 28px",
+                fontSize: "1rem",
+            },
+            contained: {
+                boxShadow: "none",
+            },
+            outlined: {
+                borderColor: colors.border,
+            },
+            },
+        },
+    }
 }); 
 
 export default theme

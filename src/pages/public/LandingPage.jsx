@@ -24,6 +24,9 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import MilitaryTechIcon from "@mui/icons-material/MilitaryTech";
 
 import mockupDashboard from '../../assets/mockup_dashboard.png';
+import Header from '../../components/Header'
+
+import { outlinedPillButtonSx } from '../../styles/buttonSx'
 
 // ------------------------------------------------------
 // Global color variables
@@ -215,9 +218,11 @@ export default function LandingPage() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
 
+      <Header />
+
       <Box sx={{ bgcolor: "background.default", minHeight: "100vh" }}>
         {/* Hero Section */}
-        <Container maxWidth="lg" sx={{ pt: { xs: 4, md: 6 }, pb: { xs: 7, md: 10 } }}>
+        <Container id="habits" maxWidth="lg" sx={{ pt: { xs: 4, md: 6 }, pb: { xs: 7, md: 10 } }}>
           <Grid
             container
             spacing={{ xs: 5, md: 7 }}
@@ -252,6 +257,7 @@ export default function LandingPage() {
                   lineHeight: 0.95,
                   letterSpacing: "-0.05em",
                   maxWidth: 620,
+                  color: colors.primaryDark,
                 }}
               >
                 Turn goals into{" "}
@@ -302,6 +308,7 @@ export default function LandingPage() {
                   variant="outlined"
                   size="large"
                   sx={{
+                    ...outlinedPillButtonSx,
                     px: 3,
                     py: 1.4,
                     borderRadius: 2,
@@ -346,7 +353,7 @@ export default function LandingPage() {
         </Container>
 
         {/* Why HabiTUM */}
-        <Container maxWidth="lg" sx={{ pb: { xs: 7, md: 10 } }}>
+        <Container id="features" maxWidth="lg" sx={{ pb: { xs: 7, md: 10 } }}>
           <Box textAlign="center" sx={{ mb: 1 }}>
             <Typography
               variant="overline"
@@ -438,7 +445,7 @@ export default function LandingPage() {
         </Container>
 
         {/* Community Section */}
-        <Container maxWidth="lg" sx={{ pb: { xs: 7, md: 10 } }}>
+        <Container id="challenges" maxWidth="lg" sx={{ pb: { xs: 7, md: 10 } }}>
           <Box
             sx={{
               bgcolor: colors.primaryDark,
