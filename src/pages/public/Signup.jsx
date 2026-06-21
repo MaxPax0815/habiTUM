@@ -79,8 +79,6 @@ const Signup = () => {
     return (
         <Box>
             <Header />  
-            <form className="signup" onSubmit={handleSubmit}>
-                <h3>Sign Up</h3>
             {/* Card */}
             <Box
                 sx={{
