@@ -15,9 +15,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
 
-
 import { useLogin } from '../../auth/useLogin'
-import Header from '../../components/Header'
 import { colors } from '../../theme'
 
 const FieldLabel = ({ children }) => (
@@ -60,10 +58,8 @@ const Login = () => {
     }
 
     return (
-    <Box> 
-        <Header />
+        <Box> 
 
-            
             {/* Card */}
             <Box
                 sx={{

@@ -19,12 +19,9 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
 
-
-
 import { colors } from '../../theme'
-
 import { useSignup } from '../../auth/useSignup'
-import Header from '../../components/Header'
+
 
 const BENEFITS = [
     'Track unlimited habits for free',
@@ -78,7 +75,6 @@ const Signup = () => {
 
     return (
         <Box>
-            <Header />  
             {/* Card */}
             <Box
                 sx={{

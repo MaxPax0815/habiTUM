@@ -24,8 +24,6 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import MilitaryTechIcon from "@mui/icons-material/MilitaryTech";
 
 import mockupDashboard from '../../assets/mockup_dashboard.png';
-import Header from '../../components/Header'
-
 import { outlinedPillButtonSx } from '../../styles/buttonSx'
 
 // ------------------------------------------------------
@@ -217,8 +215,6 @@ export default function LandingPage() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-
-      <Header />
 
       <Box sx={{ bgcolor: "background.default", minHeight: "100vh" }}>
         {/* Hero Section */}
