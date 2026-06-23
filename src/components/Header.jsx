@@ -51,7 +51,6 @@ const LogoLink = ({ showBackArrow = false}) => {
                 <IconButton
                     component={RouterLink}
                     to="/"
-                    onClick={handleLogoClick}
                     aria-label="Back to landing page"
                     sx={{
                         ...linkResetSx,
