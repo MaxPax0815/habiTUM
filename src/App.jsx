@@ -1,16 +1,19 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { useAuthContext } from './auth/useAuthContext'
 
+// Layouts
 import AppLayout from './layouts/AppLayout'
 import PublicLayout from './layouts/PublicLayout.jsx'
 import AuthLayout from './layouts/AuthLayout.jsx'
 
+// App pages 
 import Communities from './pages/app/Communities'
 import Home from './pages/app/Home'
 import ManagerDashboard from './pages/app/ManagerDashboard'
 import Profile from './pages/app/Profile'
 import Progress from './pages/app/Progress'
 
+// Public Pages
 import LandingPage from './pages/public/LandingPage'
 import Login from './pages/public/Login.jsx'
 import Signup from './pages/public/Signup.jsx'

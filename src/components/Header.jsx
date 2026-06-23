@@ -10,9 +10,9 @@ import { outlinedPillButtonSx, pillButtonSx } from "../styles/buttonSx";
 // Each `href` is an anchor (#features, #habits, #challenges) that scrolls to the
 // element with the matching `id` in LandingPage.jsx. Consumed by <SectionNav />.
 const sectionLinks = [
-  { label: "Features", href: "#features" },
-  { label: "Habits", href: "#habits" },
-  { label: "Challenges", href: "#challenges" },
+    { label: "Habits", href: "#habits" },
+    { label: "Features", href: "#features" },
+    { label: "Challenges", href: "#challenges" },
 ];
 
 // Shared style object that strips the default anchor styling (underline, borders,
@@ -37,89 +37,97 @@ const linkResetSx = {
 // When `showBackArrow` is true (i.e. we're NOT on the landing page), an extra
 // back-arrow IconButton is shown so users can return home from sub-pages.
 // Used by <Header /> via `showBackArrow={!isLandingPage}`.
-const LogoLink = ({ showBackArrow = false }) => {
-  return (
-    <Stack direction="row" alignItems="center" spacing={1.5}>
-        {showBackArrow && (
-            <IconButton
-                component={RouterLink}
-                to="/"
-                aria-label="Back to landing page"
-                sx={{
-                    ...linkResetSx,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    p: 0,
-                    m: 0,
-                    backgroundColor: "transparent",
-                    boxShadow: "none",
-                    borderRadius: 0,
-                    color: colors.textSecondary,
+const LogoLink = ({ showBackArrow = false}) => {
 
-                    "&:hover": {
-                    color: colors.textPrimary,
-                    backgroundColor: "transparent",
-                    textDecoration: "none",
-                    },
-                }}
-            >
-                <ArrowBackIcon />
-            </IconButton>
-        )}
 
-        <Box
-            component={RouterLink}
-            to="/"
+    return (
+        <Stack 
+            direction="row" 
+            spacing={1.5}
             sx={{
-            ...linkResetSx,  
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-
-            "&:hover": {
-                textDecoration: "none",
-                backgroundColor: "transparent",
-            }
-            }}
-        >
-            <Box
-            component="img"
-            src="/logo.png"
-            alt="HabiTUM logo"
-            sx={{
-                width: 40,
-                height: 40,
-                objectFit: "contain",
-                display: "block",
-            }}
-            />
-
-            <Typography
-            variant="h6"
-            component="span"
-            sx={{
-                fontWeight: 800,
-                lineHeight: 1,
-                color: colors.textPrimary,
-            }}
-            >
-                Habi
-                <Box 
-                    component="span" 
+                alignItems: "center", 
+            }}>
+            {showBackArrow && (
+                <IconButton
+                    component={RouterLink}
+                    to="/"
+                    onClick={handleLogoClick}
+                    aria-label="Back to landing page"
                     sx={{
-                        color: colors.primary,
-                        fontSize: "inherit",
-                        fontWeight: "inherit",
-                        lineHeight: "inherit",
+                        ...linkResetSx,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        p: 0,
+                        m: 0,
+                        backgroundColor: "transparent",
+                        boxShadow: "none",
+                        borderRadius: 0,
+                        color: colors.textSecondary,
+
+                        "&:hover": {
+                        color: colors.textPrimary,
+                        backgroundColor: "transparent",
+                        textDecoration: "none",
+                        },
                     }}
                 >
-                    TUM
-                </Box>
-            </Typography>
-        </Box>
-    </Stack>
-  );
+                    <ArrowBackIcon />
+                </IconButton>
+            )}
+
+            <Box
+                component={RouterLink}
+                to="/"
+                sx={{
+                ...linkResetSx,  
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+
+                "&:hover": {
+                    textDecoration: "none",
+                    backgroundColor: "transparent",
+                }
+                }}
+            >
+                <Box
+                component="img"
+                src="/logo.png"
+                alt="HabiTUM logo"
+                sx={{
+                    width: 40,
+                    height: 40,
+                    objectFit: "contain",
+                    display: "block",
+                }}
+                />
+
+                <Typography
+                variant="h6"
+                component="span"
+                sx={{
+                    fontWeight: 800,
+                    lineHeight: 1,
+                    color: colors.textPrimary,
+                }}
+                >
+                    Habi
+                    <Box 
+                        component="span" 
+                        sx={{
+                            color: colors.primary,
+                            fontSize: "inherit",
+                            fontWeight: "inherit",
+                            lineHeight: "inherit",
+                        }}
+                    >
+                        TUM
+                    </Box>
+                </Typography>
+            </Box>
+        </Stack>
+    );
 };
 
 // Center navigation menu for the landing page. Maps over `sectionLinks` to

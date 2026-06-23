@@ -53,7 +53,8 @@ const Login = () => {
         if (ok) {
             setSuccess(true)
             // Manager redirects to manager dashboard, regular users to today's habits page
-            setTimeout(() => navigate(user.role === 'manager' ? '/manager-dashboard' : '/today'), 1000)
+            // setTimeout(() => navigate(user.role === 'manager' ? '/manager-dashboard' : '/today'), 1000)
+            setTimeout(() => navigate('/today'), 1000)
         }
     }
 
@@ -73,6 +74,38 @@ const Login = () => {
                     p: { xs: 4, sm: 6 },
                 }}
             >
+
+                 <Box
+                    sx={{
+                        textAlign: "center",
+                        pb: 3,
+                        mb: 3,
+                        borderBottom: `1px solid ${colors.border}`,
+                    }}
+                    >
+                    <Typography
+                        variant="h4"
+                        sx={{
+                        fontWeight: 900,
+                        color: colors.primary,
+                        mb: 1,
+                        }}
+                    >
+                        Welcome Back
+                    </Typography>
+
+                    <Typography
+                        variant="body1"
+                        sx={{
+                        color: colors.textSecondary,
+                        lineHeight: 1.6,
+                        }}
+                    >
+                        Continue building your habits. 
+                    </Typography>
+                </Box>
+
+
                 <Box
                     component="form"
                     onSubmit={handleSubmit}
