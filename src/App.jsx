@@ -3,11 +3,13 @@ import { useAuthContext } from './auth/useAuthContext'
 
 // Layouts
 import AppLayout from './layouts/AppLayout'
-import PublicLayout from './layouts/PublicLayout.jsx'
 import AuthLayout from './layouts/AuthLayout.jsx'
+import PublicLayout from './layouts/PublicLayout.jsx'
 
 // App pages 
 import Communities from './pages/app/Communities'
+import NewCommunity from './pages/app/NewCommunity'
+import CommunityDashboard from './pages/app/CommunityDashboard'
 import Home from './pages/app/Home'
 import ManagerDashboard from './pages/app/ManagerDashboard'
 import Profile from './pages/app/Profile'
@@ -49,6 +51,8 @@ function App() {
             <Route path="/communities" element={<Communities />} />
             <Route path="/progress" element={<Progress />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/communities/new" element={<NewCommunity />} />
+            <Route path="/communities/:id" element={<CommunityDashboard />} /> 
 
             <Route 
               path="/manager" 

@@ -22,6 +22,7 @@ const AppLayout = () => {
         component="main"
         sx={{
           flex: 1,
+          minWidth: 0,
           minHeight: '100vh',
           px: { xs: 3, md: 8, lg: 6 },
           py: { xs: 3, md: 4 },
