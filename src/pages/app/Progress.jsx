@@ -1,130 +1,126 @@
-import { useEffect, useState } from 'react'
-import { Box, Button, Card, CardContent, Typography } from '@mui/material'
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
+import { Box, Card, CardContent, Typography } from '@mui/material'
+import WorkspacePremiumOutlinedIcon from '@mui/icons-material/WorkspacePremiumOutlined'
 
 import { useAuthContext } from '../../auth/useAuthContext'
-
-import { pillButtonSx } from '../../styles/buttonSx'
+import UpgradeButton from '../../billing/UpgradeButton'
+import { colors } from '../../theme'
 
 const Progress = () => {
-  const { user, dispatch } = useAuthContext()
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(null)
+  // Get the currently logged-in user from the global AuthContext.
+  // Progress only needs to know whether the user is premium or not.
+  const { user } = useAuthContext()
 
+  // The backend/webhook decides whether the user is premium.
+  // The frontend only reads this value from AuthContext.
   const isPremium = user?.subscription === 'premium'
 
-  const handleUpgradeClick = async () => {
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const response = await fetch('/api/billing/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${user.token}`
-        }
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Could not start checkout.')
-      }
-
-      window.location.href = data.url
-    } catch (error) {
-        setError(error.message)
-        setIsLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    const refreshUserAfterCheckout = async () => {
-      const params = new URLSearchParams(window.location.search) // URL see stripeController
-      const checkoutStatus = params.get('checkout') 
-
-      // If stripe chekcout wasn't successful simply 
-      // or user token is null oder undefined return to the progress page
-      if (checkoutStatus !== 'success' || !user?.token) {
-        return 
-      }
-
-      // fetch the current user form the DB
-      // Backend: 
-        // Request comes in
-        // -> requireAuth checks the JWT Token
-        // -> requireAuth requests req.user based on the user._id 
-        // -> based on the req.user._id getMe fetches the user
-        // -> getMe returns user data 
-      try {
-        const response = await fetch('/api/user/me', {
-          headers: {
-            Authorization: `Bearer ${user.token}`
-          }
-        })
-
-        const data = await response.json() // data = user which getMe returns
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Could not refresh user.')
-        }
-
-        // dispatch calls the reducer function inside AuthContext.jsx
-        // overrides user.state with the newly fetched data from the DB
-        // local storage is then automatically updated through useEffect() inside AuthContext
-        dispatch({
-          type: 'UPDATE_USER',
-          payload: data
-        }) 
-
-        window.history.replaceState({}, '', '/progress')
-      } catch (error) {
-        console.log(error.message)
-      }
-    }
-
-    refreshUserAfterCheckout()
-  }, [user?.token, dispatch])
-
+  // Free users see the Premium Analytics lock screen.
+  // The UpgradeButton starts the central Stripe Checkout flow.
   if (!isPremium) {
-    return(
-      <Box>
-        <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
-          Progress
-        </Typography>
-
-        <Card sx={{ maxWidth: 560, borderRadius: 4 }}>
-          <CardContent sx={{ p: 4 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-              <LockOutlinedIcon color="primary" />
-
-              <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                Advanced analytics are Premium
-              </Typography>
+    return (
+      <Box
+        sx={{
+          minHeight: '70vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          px: 2
+        }}
+      >
+        <Card
+          sx={{
+            width: '100%',
+            maxWidth: 720,
+            borderRadius: 5,
+            border: `1px solid ${colors.border}`,
+            boxShadow: '0 24px 60px rgba(15, 23, 42, 0.12)'
+          }}
+        >
+          <CardContent
+            sx={{
+              p: {
+                xs: 4,
+                md: 7
+              },
+              textAlign: 'center'
+            }}
+          >
+            <Box
+              sx={{
+                width: 112,
+                height: 112,
+                mx: 'auto',
+                mb: 4,
+                borderRadius: 4,
+                backgroundColor: colors.softOrange,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <WorkspacePremiumOutlinedIcon
+                sx={{
+                  fontSize: 56,
+                  color: colors.orange
+                }}
+              />
             </Box>
 
-            <Typography sx={{ mb: 3, color: 'text.secondary' }}>
-              Upgrade to habiTUM Premium to unlock detailed progress analytics for your habits.
-            </Typography>
-
-            <Typography sx={{ mb: 3, fontWeight: 600 }}>
-              3,99 € / month
-            </Typography>
-
-            <Button
-              variant="contained"
-              onClick={handleUpgradeClick}
-              disabled={isLoading}
-              sx={{ ...pillButtonSx, }}
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: 900,
+                mb: 2,
+                color: colors.textPrimary
+              }}
             >
-              {isLoading ? 'Redirecting...' : 'Upgrade to Premium'}
-            </Button>
+              Premium Analytics
+            </Typography>
+
+            <Typography
+              sx={{
+                maxWidth: 540,
+                mx: 'auto',
+                mb: 4,
+                color: 'text.secondary',
+                fontSize: {
+                  xs: '1.1rem',
+                  md: '1.35rem'
+                },
+                lineHeight: 1.5
+              }}
+            >
+              Unlock full progress analytics, streak insights, and weekly activity charts with a Premium account.
+            </Typography>
+
+            <UpgradeButton
+              label="Upgrade to Premium"
+              showIcon
+              size="large"
+              sx={{
+                px: 5,
+                py: 1.6,
+                fontSize: '1.1rem',
+                boxShadow: '0 16px 32px rgba(0, 102, 255, 0.25)'
+              }}
+            />
+
+            <Typography
+              sx={{
+                mt: 3,
+                color: colors.muted,
+                fontWeight: 700
+              }}
+            >
+              €3.99/month · cancel anytime
+            </Typography>
           </CardContent>
         </Card>
       </Box>
     )
   }
 
+  // Premium users see the actual Progress page.
   return (
     <Box>
       <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>

@@ -23,11 +23,19 @@ const AppLayout = () => {
         sx={{
           flex: 1,
           minHeight: '100vh',
-          px: { xs: 3, md: 8 },
+          px: { xs: 3, md: 8, lg: 6 },
           py: { xs: 3, md: 4 },
+          display: 'flex',
+          justifyContent: 'center'
         }}
       >
-        <Outlet />
+        <Box
+          sx={{
+            width: '100%',
+            maxWidth: 1120
+          }} >
+          <Outlet />
+        </Box>
       </Box>
     </Box>
   )
