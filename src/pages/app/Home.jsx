@@ -9,10 +9,11 @@ import isToday from "date-fns/isToday"
 import getDay from "date-fns/getDay"
 
 // MUI
-import { Box, Button, Dialog, Paper, Stack, Typography } from "@mui/material"
+import { Box, Button, Paper, Stack, Typography } from "@mui/material"
 import { colors } from "../../theme"
 
 // components
+import AppDialog from "../../components/AppDialog"
 import HabitDetails from "../../components/HabitDetails"
 import HabitForm from "../../components/HabitForm"
 
@@ -209,22 +210,13 @@ const Home = () => {
       </Box>
 
       {/* create-habit popup — replaces the old right-side form column */}
-      <Dialog
+      <AppDialog
         open={showForm}
         onClose={() => setShowForm(false)}
-        fullWidth
         maxWidth="sm"
-        slotProps={{
-          backdrop: {
-            sx: {
-              backdropFilter: "blur(4px)",          // blurs the dashboard behind it
-              backgroundColor: "rgba(15,23,42,0.25)" // slight dim so the card pops
-            },
-          },
-        }}
       >
         <HabitForm onClose={() => setShowForm(false)} />
-      </Dialog>
+      </AppDialog>
     </div>
   )
 }
