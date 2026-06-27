@@ -96,24 +96,55 @@ const Communities = () => {
         </Box>
       )}
 
-      {/* CREATE YOUR OWN — only managers / premium users */}
-      {canCreate && (
-        <>
-          <Typography variant="overline" color="text.secondary">Create your own community</Typography>
-          <Paper
-            variant="outlined"
-            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', p: 2.5, borderRadius: 3, mb: 4 }}
+      {/* CREATE YOUR OWN — always visible. Free users see a locked state
+          instead of the active create button (gating is also enforced backend-side). */}
+      <Typography variant="overline" color="text.secondary">Create your own community</Typography>
+      <Paper
+        variant="outlined"
+        sx={{
+          position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          p: 2.5, borderRadius: 3, mb: 4,
+          bgcolor: colors.surface, opacity: canCreate ? 1 : 0.85,
+        }}
+      >
+        {/* lock badge sits on top of the card for free users */}
+        {!canCreate && (
+          <Box
+            sx={{
+              position: 'absolute', top: -12, left: 20,
+              display: 'flex', alignItems: 'center', gap: 0.5,
+              px: 1, py: 0.25, borderRadius: 999,
+              bgcolor: colors.primaryDark, color: '#fff',
+            }}
           >
-            <Box>
-              <Typography sx={{ fontWeight: 700 }}>Start something new</Typography>
-              <Typography variant="body2" color="text.secondary">Build your own accountability community.</Typography>
-            </Box>
-            <Button variant="outlined" onClick={() => navigate('/communities/new')}>
-              + Create Community
-            </Button>
-          </Paper>
-        </>
-      )}
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>lock</span>
+            <Typography variant="caption" sx={{ fontWeight: 700 }}>Premium</Typography>
+          </Box>
+        )}
+
+        <Box>
+          <Typography sx={{ fontWeight: 700 }}>Start something new</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {canCreate
+              ? 'Build your own accountability community.'
+              : 'Upgrade to premium to create your own community.'}
+          </Typography>
+        </Box>
+
+        {canCreate ? (
+          <Button variant="outlined" onClick={() => navigate('/communities/new')}>
+            + Create Community
+          </Button>
+        ) : (
+          <Button
+            variant="outlined"
+            disabled
+            startIcon={<span className="material-symbols-outlined">lock</span>}
+          >
+            Premium only
+          </Button>
+        )}
+      </Paper>
 
       {/* DISCOVER */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 1 }}>
