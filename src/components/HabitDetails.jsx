@@ -16,9 +16,14 @@ import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 
+import { colors } from '../theme'
+
 const HabitDetails = ({ habit }) => {
   const { dispatch } = useHabitsContext()
   const { user } = useAuthContext()
+
+  // break habits ("eliminate a negative pattern") get the orange accent from the mockups
+  const isBreak = habit.habitType === 'break'
 
   // "done this period" = the last checkin falls in the current day (daily) or week (weekly)
   const done = !!habit.lastCheckin && (
@@ -82,25 +87,47 @@ const HabitDetails = ({ habit }) => {
           <LinearProgress
             variant="determinate"
             value={done ? 100 : 0}
-            sx={{ mt: 1, height: 6, borderRadius: 5 }}
+            color={isBreak ? 'warning' : 'primary'}
+            sx={{
+              mt: 1, height: 6, borderRadius: 5,
+              ...(isBreak && { '& .MuiLinearProgress-bar': { backgroundColor: colors.orange } }),
+            }}
           />
         </Box>
 
-        {/* streak chip — turns blue once done this period */}
+        {/* streak chip — orange for break habits, otherwise blue once done this period */}
         <Chip
-          color={done ? 'primary' : 'default'}
+          color={!isBreak && done ? 'primary' : 'default'}
           icon={
-            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+            <span
+              className="material-symbols-outlined"
+              style={{ fontSize: 18, ...(isBreak && { color: colors.orange }) }}
+            >
               local_fire_department
             </span>
           }
           label={`${habit.streak}d`}
+          sx={isBreak ? { color: colors.orange, bgcolor: colors.softOrange, fontWeight: 700 } : undefined}
         />
 
-        {/* mark done / undo */}
-        {done
-          ? <Button variant="outlined" onClick={handleUndo}>Undo</Button>
-          : <Button variant="contained" onClick={handleMarkDone}>Mark done</Button>}
+        {/* mark done / undo — break habits use the orange "Still clean" action */}
+        {isBreak
+          ? (
+            <Button
+              variant="outlined"
+              onClick={done ? handleUndo : handleMarkDone}
+              sx={{
+                color: colors.orange,
+                borderColor: colors.orange,
+                '&:hover': { borderColor: colors.orange, backgroundColor: colors.softOrange },
+              }}
+            >
+              {done ? 'Undo' : 'Mark Done'}
+            </Button>
+          )
+          : (done
+            ? <Button variant="outlined" onClick={handleUndo}>Undo</Button>
+            : <Button variant="contained" onClick={handleMarkDone}>Mark done</Button>)}
 
         {/* delete */}
         <IconButton onClick={handleDelete} aria-label="delete">

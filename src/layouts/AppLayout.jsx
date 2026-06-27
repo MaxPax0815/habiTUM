@@ -23,11 +23,15 @@ const AppLayout = () => {
         sx={{
           flex: 1,
           minHeight: '100vh',
-          px: { xs: 3, md: 8 },
           py: { xs: 3, md: 4 },
+          display: 'flex',
+          justifyContent: 'center',
         }}
       >
-        <Outlet />
+        {/* every page is constrained to 80% of the content area (excluding the sidebar) and centered */}
+        <Box sx={{ width: { xs: '100%', md: '80%' }, px: { xs: 3, md: 0 } }}>
+          <Outlet />
+        </Box>
       </Box>
     </Box>
   )
