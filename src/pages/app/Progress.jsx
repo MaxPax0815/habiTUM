@@ -3,7 +3,7 @@ import WorkspacePremiumOutlinedIcon from '@mui/icons-material/WorkspacePremiumOu
 
 import { useAuthContext } from '../../auth/useAuthContext'
 import UpgradeButton from '../../billing/UpgradeButton'
-import { colors } from '../../theme'
+import { colors, cardSx, centeredContentSx } from '../../theme'
 
 const Progress = () => {
   // Get the currently logged-in user from the global AuthContext.
@@ -18,17 +18,10 @@ const Progress = () => {
   // The UpgradeButton starts the central Stripe Checkout flow.
   if (!isPremium) {
     return (
-      <Box
-        sx={{
-          minHeight: '70vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          px: 2
-        }}
-      >
+      <Box sx={centeredContentSx}>
         <Card
           sx={{
+            ...cardSx,
             width: '100%',
             maxWidth: 720,
             borderRadius: 5,

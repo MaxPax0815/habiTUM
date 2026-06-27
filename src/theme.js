@@ -46,6 +46,48 @@ export const linkResetSx = {
   },
 };
 
+export const sectionTitleSx = {
+  mb: 2,
+  fontSize: '0.95rem',
+  fontWeight: 900,
+  letterSpacing: '0.14em',
+  color: colors.textSecondary,
+  textTransform: 'uppercase',
+  textAlign: 'left'
+}
+
+export const cardSx = {
+  borderRadius: 4,
+  border: '1px solid',
+  borderColor: 'divider',
+  boxShadow: 'none',
+  backgroundColor: 'background.paper'
+}
+
+export const centeredPageSx = {
+  minHeight: 'calc(100vh - 48px)',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  px: {
+    xs: 2,
+    sm: 3
+  },
+  pt: {
+    xs: 4,
+    md: 6
+  },
+  pb: 6
+}
+
+export const centeredContentSx = {
+  minHeight: '70vh',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  px: 2
+}
+
 export const theme = createTheme({
     palette: {
         primary: {
