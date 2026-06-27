@@ -3,8 +3,8 @@ import { useAuthContext } from './auth/useAuthContext'
 
 // Layouts
 import AppLayout from './layouts/AppLayout'
-import PublicLayout from './layouts/PublicLayout.jsx'
 import AuthLayout from './layouts/AuthLayout.jsx'
+import PublicLayout from './layouts/PublicLayout.jsx'
 
 // App pages 
 import Communities from './pages/app/Communities'
@@ -36,26 +36,13 @@ function App() {
               <Route path="/signup" element={<Signup />} />
             </Route>
           </Route>
-          {/* after login, managers go to /manager; regular users go to /today */}
-          <Route
-            path="/login" element={!user ? <Login /> :
-            <Navigate to={user.accountType === 'manager' ? '/manager' : '/today'} />}
-          />
-
-          <Route 
-            path="/signup" element={!user ? <Signup /> : <Navigate to="/today" />} 
-          />
-
-          <Route
-            element={user ? <AppLayout user={user} /> : <Navigate to="/login" />}
-          />
-          <Route element={<AppLayout />}>
-            <Route path="/today" element={<Home />} />
-            <Route path="/communities" element={<Communities />} />
-            <Route path="/progress" element={<Progress />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/manager" element={<ManagerDashboard />} /> {/* manager-only page; accessible by URL but only linked in sidebar for managers */}
-          </Route>
+          <Route element={user ? <AppLayout user={user} /> : <Navigate to="/login" />}>
+          <Route path="/today" element={<Home />} />
+          <Route path="/communities" element={<Communities />} />
+          <Route path="/progress" element={<Progress />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/manager" element={<ManagerDashboard />} />
+        </Route>
         </ Routes>
       </ BrowserRouter>
   )
