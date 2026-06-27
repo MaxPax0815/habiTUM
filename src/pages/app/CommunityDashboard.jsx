@@ -28,13 +28,29 @@ const CommunityDashboard = () => {
 
   const handleJoin = async () => {
     const res = await fetch(`/api/communities/${id}/join`, { method: 'POST', headers: authHeader })
-    if (res.ok) fetchCommunity() // refresh so the button flips to "Joined"
+    if (res.ok) fetchCommunity() // refresh so the button flips to "Leave"
+  }
+
+  const handleLeave = async () => {
+    const res = await fetch(`/api/communities/${id}/leave`, { method: 'DELETE', headers: authHeader })
+    if (res.ok) fetchCommunity() // refresh so the button flips back to "Join"
+  }
+
+  const handleDelete = async () => {
+    if (!window.confirm('Delete this community? This cannot be undone.')) return
+    const res = await fetch(`/api/communities/${id}`, { method: 'DELETE', headers: authHeader })
+    if (res.ok) navigate('/communities')
+    else {
+      const json = await res.json()
+      setError(json.error)
+    }
   }
 
   if (error) return <Box sx={{ maxWidth: 760, mx: 'auto' }}><Typography color="error">{error}</Typography></Box>
   if (!community) return <Box sx={{ maxWidth: 760, mx: 'auto' }}><Typography>Loading…</Typography></Box>
 
   const isMember = community.membershipStatus === 'accepted'
+  const isCreator = community.myRole === 'creator'
 
   return (
     <Box sx={{ maxWidth: 760, mx: 'auto', textAlign: 'left' }}>
@@ -66,9 +82,20 @@ const CommunityDashboard = () => {
           </Box>
           <Typography color="text.secondary">{community.memberCount} members</Typography>
         </Box>
-        {isMember ? (
-          <Button variant="outlined" disabled startIcon={<span className="material-symbols-outlined">check</span>}>
-            Joined
+        {/* Creator → Delete; other members → Leave; non-members → Join */}
+        {isCreator ? (
+          <Button
+            variant="outlined" color="error" onClick={handleDelete}
+            startIcon={<span className="material-symbols-outlined">delete</span>}
+          >
+            Delete
+          </Button>
+        ) : isMember ? (
+          <Button
+            variant="outlined" onClick={handleLeave}
+            startIcon={<span className="material-symbols-outlined">logout</span>}
+          >
+            Leave
           </Button>
         ) : (
           <Button variant="contained" onClick={handleJoin}>Join</Button>
