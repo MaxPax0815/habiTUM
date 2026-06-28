@@ -50,7 +50,7 @@ function App() {
           <Route element={user ? <AppLayout user={user} /> : <Navigate to="/login"  repalce />}>
             <Route path="/today" element={<Home />} />
             <Route path="/communities" element={<Communities />} />
-            <Route path="/challenges/:id" element={<ChallengePage />} />
+            <Route path="/challenges/:challengeId" element={<ChallengePage />} />
             <Route path="/progress" element={<Progress />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/communities/new" element={<NewCommunity />} />

@@ -243,7 +243,7 @@ export const ExtendedChallengeCard = ({ challenge, currentUserRank, isJoined = f
                 borderRadius: 999,
                 bgcolor: colors.softBlue,
                 color: colors.primary,
-                fontSize: 18,
+                fontSize: 15,
                 fontWeight: 800,
                 "& .MuiChip-label": { px: 1.5 },
               }}
@@ -256,7 +256,7 @@ export const ExtendedChallengeCard = ({ challenge, currentUserRank, isJoined = f
                 borderRadius: 999,
                 bgcolor: colors.softOrange,
                 color: colors.orange,
-                fontSize: 18,
+                fontSize: 15,
                 fontWeight: 800,
                 textTransform: "capitalize",
                 "& .MuiChip-label": { px: 1.5 },
@@ -270,7 +270,7 @@ export const ExtendedChallengeCard = ({ challenge, currentUserRank, isJoined = f
                 borderRadius: 999,
                 bgcolor: "#F3F4F6",
                 color: colors.muted,
-                fontSize: 18,
+                fontSize: 15,
                 fontWeight: 800,
                 "& .MuiChip-label": { px: 1.5 },
               }}
@@ -284,7 +284,7 @@ export const ExtendedChallengeCard = ({ challenge, currentUserRank, isJoined = f
               color: colors.textPrimary,
               fontWeight: 900,
               lineHeight: 1.15,
-              fontSize: { xs: 32, md: 40 },
+              fontSize: { xs: 28, md: 34 },
             }}
           >
             {challenge?.title || "Untitled challenge"}
@@ -294,7 +294,7 @@ export const ExtendedChallengeCard = ({ challenge, currentUserRank, isJoined = f
             sx={{
               mt: 2.5,
               color: colors.textSecondary,
-              fontSize: { xs: 20, md: 24 },
+              fontSize: { xs: 18, md: 20 },
               lineHeight: 1.45,
             }}
           >
@@ -306,20 +306,20 @@ export const ExtendedChallengeCard = ({ challenge, currentUserRank, isJoined = f
           <Stack direction="row" spacing={{ xs: 3, md: 6 }} flexWrap="wrap" useFlexGap>
             <Stack direction="row" spacing={1.5} alignItems="center">
               <GroupsOutlinedIcon sx={{ fontSize: 28, color: colors.muted }} />
-              <Typography sx={{ color: colors.textPrimary, fontSize: 24, fontWeight: 900 }}>
+              <Typography sx={{ color: colors.textPrimary, fontSize: 20, fontWeight: 900 }}>
                 {participants.toLocaleString()}
               </Typography>
-              <Typography sx={{ color: colors.muted, fontSize: 22, fontWeight: 700 }}>
+              <Typography sx={{ color: colors.muted, fontSize: 18, fontWeight: 700 }}>
                 {participants === 1 ? "participant" : "participants"}
               </Typography>
             </Stack>
 
             <Stack direction="row" spacing={1.5} alignItems="center">
               <AccessTimeOutlinedIcon sx={{ fontSize: 28, color: colors.muted }} />
-              <Typography sx={{ color: colors.textPrimary, fontSize: 24, fontWeight: 900 }}>
+              <Typography sx={{ color: colors.textPrimary, fontSize: 20, fontWeight: 900 }}>
                 {daysLeft === null ? "--" : daysLeft}
               </Typography>
-              <Typography sx={{ color: colors.muted, fontSize: 22, fontWeight: 700 }}>
+              <Typography sx={{ color: colors.muted, fontSize: 18, fontWeight: 700 }}>
                 days left
               </Typography>
             </Stack>
@@ -327,10 +327,10 @@ export const ExtendedChallengeCard = ({ challenge, currentUserRank, isJoined = f
             {hasCurrentUserRank && (
               <Stack direction="row" spacing={1.5} alignItems="center">
                 <EmojiEventsOutlinedIcon sx={{ fontSize: 26, color: colors.primary }} />
-                <Typography sx={{ color: colors.primary, fontSize: 24, fontWeight: 900 }}>
+                <Typography sx={{ color: colors.primary, fontSize: 20, fontWeight: 900 }}>
                   #{rank}
                 </Typography>
-                <Typography sx={{ color: colors.muted, fontSize: 22, fontWeight: 700 }}>
+                <Typography sx={{ color: colors.muted, fontSize: 18, fontWeight: 700 }}>
                   your rank
                 </Typography>
               </Stack>
@@ -344,10 +344,10 @@ export const ExtendedChallengeCard = ({ challenge, currentUserRank, isJoined = f
           sx={{
             alignSelf: { xs: "stretch", md: "flex-start" },
             minWidth: { md: 280 },
-            px: 4,
-            py: 2,
+            px: 3,
+            py: 1.5,
             borderRadius: 3,
-            fontSize: 24,
+            fontSize: 18,
             fontWeight: 900,
             borderColor: colors.primary,
             bgcolor: isJoined ? colors.softBlue : colors.primary,
