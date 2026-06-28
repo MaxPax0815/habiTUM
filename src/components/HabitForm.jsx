@@ -5,11 +5,14 @@ import { useHabitsContext } from '../hooks/useHabitsContext'
 // MUI specific imports
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import MenuItem from '@mui/material/MenuItem'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Typography from '@mui/material/Typography'
+
+import { colors } from '../theme'
 
 // allowed categories — must match the enum in the backend habitModel.js
 const CATEGORIES = ['Nutrition', 'Fitness', 'Learning', 'Wellness', 'Productivity', 'Other']
@@ -23,6 +26,7 @@ const HabitForm = ({ onClose }) => {
   const [title, setTitle] = useState('')
   const [frequency, setFrequency] = useState('daily') // default to 'daily' since it's the most common frequency
   const [motivation, setMotivation] = useState('')
+  const [category, setCategory] = useState('') // mandatory — the user must pick one before submitting
   const [error, setError] = useState(null)
   const [emptyFields, setEmptyFields] = useState([])
 
@@ -35,7 +39,13 @@ const HabitForm = ({ onClose }) => {
       return
     }
 
-    const habit = {title, frequency, motivation, habitType}
+    if (!category) { // category is mandatory — stop early and highlight the field
+      setError('Please choose a category')
+      setEmptyFields(['category'])
+      return
+    }
+
+    const habit = {title, frequency, motivation, habitType, category}
 
     const response = await fetch('/api/habits', {
       method: 'POST',
@@ -57,6 +67,7 @@ const HabitForm = ({ onClose }) => {
       setTitle('')
       setFrequency('')
       setMotivation('')
+      setCategory('')
       dispatch({type: 'CREATE_HABIT', payload: json})
       onClose?.() // call the onClose callback to close the form after successful habit creation
     }
@@ -76,8 +87,32 @@ return (
           onChange={(e, val) => val && setHabitType(val)}
           fullWidth
         >
-          <ToggleButton value="build">↑ Build habit</ToggleButton>
-          <ToggleButton value="break">↓ Break habit</ToggleButton>
+          <ToggleButton
+            value="build"
+            sx={{
+              '&.Mui-selected': {
+                color: colors.primary,
+                backgroundColor: colors.softBlue,
+                borderColor: colors.primary,
+                '&:hover': { backgroundColor: colors.softBlue },
+              },
+            }}
+          >
+            ↑ Build habit
+          </ToggleButton>
+          <ToggleButton
+            value="break"
+            sx={{
+              '&.Mui-selected': {
+                color: colors.orange,
+                backgroundColor: colors.softOrange,
+                borderColor: colors.orange,
+                '&:hover': { backgroundColor: colors.softOrange },
+              },
+            }}
+          >
+            ↓ Break habit
+          </ToggleButton>
         </ToggleButtonGroup>
 
         {/* STEP 3a textfield: habit name */}
@@ -100,6 +135,22 @@ return (
           minRows={2}
           fullWidth
         />
+
+        {/* STEP 3c select: category (mandatory) */}
+        <TextField
+          select
+          required
+          label="Category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          error={emptyFields.includes('category')}
+          helperText={emptyFields.includes('category') ? 'Please choose a category' : ' '}
+          fullWidth
+        >
+          {CATEGORIES.map((c) => (
+            <MenuItem key={c} value={c}>{c}</MenuItem>
+          ))}
+        </TextField>
 
         {/* STEP 2b toggle: frequency toggle */}
         <Typography variant="overline" color="text.secondary">Frequency</Typography>

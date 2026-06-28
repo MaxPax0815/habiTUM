@@ -8,6 +8,8 @@ import PublicLayout from './layouts/PublicLayout.jsx'
 
 // App pages 
 import Communities from './pages/app/Communities'
+import NewCommunity from './pages/app/NewCommunity'
+import CommunityDashboard from './pages/app/CommunityDashboard'
 import Home from './pages/app/Home'
 import ManagerDashboard from './pages/app/ManagerDashboard'
 import Profile from './pages/app/Profile'
@@ -29,22 +31,42 @@ function App() {
   return (
       <BrowserRouter>
         <Routes>
+          {/* Public pages */}
           <Route element={<PublicLayout />}>
             <Route path="/" element={<LandingPage />} />
 
             <Route element={<AuthLayout />}>
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
+              <Route 
+                path="/login" 
+                element={!user ? <Login /> : <Navigate to={user.accountType === 'manager' ? '/manager' : '/today'} replace /> } 
+              />
+              <Route 
+                path="/signup" 
+                element={!user ? <Signup /> : <Navigate to="/today" repalce />} />
             </Route>
           </Route>
-          <Route element={user ? <AppLayout user={user} /> : <Navigate to="/login" />}>
-          <Route path="/today" element={<Home />} />
-          <Route path="/communities" element={<Communities />} />
-          <Route path="/challenges/:challengeId" element={<ChallengePage />} />
-          <Route path="/progress" element={<Progress />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/manager" element={<ManagerDashboard />} />
-        </Route>
+
+          {/* Proctected app pages */}
+          <Route element={user ? <AppLayout user={user} /> : <Navigate to="/login"  repalce />}>
+            <Route path="/today" element={<Home />} />
+            <Route path="/communities" element={<Communities />} />
+            <Route path="/challenges/:id" element={<ChallengePage />} />
+            <Route path="/progress" element={<Progress />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/communities/new" element={<NewCommunity />} />
+            <Route path="/communities/:id" element={<CommunityDashboard />} /> 
+
+            <Route 
+              path="/manager" 
+              element={user?.acccountType === 'manager' ? <ManagerDashboard /> : <Navigate to="/today" replace />} 
+            /> {/* manager-only page; accessible by URL but only linked in sidebar for managers */}
+          </Route>
+
+          {/* Fallback Route */}
+          <Route
+            path="*"
+            element={<Navigate to={user ? '/today' : '/'} replace />}
+          />
         </ Routes>
       </ BrowserRouter>
   )

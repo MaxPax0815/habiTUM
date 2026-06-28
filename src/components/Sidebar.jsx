@@ -58,11 +58,17 @@ const Sidebar = ({ user }) => {
       component="aside"
       sx={{
         width: 230,
-        minHeight: "100vh",
+        height: '100vh',
+        maxHeight: '100vh',
+        position: 'sticky',
+        top: 0,
+        alignSelf: 'flex-start',
+        overflowY: 'auto',
+
         backgroundColor: colors.primaryDark,
         color: colors.surface,
-        display: "flex",
-        flexDirection: "column",
+        display: 'flex',
+        flexDirection: 'column',
         flexShrink: 0,
       }}
     >
