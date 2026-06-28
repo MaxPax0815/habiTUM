@@ -197,15 +197,15 @@ const buildActionableInsight = (habit, checkins, completionRate, weekdayData, re
       return `Check in today to tie your best-ever streak of ${bestStreak}${streakUnit}!`
   }
   if (habit.streak === bestStreak && habit.streak >= 7)
-    return `You're on your longest-ever streak at ${habit.streak}${streakUnit} — keep it alive!`
+    return `You're on your longest-ever streak at ${habit.streak}${streakUnit}, keep it alive!`
 
   if (habit.streak === 0 && recovery.breaks > 0 && checkins.length > 0) {
     const lastDate = checkins.reduce((a, b) => new Date(a.date) > new Date(b.date) ? a : b).date
     const gapDays  = daysBetween(lastDate, now)
     if (recovery.avgDays > 0 && gapDays > recovery.avgDays)
-      return `You usually bounce back in ${recovery.avgDays} day${recovery.avgDays !== 1 ? "s" : ""} — today is day ${gapDays}. Time to re-engage!`
+      return `You usually bounce back in ${recovery.avgDays} day${recovery.avgDays !== 1 ? "s" : ""}, today is day ${gapDays}. Time to re-engage!`
     if (recovery.avgDays > 0)
-      return `After ${recovery.breaks} streak break${recovery.breaks > 1 ? "s" : ""}, you bounce back in ${recovery.avgDays} day${recovery.avgDays !== 1 ? "s" : ""} on average — you're right on track.`
+      return `After ${recovery.breaks} streak break${recovery.breaks > 1 ? "s" : ""}, you bounce back in ${recovery.avgDays} day${recovery.avgDays !== 1 ? "s" : ""} on average. You're right on track.`
   }
 
   if (habit.frequency === "daily") {
@@ -226,7 +226,7 @@ const buildActionableInsight = (habit, checkins, completionRate, weekdayData, re
         }
       }
       if (missed >= 3)
-        return `You've missed the last ${missed} ${day}s in a row — that's your toughest day at ${rate}% completion.`
+        return `You've missed the last ${missed} ${day}s in a row. That's your toughest day at ${rate}% completion.`
     }
   }
 
@@ -237,16 +237,16 @@ const buildActionableInsight = (habit, checkins, completionRate, weekdayData, re
     const maxGap = days.reduce((mx, _, i) =>
       i ? Math.max(mx, (days[i] - days[i-1]) / 86400000) : mx, 0)
     if (maxGap < 2.5)
-      return `You've never missed two ${unit} in a row on this habit — impressive consistency!`
+      return `You've never missed two ${unit} in a row on this habit, impressive consistency!`
   }
 
   if (recovery.breaks >= 2 && recovery.avgDays <= 2)
-    return `After ${recovery.breaks} streak breaks, you've always bounced back in ${recovery.avgDays} day${recovery.avgDays !== 1 ? "s" : ""} on average — your resilience is strong.`
+    return `After ${recovery.breaks} streak breaks, you've always bounced back in ${recovery.avgDays} day${recovery.avgDays !== 1 ? "s" : ""} on average. Your resilience is strong.`
 
   const verb = isBreak ? "kept clean" : "completed"
-  if (completionRate >= 70) return `You've ${verb} this habit on ${completionRate}% of ${unit} — great consistency.`
-  if (completionRate >= 40) return `You've ${verb} this habit on ${completionRate}% of ${unit} — steady progress adds up.`
-  return `You've ${verb} this habit on ${completionRate}% of ${unit} — try to build more consistency.`
+  if (completionRate >= 70) return `You've ${verb} this habit on ${completionRate}% of ${unit}, great consistency.`
+  if (completionRate >= 40) return `You've ${verb} this habit on ${completionRate}% of ${unit}, steady progress adds up.`
+  return `You've ${verb} this habit on ${completionRate}% of ${unit}, try to build more consistency.`
 }
 
 const computeWeeklyLineData = (habits, now) => {
@@ -400,7 +400,7 @@ const WeeklyLineChart = ({ data }) => {
           <YAxis domain={[yMin, yMax]} tick={{ fontSize: 12 }} unit="%" />
           <RTooltip
             formatter={(v, name) => [
-              v == null ? "—" : `${v}%`,
+              v == null ? ":" : `${v}%`,
               name === "thisWeek" ? "This week" : name === "lastWeek" ? "Last week" : "All-time avg",
             ]}
           />
@@ -420,7 +420,7 @@ const WeeklyLineChart = ({ data }) => {
       </ResponsiveContainer>
       {hasFutureDays && todayLabel && (
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-          This week shown through today ({todayLabel}) — future days are hidden
+          This week shown through today ({todayLabel}), future days are hidden
         </Typography>
       )}
     </Box>
@@ -467,7 +467,7 @@ const Heatmap = ({ cells, habitType, fromCreation, startDate }) => {
         ))}
         {cells.map((day, i) => (
           <Tooltip key={i}
-            title={`${format(day.date, "MMM d")} — ${day.checked ? checkedLabel : missedLabel}`}
+            title={`${format(day.date, "MMM d")} , ${day.checked ? checkedLabel : missedLabel}`}
             placement="top">
             <Box sx={{
               aspectRatio: "1", borderRadius: 1,
@@ -512,7 +512,7 @@ const WeekdayBars = ({ data }) => (
 const RollingTrendChart = ({ data, frequency }) => {
   if (data.length < 3) return (
     <Typography variant="caption" color="text.secondary">
-      Not enough data yet — check back after a few more days.
+      Not enough data yet, check back after a few more days.
     </Typography>
   )
   const interval  = Math.max(0, Math.floor(data.length / 12) - 1)
@@ -591,7 +591,7 @@ const Progress = () => {
   if (!habits)    return <Typography p={4}>Loading…</Typography>
   if (!habits.length) return (
     <Typography p={4} color="text.secondary">
-      No habits yet — add some from Today to start tracking.
+      No habits yet, add some from Today to start tracking.
     </Typography>
   )
 
@@ -641,7 +641,7 @@ const Progress = () => {
       {/* ── Weekly activity — all daily habits ── */}
       {weeklyLineData.length > 0 && (
         <Paper variant="outlined" sx={{ p: 3, mb: 4 }}>
-          <SectionTitle>Weekly Activity — All Daily Habits</SectionTitle>
+          <SectionTitle>Weekly Activity Of All Daily Habits</SectionTitle>
           <WeeklyLineChart data={weeklyLineData} />
         </Paper>
       )}
@@ -682,7 +682,7 @@ const Progress = () => {
           }}>
             <WarningAmberIcon sx={{ color: colors.orange, fontSize: 18 }} />
             <Typography variant="body2" sx={{ color: "#92400e" }}>
-              Not yet {isBreak ? "clean" : "checked in"} today — your {habit.streak}{streakUnit} streak is at risk
+              Not yet {isBreak ? "clean" : "checked in"} today! your {habit.streak}{streakUnit} streak is at risk
             </Typography>
           </Box>
         )}
@@ -702,7 +702,7 @@ const Progress = () => {
 
       {/* ── Summary stat cards ── */}
       <Box sx={{ mb: 4 }}>
-        <SectionTitle>Summary — {habit.title}</SectionTitle>
+        <SectionTitle>Summary  {habit.title}</SectionTitle>
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2} flexWrap="wrap">
           <StatCard
             label={isBreak ? "Clean streak" : "Current streak"}
