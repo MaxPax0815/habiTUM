@@ -17,6 +17,16 @@ export const colors = {
     green: "#00A86B",
 };
 
+export const avatarColors = [
+    "#B85F35",
+    "#B59B2A",
+    "#B233B5",
+    "#6F35BF",
+    "#3942BF",
+    "#1467F2",
+    "#B93A35",
+];
+
 export const theme = createTheme({
     palette: {
         primary: {

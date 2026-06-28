@@ -12,6 +12,7 @@ import Home from './pages/app/Home'
 import ManagerDashboard from './pages/app/ManagerDashboard'
 import Profile from './pages/app/Profile'
 import Progress from './pages/app/Progress'
+import ChallengePage from './challenges/ChallengePage.jsx'
 
 // Public Pages
 import LandingPage from './pages/public/LandingPage'
@@ -39,6 +40,7 @@ function App() {
           <Route element={user ? <AppLayout user={user} /> : <Navigate to="/login" />}>
           <Route path="/today" element={<Home />} />
           <Route path="/communities" element={<Communities />} />
+          <Route path="/challenges/:challengeId" element={<ChallengePage />} />
           <Route path="/progress" element={<Progress />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/manager" element={<ManagerDashboard />} />
