@@ -19,6 +19,8 @@ import {
   ResponsiveContainer, Tooltip as RTooltip, XAxis, YAxis,
 } from "recharts"
 
+import UpgradeButton from "../../../billing/UpgradeButton"
+
 import {
   buildActionableInsight,
   computeBestStreak,
@@ -442,11 +444,11 @@ const PaywallBanner = () => (
       Upgrade to Premium to unlock your full progress dashboard: streaks, heatmaps,
       momentum analytics, and personalised insights.
     </Typography>
-    <Chip
-      icon={<AutoAwesomeIcon />}
+    <UpgradeButton
       label="Upgrade to Premium"
-      color="primary"
-      sx={{ fontWeight: 700, px: 2, py: 2.5, fontSize: "0.9rem" }}
+      showIcon
+      size="large"
+      sx={{ px: 3 }}
     />
   </Box>
 )
@@ -525,7 +527,9 @@ const Progress = () => {
     const expected = getExpectedCount(created, now, habit.frequency)
     const completed = uniqueCheckinDays(checkins).length
     const completionRate = Math.min(100, Math.round(completed / expected * 100))
-    const bestStreak     = computeBestStreak(checkins, habit.frequency)
+    // Prefer the server-computed value (exact period-key consecutive logic).
+    // Fall back to local computation if the progress object is missing.
+    const bestStreak     = habit.bestStreak ?? computeBestStreak(checkins, habit.frequency)
     const weekdayData    = computeWeekdayRates(checkins, created, now)
     // maxDays=45 keeps the heatmap compact alongside the weekday bars on sm+ screens
     const heatmap        = computeHeatmap(checkins, created, now, 45)

@@ -69,10 +69,35 @@ export const getExpectedCount = (created, now, frequency) => {
 // --- Per-habit analytics ---
 
 /**
+ * Builds a period key matching the backend's getPeriodKey() in habit/periodUtils.js.
+ * Format: "daily:YYYY-MM-DD" or "weekly:YYYY-MM-DD" (Monday of the week).
+ */
+const buildPeriodKey = (date, frequency) => {
+  const d = new Date(date)
+  d.setHours(0, 0, 0, 0)
+  if (frequency === "weekly") {
+    // Align to Monday — same formula as the backend's startOfWeek()
+    const daysSinceMonday = (d.getDay() + 6) % 7
+    d.setDate(d.getDate() - daysSinceMonday)
+  }
+  const pad = (n) => String(n).padStart(2, "0")
+  const dateStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  return `${frequency === "weekly" ? "weekly" : "daily"}:${dateStr}`
+}
+
+/**
  * Returns true if the habit was checked in today (daily) or during the current
- * Mon-Sun calendar week (weekly). Uses lastCheckin from the habit object.
+ * Mon-Sun calendar week (weekly).
+ *
+ * Prefers habit.progress.lastPeriodKey (server-authoritative, exact period match).
+ * Falls back to lastCheckin date math for backward compatibility.
  */
 export const isCheckedInToday = (habit, now) => {
+  const lastPeriodKey = habit.progress?.lastPeriodKey
+  if (lastPeriodKey) {
+    return lastPeriodKey === buildPeriodKey(now, habit.frequency)
+  }
+  // Fallback: date-math against lastCheckin
   if (!habit.lastCheckin) return false
   const d = new Date(habit.lastCheckin)
   if (habit.frequency === "weekly") {
