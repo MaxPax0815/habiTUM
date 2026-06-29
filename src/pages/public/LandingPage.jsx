@@ -1,10 +1,7 @@
-import React from "react";
 import { Link as RouterLink } from "react-router-dom";
 import {
   Box,
   Button,
-  Card,
-  CardContent,
   Chip,
   Container,
   CssBaseline,
@@ -19,11 +16,11 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import TrackChangesIcon from "@mui/icons-material/TrackChanges";
 import WhatshotIcon from "@mui/icons-material/Whatshot";
 import GroupsIcon from "@mui/icons-material/Groups";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import MilitaryTechIcon from "@mui/icons-material/MilitaryTech";
 
 import mockupDashboard from '../../assets/mockup_dashboard.png';
+import AppCard from "../../components/AppCard";
 import { outlinedPillButtonSx } from '../../styles/buttonSx'
 
 // ------------------------------------------------------
@@ -86,29 +83,6 @@ const theme = createTheme({
     borderRadius: 14,
   },
 });
-
-// ------------------------------------------------------
-// Reusable card component
-// ------------------------------------------------------
-//! Consider making this a reusable component in the future
-//! if we find ourselves using it in multiple places
-function GrayCard({ children, sx = {} }) {
-  return (
-    <Card
-      elevation={0}
-      sx={{
-        height: "100%",
-        borderRadius: 3,
-        border: `1px solid ${colors.border}`,
-        backgroundColor: colors.surface,
-        boxShadow: "0 10px 24px rgba(7, 29, 53, 0.06)",
-        ...sx,
-      }}
-    >
-      <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>{children}</CardContent>
-    </Card>
-  );
-}
 
 // ------------------------------------------------------
 // Small helper components
@@ -375,7 +349,7 @@ export default function LandingPage() {
 
           <Grid container spacing={3} sx={{ mt: 3}}>
             <Grid size={{ xs: 12, md: 4 }}>
-              <GrayCard>
+              <AppCard>
                 <IconBadge>
                   <TrackChangesIcon fontSize="small" />
                 </IconBadge>
@@ -392,11 +366,11 @@ export default function LandingPage() {
                   Define daily habits, track your streaks, and watch your consistency grow day
                   by day with clear progress indicators.
                 </Typography>
-              </GrayCard>
+              </AppCard>
             </Grid>
 
             <Grid size={{ xs: 12, md: 4 }}>
-              <GrayCard>
+              <AppCard>
                 <IconBadge bg={colors.softOrange} color={colors.orange}>
                   <WhatshotIcon fontSize="small" />
                 </IconBadge>
@@ -413,11 +387,11 @@ export default function LandingPage() {
                   HabiTUM’s break-habit mode helps you reduce and eliminate habits you want
                   to quit, with the same tracking power.
                 </Typography>
-              </GrayCard>
+              </AppCard>
             </Grid>
 
             <Grid size={{ xs: 12, md: 4 }}>
-              <GrayCard>
+              <AppCard>
                 <IconBadge bg={colors.softGreen} color={colors.green}>
                   <GroupsIcon fontSize="small" />
                 </IconBadge>
@@ -435,7 +409,7 @@ export default function LandingPage() {
                   Join student communities, take on shared challenges, and keep each other
                   accountable — together you go further.
                 </Typography>
-              </GrayCard>
+              </AppCard>
             </Grid>
           </Grid>
         </Container>
@@ -497,7 +471,7 @@ export default function LandingPage() {
                 }}
               >
                 <Stack spacing={2} sx={{ width: "100%", maxWidth: 560 }}>
-                  <GrayCard sx={{ boxShadow: "none", textAlign: "center" }}>
+                  <AppCard sx={{ boxShadow: "none", textAlign: "center" }}>
                     <Typography sx={{ fontSize: 34, mb: 1 }}>👥</Typography>
 
                     <Typography
@@ -515,9 +489,9 @@ export default function LandingPage() {
                       Find your people and build routines together — from fitness groups to
                       study accountability circles.
                     </Typography>
-                  </GrayCard>
+                  </AppCard>
 
-                  <GrayCard sx={{ boxShadow: "none", textAlign: "center" }}>
+                  <AppCard sx={{ boxShadow: "none", textAlign: "center" }}>
                     <Typography sx={{ fontSize: 34, mb: 1 }}>🏆</Typography>
 
                     <Typography
@@ -535,7 +509,7 @@ export default function LandingPage() {
                       30-day sprints, reading goals, detox weeks — take on challenges and earn
                       your place on the leaderboard.
                     </Typography>
-                  </GrayCard>
+                  </AppCard>
                 </Stack>
               </Grid>
             </Grid>
@@ -544,7 +518,7 @@ export default function LandingPage() {
 
         {/* Stats Section */}
         <Container maxWidth="lg" sx={{ pb: { xs: 5, md: 7 } }}>
-          <GrayCard>
+          <AppCard>
             <Grid container spacing={3}
             sx={{
               justifyContent: "space-around",
@@ -579,7 +553,7 @@ export default function LandingPage() {
                 />
               </Grid>
             </Grid>
-          </GrayCard>
+          </AppCard>
         </Container>
 
         {/* Call to Action Section */}

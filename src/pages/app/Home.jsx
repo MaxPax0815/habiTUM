@@ -13,6 +13,7 @@ import { Box, Button, Dialog, Paper, Stack, Typography } from "@mui/material"
 import { colors } from "../../theme"
 
 // components
+import AppDialog from "../../components/AppDialog"
 import HabitDetails from "../../components/HabitDetails"
 import HabitForm from "../../components/HabitForm"
 
@@ -122,8 +123,16 @@ const Home = () => {
         </Typography>
       </Box>
 
-      {/* three Stat-Cards as template-stat-cards */}
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mb: 4 }}>
+      {/* three Stat-Cards — laid out on the same 3-column grid as the dashboard below
+          so the habit list lines up under the first two cards and the sidebar under the third */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" },
+          gap: 2,
+          mb: 4,
+        }}
+      >
         <StatCard
           icon="task_alt"
           iconColor={colors.primary}
@@ -142,26 +151,39 @@ const Home = () => {
           label="This week"
           value={`${weekDays}/7 days`}
         />
-      </Stack>
+      </Box>
 
-      {/* main dashboard: habits on the left, Active Challenges reserved on the right */}
+      {/* main dashboard: shares the same 3-column grid + gap as the stat cards above,
+          so the habit list spans the first two columns and the sidebar the third */}
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "1fr 320px" }, // single column on mobile, sidebar on desktop
-          gap: 4,
+          gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
+          gap: 2,
           alignItems: "start",
         }}
       >
-        {/* LEFT: build habits, add button, then break habits */}
-        <Box>
+        {/* LEFT: build habits, then break habits, then add button — spans the two left columns */}
+        <Box sx={{ gridColumn: { md: "span 2" } }}>
               <Typography variant="overline" color="text.secondary" sx={{ display: "block", textAlign: "left" }}>
               Build habits
               </Typography>          {buildHabits.map(habit => (
             <HabitDetails habit={habit} key={habit._id} />
           ))}
 
-          {/* grey "add" button under the habits -> opens the popup */}
+          {/* break habits -> heading + list only render when at least one exists */}
+          {breakHabits.length > 0 && (
+            <>
+              <Typography variant="overline" color="text.secondary" sx={{ display: "block", textAlign: "left", mt: 3 }}>
+              Break habits
+              </Typography>
+              {breakHabits.map(habit => (
+                <HabitDetails habit={habit} key={habit._id} />
+              ))}
+            </>
+          )}
+
+          {/* grey "add" button under both lists -> opens the popup */}
           <Button
             fullWidth
             onClick={() => setShowForm(true)}
@@ -176,18 +198,6 @@ const Home = () => {
           >
             + Add another habit
           </Button>
-
-          {/* break habits -> heading + list only render when at least one exists */}
-          {breakHabits.length > 0 && (
-            <>
-              <Typography variant="overline" color="text.secondary" sx={{ display: "block", textAlign: "left" }}>
-              Build habits
-              </Typography>
-              {breakHabits.map(habit => (
-                <HabitDetails habit={habit} key={habit._id} />
-              ))}
-            </>
-          )}
         </Box>
 
         {/* RIGHT: Active Challenges placeholder (real feature comes later) */}
@@ -209,22 +219,13 @@ const Home = () => {
       </Box>
 
       {/* create-habit popup — replaces the old right-side form column */}
-      <Dialog
+      <AppDialog
         open={showForm}
         onClose={() => setShowForm(false)}
-        fullWidth
         maxWidth="sm"
-        slotProps={{
-          backdrop: {
-            sx: {
-              backdropFilter: "blur(4px)",          // blurs the dashboard behind it
-              backgroundColor: "rgba(15,23,42,0.25)" // slight dim so the card pops
-            },
-          },
-        }}
       >
         <HabitForm onClose={() => setShowForm(false)} />
-      </Dialog>
+      </AppDialog>
     </div>
   )
 }
