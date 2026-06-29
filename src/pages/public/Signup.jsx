@@ -21,6 +21,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff'
 
 import { colors } from '../../theme'
 import { useSignup } from '../../auth/useSignup'
+import AppCard from '../../components/AppCard'
 
 
 const BENEFITS = [
@@ -76,15 +77,17 @@ const Signup = () => {
     return (
         <Box>
             {/* Card */}
-            <Box
+            <AppCard
                 sx={{
                     maxWidth: 480,
                     mx: 'auto',
                     mb: 6,
-                    bgcolor: colors.surface,
-                    borderRadius: 3,
-                    boxShadow: '0 4px 32px rgba(7,29,53,0.08)',
+                    height: 'auto',
+                    border: 'none',
+                }}
+                contentSx={{
                     p: { xs: 3, sm: 4 },
+                    '&:last-child': { pb: { xs: 3, sm: 4 } },
                 }}
             >
                 <Box
@@ -341,7 +344,7 @@ const Signup = () => {
                         </Typography>
                     </Typography>
                 </Box>
-            </Box>
+            </AppCard>
         </Box>
     )
 }

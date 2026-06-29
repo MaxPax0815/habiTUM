@@ -16,6 +16,7 @@ import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
 
 import { useLogin } from '../../auth/useLogin'
+import AppCard from '../../components/AppCard'
 import { colors } from '../../theme'
 
 const FieldLabel = ({ children }) => (
@@ -62,16 +63,18 @@ const Login = () => {
         <Box> 
 
             {/* Card */}
-            <Box
+            <AppCard
                 sx={{
                     width: "100%",
                     maxWidth: 440,
                     mx: 'auto',
                     mb: 6,
-                    bgcolor: colors.surface,
-                    borderRadius: 3,
-                    boxShadow: '0 4px 32px rgba(7,29,53,0.08)',
+                    height: 'auto',
+                    border: 'none',
+                }}
+                contentSx={{
                     p: { xs: 4, sm: 6 },
+                    '&:last-child': { pb: { xs: 4, sm: 6 } },
                 }}
             >
 
@@ -226,7 +229,7 @@ const Login = () => {
                         </Typography>
                     </Typography>
                 </Box>
-            </Box>
+            </AppCard>
         </Box>
     )
 }
