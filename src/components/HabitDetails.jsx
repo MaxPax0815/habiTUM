@@ -106,7 +106,7 @@ const HabitDetails = ({ habit }) => {
               local_fire_department
             </span>
           }
-          label={`${habit.streak}d`}
+          label={`${habit.streak}${habit.frequency === 'weekly' ? 'w' : 'd'}`}
           sx={isBreak ? { color: colors.orange, bgcolor: colors.softOrange, fontWeight: 700 } : undefined}
         />
 
