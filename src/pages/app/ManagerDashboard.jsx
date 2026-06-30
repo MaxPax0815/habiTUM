@@ -2,7 +2,7 @@ import { Box, Typography, Paper } from '@mui/material'
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined'
 import EmojiEventsOutlinedIcon from '@mui/icons-material/EmojiEventsOutlined'
 import { useAuthContext } from '../../auth/useAuthContext' // reads user from AuthContext to personalize the greeting
-import { colors } from '../../theme'
+import { colors } from '../../styles/tokens'
 
 // preview cards for features not yet implemented; replace with real components when ready
 const placeholderCards = [

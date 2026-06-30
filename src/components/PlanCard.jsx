@@ -8,7 +8,7 @@ import {
 } from '@mui/material'
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined'
 
-import { colors } from '../theme'
+import { colors } from '../styles/tokens'
 
 /**
  * Reusable plan card for the Profile page.

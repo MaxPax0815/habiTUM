@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@mui/material";
-import { colors } from "../theme";
+import { colors } from '../styles/tokens'
 
 const AppCard = ({ children, sx = {}, contentSx = {} }) => {
   return (

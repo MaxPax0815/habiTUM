@@ -2,7 +2,7 @@ import { Outlet } from 'react-router-dom'
 import { Box } from '@mui/material'
 
 import Sidebar from '../components/Sidebar'
-import { colors } from '../theme'
+import { colors } from '../styles/tokens'
 import { useAuthContext } from '../auth/useAuthContext'
 
 const AppLayout = () => {

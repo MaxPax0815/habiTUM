@@ -12,7 +12,7 @@ import {
   Box, Chip, CircularProgress, Divider,
   Paper, Stack, Tooltip, Typography,
 } from "@mui/material"
-import { colors } from "../../../theme"
+import { colors } from '../../../styles/tokens'
 
 import {
   CartesianGrid, Legend, Line, LineChart,

@@ -17,7 +17,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff'
 
 import { useLogin } from '../../auth/useLogin'
 import AppCard from '../../components/AppCard'
-import { colors } from '../../theme'
+import { colors } from '../../styles/tokens'
 
 const FieldLabel = ({ children }) => (
     <Typography

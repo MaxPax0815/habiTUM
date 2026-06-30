@@ -10,7 +10,8 @@ import {
 import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined'
 
 import UpgradeButton from '../billing/UpgradeButton'
-import { colors, sectionTitleSx, cardSx } from '../theme'
+import { colors } from '../styles/tokens'
+import { cardSx, sectionTitleSx } from '../styles/recipes'
 
 const formatBillingDate = (dateString) => {
   if (!dateString) return '—'

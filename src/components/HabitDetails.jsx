@@ -16,7 +16,7 @@ import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 
-import { colors } from '../theme'
+import { colors } from '../styles/tokens'
 
 const HabitDetails = ({ habit }) => {
   const { dispatch } = useHabitsContext()

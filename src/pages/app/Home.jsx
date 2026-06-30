@@ -10,7 +10,7 @@ import getDay from "date-fns/getDay"
 
 // MUI
 import { Box, Button, Dialog, Paper, Stack, Typography } from "@mui/material"
-import { colors } from "../../theme"
+import { colors } from '../../styles/tokens'
 
 // components
 import AppDialog from "../../components/AppDialog"

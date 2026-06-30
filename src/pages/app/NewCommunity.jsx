@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Box, Button, InputBase, Paper, Typography } from '@mui/material'
 import { useCommunities } from '../../hooks/useCommunites'
-import { colors } from '../../theme'
+import { colors } from '../../styles/tokens'
 
 // One selectable visibility card (Public / Private). Highlights when active.
 const VisibilityCard = ({ icon, title, subtitle, active, onClick }) => (

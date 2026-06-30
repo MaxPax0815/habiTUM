@@ -2,7 +2,7 @@ import { Box, Button, Typography } from '@mui/material'
 import WorkspacePremiumOutlinedIcon from '@mui/icons-material/WorkspacePremiumOutlined'
 
 import { useBilling } from './useBillings'
-import { colors } from '../theme'
+import { colors } from '../styles/tokens'
 
 /**
  * Reusable Upgrade Button.

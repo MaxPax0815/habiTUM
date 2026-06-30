@@ -7,7 +7,7 @@ import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { Link as RouterLink } from "react-router-dom";
 
 import AppCard from "../components/AppCard";
-import { colors } from "../theme";
+import { colors } from '../styles/tokens'
 
 // ---------------------------------------------------------------------------
 // Challenges.jsx

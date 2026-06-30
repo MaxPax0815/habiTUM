@@ -19,7 +19,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
 
-import { colors } from '../../theme'
+import { colors } from '../../styles/tokens'
 import { useSignup } from '../../auth/useSignup'
 import AppCard from '../../components/AppCard'
 

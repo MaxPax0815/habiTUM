@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Alert, Box, Button, CircularProgress, Paper, Typography } from '@mui/material'
 import { useAuthContext } from '../../auth/useAuthContext'
 import ChallengeCard from '../../challenges/Challenges'
-import { colors } from '../../theme'
+import { colors } from '../../styles/tokens'
 
 const avatarColors = [colors.primary, '#A21CAF', '#B91C1C', colors.secondary, colors.orange]
 const colorFor = (name) => avatarColors[(name?.charCodeAt(0) || 0) % avatarColors.length]

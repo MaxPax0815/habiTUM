@@ -21,7 +21,8 @@ import { useBilling } from '../../billing/useBillings'
 import UpgradeButton from '../../billing/UpgradeButton'
 import PlanCard from '../../components/PlanCard'
 import BillingInformationCard from '../../components/BillingInformationCard'
-import { colors, pillButtonSx, sectionTitleSx, cardSx } from '../../theme'
+import { colors } from '../../styles/tokens'
+import { cardSx, pillButtonSx, sectionTitleSx } from '../../styles/recipes'
 
 const formatDate = (dateString) => {
   if (!dateString) return '—'

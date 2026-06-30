@@ -16,7 +16,7 @@ import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 
 import { useLogout } from '../auth/useLogout';
-import { colors } from "../theme";
+import { colors } from '../styles/tokens'
 
 
 // user is passed down from AppLayout, which reads it from AuthContext (set on login, persisted in localStorage)

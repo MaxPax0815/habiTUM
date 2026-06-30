@@ -16,7 +16,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import WhatshotIcon from "@mui/icons-material/Whatshot";
 
 import { useAuthContext } from "../auth/useAuthContext";
-import { avatarColors, colors } from "../theme";
+import { avatarColors, colors } from '../styles/tokens'
 
 // ---------------------------------------------------------------------------
 // Leaderboard.jsx

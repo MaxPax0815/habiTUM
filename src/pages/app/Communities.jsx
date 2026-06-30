@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Box, Button, InputBase, Paper, Typography } from '@mui/material'
 import { useAuthContext } from '../../auth/useAuthContext'
 import { useCommunities } from '../../hooks/useCommunites'
-import { colors } from '../../theme'
+import { colors } from '../../styles/tokens'
 
 // Deterministic avatar colour from the community name so each one looks distinct
 // without storing a colour (logo/brand colour are deferred to a later version).

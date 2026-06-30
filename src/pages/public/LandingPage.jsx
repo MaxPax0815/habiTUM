@@ -21,7 +21,7 @@ import MilitaryTechIcon from "@mui/icons-material/MilitaryTech";
 
 import mockupDashboard from '../../assets/mockup_dashboard.png';
 import AppCard from "../../components/AppCard";
-import { outlinedPillButtonSx } from '../../styles/buttonSx'
+import { outlinedPillButtonSx } from '../../styles/recipes'
 
 // ------------------------------------------------------
 // Global color variables

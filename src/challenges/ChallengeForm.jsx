@@ -15,7 +15,7 @@ import {
 
 import { useAuthContext } from "../auth/useAuthContext";
 import AppCard from "../components/AppCard";
-import { colors } from "../theme";
+import { colors } from '../styles/tokens'
 
 // ---------------------------------------------------------------------------
 // ChallengeForm.jsx
