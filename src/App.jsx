@@ -42,12 +42,12 @@ function App() {
               />
               <Route 
                 path="/signup" 
-                element={!user ? <Signup /> : <Navigate to="/today" repalce />} />
+                element={!user ? <Signup /> : <Navigate to="/today" replace />} />
             </Route>
           </Route>
 
           {/* Proctected app pages */}
-          <Route element={user ? <AppLayout user={user} /> : <Navigate to="/login"  repalce />}>
+          <Route element={user ? <AppLayout user={user} /> : <Navigate to="/login" replace />}>
             <Route path="/today" element={<Home />} />
             <Route path="/communities" element={<Communities />} />
             <Route path="/challenges/:challengeId" element={<ChallengePage />} />
@@ -58,7 +58,7 @@ function App() {
 
             <Route 
               path="/manager" 
-              element={user?.acccountType === 'manager' ? <ManagerDashboard /> : <Navigate to="/today" replace />} 
+              element={user?.accountType === 'manager' ? <ManagerDashboard /> : <Navigate to="/today" replace />}
             /> {/* manager-only page; accessible by URL but only linked in sidebar for managers */}
           </Route>
 
