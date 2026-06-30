@@ -1,0 +1,99 @@
+:root {
+  --color-primary: #0066FF;
+  --color-primary-dark: #00213D;
+  --color-secondary: #00B894;
+  --color-background: #F4F7FB;
+  --color-surface: #FFFFFF;
+  --color-text-primary: #071D35;
+  --color-text-secondary: #5B6B7F;
+  --color-muted: #94A3B8;
+  --color-border: #DDE5EF;
+  --color-soft-blue: #EAF2FF;
+  --color-soft-orange: #FFF1E8;
+  --color-soft-green: #E9FFF5;
+  --color-orange: #FF7A1A;
+  --color-green: #00A86B;
+
+  --font-sans: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  color-scheme: light;
+  color: var(--color-text-primary);
+  background: var(--color-background);
+  font-family: var(--font-sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark mode block for now — we can later add a toggle and store the preference in localStorage or so, but for now this is good enough since most OSes have a dark mode setting that will trigger this
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #16171d;
+    --border: #2e303a;
+    --code-bg: #1f2028;
+    --accent: #c084fc;
+    --accent-bg: rgba(192, 132, 252, 0.15);
+    --accent-border: rgba(192, 132, 252, 0.5);
+    --social-bg: rgba(47, 48, 58, 0.5);
+    --shadow:
+      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  }
+
+  #social .button-icon {
+    filter: invert(1) brightness(2);
+  }
+}
+*/
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--color-background);
+}
+
+#root {
+  width: 100%;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+img,
+picture {
+  display: block;
+  max-width: 100%;
+}
+
+code,
+pre {
+  font-family: var(--font-mono);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 3px;
+}
