@@ -1,8 +1,24 @@
-import { Box, Button, Chip, Divider, Stack, Typography } from "@mui/material";
+import { useState } from "react";
+import {
+  Box,
+  Button,
+  Chip,
+  Divider,
+  IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Stack,
+  Typography,
+} from "@mui/material";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import CheckIcon from "@mui/icons-material/Check";
 import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
 import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { Link as RouterLink } from "react-router-dom";
 
@@ -225,16 +241,46 @@ const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
 // ---------------------------------------------------------------------------
 // Extended full-width challenge card
 // ---------------------------------------------------------------------------
-export const ExtendedChallengeCard = ({ challenge, currentUserRank, isJoined = false, onJoin }) => {
+export const ExtendedChallengeCard = ({
+  challenge,
+  currentUserRank,
+  isJoined = false,
+  onJoin,
+  canManageChallenge = false,
+  onManageChallenge,
+  onLeaveChallenge,
+}) => {
+  const [actionAnchorEl, setActionAnchorEl] = useState(null);
   const daysLeft = getDaysLeft(challenge?.ends);
   const participantCount = Number(getParticipantCount(challenge));
   const participants = Number.isFinite(participantCount) ? participantCount : 0;
   const rank = Number(currentUserRank);
   const hasCurrentUserRank = Number.isFinite(rank) && rank > 0;
+  const hasManageAction = Boolean(canManageChallenge && onManageChallenge);
+  const hasLeaveAction = Boolean(isJoined && onLeaveChallenge);
+  const hasActionMenu = Boolean(isJoined && (hasManageAction || hasLeaveAction));
+  const isActionMenuOpen = Boolean(actionAnchorEl);
 
   const community = getChallengeCommunity(challenge);
-  const category = getChallengeCategory(challenge);
   const difficulty = getChallengeDifficulty(challenge);
+
+  const handleActionMenuOpen = (event) => {
+    setActionAnchorEl(event.currentTarget);
+  };
+
+  const handleActionMenuClose = () => {
+    setActionAnchorEl(null);
+  };
+
+  const handleManageChallenge = () => {
+    handleActionMenuClose();
+    onManageChallenge?.();
+  };
+
+  const handleLeaveChallenge = () => {
+    handleActionMenuClose();
+    onLeaveChallenge?.();
+  };
 
   return (
     <AppCard
@@ -249,14 +295,23 @@ export const ExtendedChallengeCard = ({ challenge, currentUserRank, isJoined = f
         p: { xs: 3, md: 4 },
       }}
     >
-      <Stack
-        direction={{ xs: "column", md: "row" }}
-        spacing={{ xs: 3, md: 4 }}
-        justifyContent="space-between"
-        alignItems={{ xs: "stretch", md: "flex-start" }}
-      >
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
+      <Box sx={{ minWidth: 0 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            gap: 2,
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 1.5,
+              minWidth: 0,
+            }}
+          >
             <Chip
               label={community}
               sx={{
@@ -283,94 +338,149 @@ export const ExtendedChallengeCard = ({ challenge, currentUserRank, isJoined = f
                 "& .MuiChip-label": { px: 1.5 },
               }}
             />
+          </Box>
 
-            <Chip
-              label={category}
+          {hasActionMenu && (
+            <IconButton
+              aria-label="Challenge actions"
+              aria-controls={isActionMenuOpen ? "challenge-actions-menu" : undefined}
+              aria-haspopup="menu"
+              aria-expanded={isActionMenuOpen ? "true" : undefined}
+              onClick={handleActionMenuOpen}
               sx={{
-                height: 32,
-                borderRadius: 999,
-                bgcolor: "#F3F4F6",
-                color: colors.muted,
-                fontSize: 15,
-                fontWeight: 800,
-                "& .MuiChip-label": { px: 1.5 },
+                width: 40,
+                height: 40,
+                flexShrink: 0,
+                border: `1px solid ${colors.border}`,
+                color: colors.textSecondary,
+                bgcolor: colors.surface,
+                "&:hover": {
+                  borderColor: colors.primary,
+                  bgcolor: colors.softBlue,
+                  color: colors.primary,
+                },
               }}
-            />
-          </Stack>
-
-          <Typography
-            variant="h4"
-            sx={{
-              mt: 2.5,
-              color: colors.textPrimary,
-              fontWeight: 900,
-              lineHeight: 1.15,
-              fontSize: { xs: 28, md: 34 },
-            }}
-          >
-            {challenge?.title || "Untitled challenge"}
-          </Typography>
-
-          <Typography
-            sx={{
-              mt: 2.5,
-              color: colors.textSecondary,
-              fontSize: { xs: 18, md: 20 },
-              lineHeight: 1.45,
-            }}
-          >
-            {challenge?.description || "No description yet."}
-          </Typography>
-
-          <Divider sx={{ my: 4, borderColor: colors.border }} />
-
-          <Stack direction="row" spacing={{ xs: 3, md: 6 }} flexWrap="wrap" useFlexGap>
-            <Stack direction="row" spacing={1.5} alignItems="center">
-              <GroupsOutlinedIcon sx={{ fontSize: 28, color: colors.muted }} />
-              <Typography sx={{ color: colors.textPrimary, fontSize: 20, fontWeight: 900 }}>
-                {participants.toLocaleString()}
-              </Typography>
-              <Typography sx={{ color: colors.muted, fontSize: 18, fontWeight: 700 }}>
-                {participants === 1 ? "participant" : "participants"}
-              </Typography>
-            </Stack>
-
-            <Stack direction="row" spacing={1.5} alignItems="center">
-              <AccessTimeOutlinedIcon sx={{ fontSize: 28, color: colors.muted }} />
-              <Typography sx={{ color: colors.textPrimary, fontSize: 20, fontWeight: 900 }}>
-                {daysLeft === null ? "--" : daysLeft}
-              </Typography>
-              <Typography sx={{ color: colors.muted, fontSize: 18, fontWeight: 700 }}>
-                days left
-              </Typography>
-            </Stack>
-
-            {hasCurrentUserRank && (
-              <Stack direction="row" spacing={1.5} alignItems="center">
-                <EmojiEventsOutlinedIcon sx={{ fontSize: 26, color: colors.primary }} />
-                <Typography sx={{ color: colors.primary, fontSize: 20, fontWeight: 900 }}>
-                  #{rank}
-                </Typography>
-                <Typography sx={{ color: colors.muted, fontSize: 18, fontWeight: 700 }}>
-                  your rank
-                </Typography>
-              </Stack>
-            )}
-          </Stack>
+            >
+              <MoreHorizIcon />
+            </IconButton>
+          )}
         </Box>
 
-        <ChallengeJoinButton
-          isJoined={isJoined}
-          onClick={isJoined ? undefined : onJoin}
-          sx={{
-            alignSelf: { xs: "stretch", md: "flex-start" },
-            minWidth: { md: 280 },
-            py: 1.5,
-            borderRadius: 3,
-            fontWeight: 900,
+        <Menu
+          id="challenge-actions-menu"
+          anchorEl={actionAnchorEl}
+          open={isActionMenuOpen}
+          onClose={handleActionMenuClose}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          transformOrigin={{ vertical: "top", horizontal: "right" }}
+          slotProps={{
+            paper: {
+              sx: {
+                mt: 1,
+                minWidth: 220,
+                borderRadius: 2,
+                border: `1px solid ${colors.border}`,
+                boxShadow: "0 14px 32px rgba(7, 29, 53, 0.14)",
+              },
+            },
           }}
-        />
-      </Stack>
+        >
+          {hasManageAction && (
+            <MenuItem onClick={handleManageChallenge}>
+              <ListItemIcon sx={{ minWidth: 36, color: colors.textSecondary }}>
+                <SettingsOutlinedIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="Manage challenge" />
+            </MenuItem>
+          )}
+
+          {hasLeaveAction && (
+            <MenuItem
+              onClick={handleLeaveChallenge}
+              sx={{
+                color: "#DC2626",
+                "& .MuiListItemIcon-root": { color: "inherit" },
+              }}
+            >
+              <ListItemIcon sx={{ minWidth: 36 }}>
+                <LogoutOutlinedIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText primary="Leave challenge" />
+            </MenuItem>
+          )}
+        </Menu>
+
+        <Typography
+          variant="h4"
+          sx={{
+            mt: 2.5,
+            color: colors.textPrimary,
+            fontWeight: 900,
+            lineHeight: 1.15,
+            fontSize: { xs: 28, md: 34 },
+          }}
+        >
+          {challenge?.title || "Untitled challenge"}
+        </Typography>
+
+        <Typography
+          sx={{
+            mt: 2.5,
+            color: colors.textSecondary,
+            fontSize: { xs: 18, md: 20 },
+            lineHeight: 1.45,
+          }}
+        >
+          {challenge?.description || "No description yet."}
+        </Typography>
+
+        {!isJoined && (
+          <ChallengeJoinButton
+            isJoined={false}
+            onClick={onJoin}
+            sx={{
+              mt: 3,
+              minWidth: { xs: "100%", sm: 260 },
+            }}
+          />
+        )}
+
+        <Divider sx={{ my: 4, borderColor: colors.border }} />
+
+        <Stack direction="row" spacing={{ xs: 3, md: 6 }} flexWrap="wrap" useFlexGap>
+          <Stack direction="row" spacing={1.5} alignItems="center">
+            <GroupsOutlinedIcon sx={{ fontSize: 28, color: colors.muted }} />
+            <Typography sx={{ color: colors.textPrimary, fontSize: 20, fontWeight: 900 }}>
+              {participants.toLocaleString()}
+            </Typography>
+            <Typography sx={{ color: colors.muted, fontSize: 18, fontWeight: 700 }}>
+              {participants === 1 ? "participant" : "participants"}
+            </Typography>
+          </Stack>
+
+          <Stack direction="row" spacing={1.5} alignItems="center">
+            <AccessTimeOutlinedIcon sx={{ fontSize: 28, color: colors.muted }} />
+            <Typography sx={{ color: colors.textPrimary, fontSize: 20, fontWeight: 900 }}>
+              {daysLeft === null ? "--" : daysLeft}
+            </Typography>
+            <Typography sx={{ color: colors.muted, fontSize: 18, fontWeight: 700 }}>
+              days left
+            </Typography>
+          </Stack>
+
+          {hasCurrentUserRank && (
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <EmojiEventsOutlinedIcon sx={{ fontSize: 26, color: colors.primary }} />
+              <Typography sx={{ color: colors.primary, fontSize: 20, fontWeight: 900 }}>
+                #{rank}
+              </Typography>
+              <Typography sx={{ color: colors.muted, fontSize: 18, fontWeight: 700 }}>
+                your rank
+              </Typography>
+            </Stack>
+          )}
+        </Stack>
+      </Box>
     </AppCard>
   );
 };

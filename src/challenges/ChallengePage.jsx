@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Box, CircularProgress } from "@mui/material";
+import { Alert, Box, CircularProgress, Paper, Typography } from "@mui/material";
 import { useParams } from "react-router-dom";
 
 import { useAuthContext } from "../auth/useAuthContext";
+import HabitDetails from "../components/HabitDetails";
 import { ExtendedChallengeCard } from "./Challenges";
 import Leaderboard from "./Leaderboard";
 
@@ -16,6 +17,9 @@ const ChallengePage = () => {
   const { user } = useAuthContext();
 
   const [data, setData] = useState(null);
+  const [challengeHabits, setChallengeHabits] = useState([]);
+  const [habitsError, setHabitsError] = useState(null);
+  const [habitsLoading, setHabitsLoading] = useState(Boolean(challengeId));
   const [isLoading, setIsLoading] = useState(Boolean(challengeId));
   const [error, setError] = useState(null);
 
@@ -64,6 +68,51 @@ const ChallengePage = () => {
     };
   }, [challengeId, user]);
 
+  useEffect(() => {
+    if (!challengeId || !user) return undefined;
+
+    const controller = new AbortController();
+    let isActive = true;
+
+    const fetchChallengeHabits = async () => {
+      setHabitsLoading(true);
+      setHabitsError(null);
+
+      try {
+        const response = await fetch(`/api/challenges/${challengeId}/habits`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+          signal: controller.signal,
+        });
+        const json = await response.json();
+
+        if (!response.ok) {
+          throw new Error(json.error || "Could not load challenge habits.");
+        }
+
+        if (isActive) {
+          setChallengeHabits(json);
+        }
+      } catch (fetchError) {
+        if (fetchError.name === "AbortError" || !isActive) return;
+        setChallengeHabits([]);
+        setHabitsError(fetchError.message || "Could not load challenge habits.");
+      } finally {
+        if (isActive) {
+          setHabitsLoading(false);
+        }
+      }
+    };
+
+    fetchChallengeHabits();
+
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, [challengeId, user]);
+
   const challenge = useMemo(() => {
     if (!data?.challenge) return null;
 
@@ -73,6 +122,27 @@ const ChallengePage = () => {
       isJoined: data.challenge.isJoined ?? data.isJoined ?? false,
     };
   }, [data]);
+
+  const buildChallengeHabits = challengeHabits.filter((habit) => habit.habitType === "build");
+  const breakChallengeHabits = challengeHabits.filter((habit) => habit.habitType === "break");
+
+  const refreshChallengeData = async () => {
+    if (!challengeId || !user) return null;
+
+    const response = await fetch(`/api/challenges/${challengeId}/leaderboard`, {
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+    });
+    const json = await response.json();
+
+    if (!response.ok) {
+      throw new Error(json.error || "Could not refresh challenge.");
+    }
+
+    setData(json);
+    return json;
+  };
 
   const handleJoinChallenge = async () => {
     if (!challengeId || !user || challenge?.isJoined) return;
@@ -93,19 +163,46 @@ const ChallengePage = () => {
         throw new Error(joinJson.error || "Could not join challenge.");
       }
 
-      const response = await fetch(`/api/challenges/${challengeId}/leaderboard`, {
-        headers: authHeader,
-      });
-      const json = await response.json();
-
-      if (!response.ok) {
-        throw new Error(json.error || "Could not refresh challenge.");
-      }
-
-      setData(json);
+      await refreshChallengeData();
     } catch (joinError) {
       setError(joinError.message || "Could not join challenge.");
     }
+  };
+
+  const handleLeaveChallenge = async () => {
+    if (!challengeId || !user || !challenge?.isJoined) return;
+    if (!window.confirm("Leave this challenge?")) return;
+
+    setError(null);
+
+    try {
+      const authHeader = {
+        Authorization: `Bearer ${user.token}`,
+      };
+      const leaveResponse = await fetch(`/api/challenges/${challengeId}/leave`, {
+        method: "DELETE",
+        headers: authHeader,
+      });
+      const leaveJson = await leaveResponse.json();
+
+      if (!leaveResponse.ok) {
+        throw new Error(leaveJson.error || "Could not leave challenge.");
+      }
+
+      await refreshChallengeData();
+    } catch (leaveError) {
+      setError(leaveError.message || "Could not leave challenge.");
+    }
+  };
+
+  const handleChallengeHabitUpdated = (updatedHabit) => {
+    setChallengeHabits((currentHabits) =>
+      currentHabits.map((habit) => habit._id === updatedHabit._id ? updatedHabit : habit)
+    );
+
+    refreshChallengeData().catch((refreshError) => {
+      setError(refreshError.message || "Could not refresh challenge.");
+    });
   };
 
   if (isLoading) {
@@ -144,7 +241,67 @@ const ChallengePage = () => {
         currentUserRank={data.currentUserRank}
         isJoined={challenge.isJoined}
         onJoin={handleJoinChallenge}
+        onLeaveChallenge={handleLeaveChallenge}
       />
+
+      <Box>
+        <Typography variant="overline" color="text.secondary">
+          Challenge habits
+        </Typography>
+
+        {!challenge.isJoined && challengeHabits.length > 0 && (
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            Join this challenge to check in to these habits.
+          </Typography>
+        )}
+
+        {habitsLoading ? (
+          <Box sx={{ display: "grid", minHeight: 120, placeItems: "center" }}>
+            <CircularProgress size={24} />
+          </Box>
+        ) : habitsError ? (
+          <Alert severity="error" sx={{ mt: 1.5 }}>{habitsError}</Alert>
+        ) : challengeHabits.length > 0 ? (
+          <Box sx={{ mt: 1.5 }}>
+            {buildChallengeHabits.map((habit) => (
+              <HabitDetails
+                key={habit._id}
+                habit={habit}
+                actionsDisabled={!challenge.isJoined}
+                showDelete={false}
+                onHabitUpdated={handleChallengeHabitUpdated}
+              />
+            ))}
+
+            {breakChallengeHabits.length > 0 && (
+              <>
+                <Typography
+                  variant="overline"
+                  color="text.secondary"
+                  sx={{ display: "block", textAlign: "left", mt: 3 }}
+                >
+                  Break habits
+                </Typography>
+                {breakChallengeHabits.map((habit) => (
+                  <HabitDetails
+                    key={habit._id}
+                    habit={habit}
+                    actionsDisabled={!challenge.isJoined}
+                    showDelete={false}
+                    onHabitUpdated={handleChallengeHabitUpdated}
+                  />
+                ))}
+              </>
+            )}
+          </Box>
+        ) : (
+          <Paper variant="outlined" sx={{ p: 3, mt: 1.5, borderRadius: 2, textAlign: "center" }}>
+            <Typography variant="body2" color="text.secondary">
+              No habits have been added to this challenge yet.
+            </Typography>
+          </Paper>
+        )}
+      </Box>
 
       <Leaderboard challengeId={challengeId} initialData={data} />
     </Box>

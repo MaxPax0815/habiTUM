@@ -18,8 +18,14 @@ import Typography from '@mui/material/Typography'
 
 import { colors } from '../theme'
 
-const HabitDetails = ({ habit }) => {
-  const { dispatch } = useHabitsContext()
+const HabitDetails = ({
+  habit,
+  actionsDisabled = false,
+  showDelete = true,
+  onHabitDeleted,
+  onHabitUpdated,
+}) => {
+  const { habits, dispatch } = useHabitsContext()
   const { user } = useAuthContext()
 
   // break habits ("eliminate a negative pattern") get the orange accent from the mockups
@@ -35,13 +41,18 @@ const HabitDetails = ({ habit }) => {
   // shared helper: POST to a habit sub-route, then swap the updated habit into context.
   // both /checkin and /undo respond with { message, habit }.
   const post = async (action) => {
+    if (actionsDisabled || !user) return
+
     const response = await fetch(`/api/habits/${habit._id}/${action}`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${user.token}` } // include the JWT in the Authorization header so the backend knows which user is marking this habit done or undoing it
     })
     const json = await response.json()
     if (response.ok) {
-      dispatch({ type: 'UPDATE_HABIT', payload: json.habit })
+      if (Array.isArray(habits)) {
+        dispatch({ type: 'UPDATE_HABIT', payload: json.habit })
+      }
+      onHabitUpdated?.(json.habit)
     }
   }
 
@@ -49,13 +60,18 @@ const HabitDetails = ({ habit }) => {
   const handleUndo     = () => post('undo')
 
   const handleDelete = async () => {
+    if (actionsDisabled || !user) return
+
     const response = await fetch(`/api/habits/${habit._id}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${user.token}` } // include the JWT in the Authorization header so the backend knows which user is deleting this habit
     })
     const json = await response.json()
     if (response.ok) {
-      dispatch({ type: 'DELETE_HABIT', payload: json })
+      if (Array.isArray(habits)) {
+        dispatch({ type: 'DELETE_HABIT', payload: json })
+      }
+      onHabitDeleted?.(json)
     }
   }
 
@@ -65,6 +81,7 @@ const HabitDetails = ({ habit }) => {
         {/* circle that toggles done / not done */}
         <Checkbox
           checked={done}
+          disabled={actionsDisabled}
           onChange={done ? handleUndo : handleMarkDone}
           icon={<span className="material-symbols-outlined">radio_button_unchecked</span>}
           checkedIcon={
@@ -115,6 +132,7 @@ const HabitDetails = ({ habit }) => {
           ? (
             <Button
               variant="outlined"
+              disabled={actionsDisabled}
               onClick={done ? handleUndo : handleMarkDone}
               sx={{
                 color: colors.orange,
@@ -126,13 +144,15 @@ const HabitDetails = ({ habit }) => {
             </Button>
           )
           : (done
-            ? <Button variant="outlined" onClick={handleUndo}>Undo</Button>
-            : <Button variant="contained" onClick={handleMarkDone}>Mark done</Button>)}
+            ? <Button variant="outlined" disabled={actionsDisabled} onClick={handleUndo}>Undo</Button>
+            : <Button variant="contained" disabled={actionsDisabled} onClick={handleMarkDone}>Mark done</Button>)}
 
         {/* delete */}
-        <IconButton onClick={handleDelete} aria-label="delete">
-          <span className="material-symbols-outlined">delete</span>
-        </IconButton>
+        {showDelete && (
+          <IconButton disabled={actionsDisabled} onClick={handleDelete} aria-label="delete">
+            <span className="material-symbols-outlined">delete</span>
+          </IconButton>
+        )}
 
       </Stack>
     </Paper>
