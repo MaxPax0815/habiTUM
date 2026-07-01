@@ -67,7 +67,7 @@ export const sectionTitleSx = {
 }
 
 export const cardSx = {
-  borderRadius: 4,
+  borderRadius: 2,   // 2 × theme.shape.borderRadius (8px) = 16px
   border: '1px solid',
   borderColor: 'divider',
   boxShadow: 'none',
@@ -183,7 +183,7 @@ export const theme = createTheme({
     },
 
     shape: {
-        borderRadius: 14,
+        borderRadius: 8,   // base unit; sx borderRadius numbers multiply this value
     },
     
     components: {
@@ -193,7 +193,7 @@ export const theme = createTheme({
             },
             styleOverrides: {
                 root: {
-                    borderRadius: 12,
+                    borderRadius: 8,
                     textTransform: "none",
                     fontWeight: 700,
                 },
@@ -216,7 +216,7 @@ export const theme = createTheme({
         MuiCard: {
             styleOverrides: {
                 root: {
-                borderRadius: 16,
+                borderRadius: 12,
                 },
             },
             },

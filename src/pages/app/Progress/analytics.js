@@ -225,8 +225,9 @@ export const computeRecovery = (checkins, frequency) => {
     const gap = (days[i] - days[i - 1]) / periodMs
     if (gap > 1.5) details.push(Math.round(gap - 1))
   }
+  // Round to 1 decimal so callers can display "1.5d" instead of just "2d"
   const avg = details.length
-    ? Math.round(details.reduce((a, b) => a + b, 0) / details.length)
+    ? Math.round(details.reduce((a, b) => a + b, 0) / details.length * 10) / 10
     : 0
   return { breaks: details.length, avgDays: avg, details }
 }
@@ -536,8 +537,8 @@ export const computeOverallRecovery = (habits) => {
     .filter(r => r.breaks > 0)
   if (!withRecovery.length) return { breaks: 0, avgDays: 0 }
   const totalBreaks = withRecovery.reduce((s, r) => s + r.breaks, 0)
-  const avgDays     = Math.round(
-    withRecovery.reduce((s, r) => s + r.avgDays, 0) / withRecovery.length
-  )
+  const avgDays = Math.round(
+    withRecovery.reduce((s, r) => s + r.avgDays, 0) / withRecovery.length * 10
+  ) / 10
   return { breaks: totalBreaks, avgDays }
 }
