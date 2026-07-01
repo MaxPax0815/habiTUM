@@ -55,13 +55,45 @@ const getChallengeCommunity = (challenge) =>
 const getChallengeDifficulty = (challenge) =>
   challenge?.difficulty || "medium";
 
+const ChallengeJoinButton = ({ isJoined = false, sx = {}, ...buttonProps }) => {
+  const joined = Boolean(isJoined);
+  const { "&:hover": hoverSx, ...buttonSx } = sx;
+
+  return (
+    <Button
+      variant={joined ? "outlined" : "contained"}
+      startIcon={joined ? <CheckIcon /> : undefined}
+      sx={{
+        px: 3,
+        py: 1.2,
+        borderRadius: 2,
+        fontSize: 18,
+        fontWeight: 800,
+        borderColor: colors.primary,
+        bgcolor: joined ? colors.softBlue : colors.primary,
+        color: joined ? colors.primary : colors.surface,
+        ...buttonSx,
+        "&:hover": {
+          borderColor: colors.primary,
+          bgcolor: joined ? colors.softBlue : colors.primary,
+          ...hoverSx,
+        },
+      }}
+      {...buttonProps}
+    >
+      {joined ? "Joined" : "Join Challenge"}
+    </Button>
+  );
+};
+
 // ---------------------------------------------------------------------------
 // Compact challenge card
 // ---------------------------------------------------------------------------
-const ChallengeCard = ({ challenge }) => {
+const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
   const daysLeft = getDaysLeft(challenge?.ends);
   const participantCount = getParticipantCount(challenge);
   const challengeId = challenge?._id || challenge?.id;
+  const joined = Boolean(isJoined ?? challenge?.isJoined);
 
   const category = getChallengeCategory(challenge);
   const difficulty = getChallengeDifficulty(challenge);
@@ -178,24 +210,13 @@ const ChallengeCard = ({ challenge }) => {
           View
         </Button>
 
-        <Button
-          variant="contained"
+        <ChallengeJoinButton
+          isJoined={joined}
+          onClick={joined ? undefined : onJoin}
           sx={{
             minWidth: { xs: "100%", sm: 280 },
-            px: 3,
-            py: 1.2,
-            borderRadius: 2,
-            fontSize: 18,
-            fontWeight: 800,
-            bgcolor: colors.primary,
-            color: colors.surface,
-            "&:hover": {
-              bgcolor: colors.primary,
-            },
           }}
-        >
-          Join Challenge
-        </Button>
+        />
       </Stack>
     </AppCard>
   );
@@ -204,7 +225,7 @@ const ChallengeCard = ({ challenge }) => {
 // ---------------------------------------------------------------------------
 // Extended full-width challenge card
 // ---------------------------------------------------------------------------
-export const ExtendedChallengeCard = ({ challenge, currentUserRank, isJoined = false }) => {
+export const ExtendedChallengeCard = ({ challenge, currentUserRank, isJoined = false, onJoin }) => {
   const daysLeft = getDaysLeft(challenge?.ends);
   const participantCount = Number(getParticipantCount(challenge));
   const participants = Number.isFinite(participantCount) ? participantCount : 0;
@@ -338,28 +359,17 @@ export const ExtendedChallengeCard = ({ challenge, currentUserRank, isJoined = f
           </Stack>
         </Box>
 
-        <Button
-          variant={isJoined ? "outlined" : "contained"}
-          startIcon={isJoined ? <CheckIcon /> : undefined}
+        <ChallengeJoinButton
+          isJoined={isJoined}
+          onClick={isJoined ? undefined : onJoin}
           sx={{
             alignSelf: { xs: "stretch", md: "flex-start" },
             minWidth: { md: 280 },
-            px: 3,
             py: 1.5,
             borderRadius: 3,
-            fontSize: 18,
             fontWeight: 900,
-            borderColor: colors.primary,
-            bgcolor: isJoined ? colors.softBlue : colors.primary,
-            color: isJoined ? colors.primary : colors.surface,
-            "&:hover": {
-              borderColor: colors.primary,
-              bgcolor: isJoined ? colors.softBlue : colors.primary,
-            },
           }}
-        >
-          {isJoined ? "Joined" : "Join Challenge"}
-        </Button>
+        />
       </Stack>
     </AppCard>
   );

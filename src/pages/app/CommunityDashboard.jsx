@@ -64,6 +64,18 @@ const CommunityDashboard = () => {
     if (res.ok) fetchCommunity() // refresh so the button flips back to "Join"
   }
 
+  const handleJoinChallenge = async (challengeId) => {
+    const authHeader = { 'Authorization': `Bearer ${token}` }
+    const res = await fetch(`/api/challenges/${challengeId}/join`, { method: 'POST', headers: authHeader })
+
+    if (res.ok) {
+      fetchCommunityChallenges()
+    } else {
+      const json = await res.json()
+      setChallengesError(json.error || 'Could not join challenge.')
+    }
+  }
+
   const handleDelete = async () => {
     if (!window.confirm('Delete this community? This cannot be undone.')) return
     const authHeader = { 'Authorization': `Bearer ${token}` }
@@ -155,7 +167,12 @@ const CommunityDashboard = () => {
           }}
         >
           {challenges.map((challenge) => (
-            <ChallengeCard key={challenge._id} challenge={challenge} />
+            <ChallengeCard
+              key={challenge._id}
+              challenge={challenge}
+              isJoined={challenge.isJoined}
+              onJoin={() => handleJoinChallenge(challenge._id)}
+            />
           ))}
         </Box>
       ) : (

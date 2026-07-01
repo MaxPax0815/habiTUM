@@ -70,8 +70,43 @@ const ChallengePage = () => {
     return {
       ...data.challenge,
       participantCount: data.participantCount,
+      isJoined: data.challenge.isJoined ?? data.isJoined ?? false,
     };
   }, [data]);
+
+  const handleJoinChallenge = async () => {
+    if (!challengeId || !user || challenge?.isJoined) return;
+
+    setError(null);
+
+    try {
+      const authHeader = {
+        Authorization: `Bearer ${user.token}`,
+      };
+      const joinResponse = await fetch(`/api/challenges/${challengeId}/join`, {
+        method: "POST",
+        headers: authHeader,
+      });
+      const joinJson = await joinResponse.json();
+
+      if (!joinResponse.ok) {
+        throw new Error(joinJson.error || "Could not join challenge.");
+      }
+
+      const response = await fetch(`/api/challenges/${challengeId}/leaderboard`, {
+        headers: authHeader,
+      });
+      const json = await response.json();
+
+      if (!response.ok) {
+        throw new Error(json.error || "Could not refresh challenge.");
+      }
+
+      setData(json);
+    } catch (joinError) {
+      setError(joinError.message || "Could not join challenge.");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -107,7 +142,8 @@ const ChallengePage = () => {
       <ExtendedChallengeCard
         challenge={challenge}
         currentUserRank={data.currentUserRank}
-        isJoined={Boolean(data.currentUserRank)}
+        isJoined={challenge.isJoined}
+        onJoin={handleJoinChallenge}
       />
 
       <Leaderboard challengeId={challengeId} initialData={data} />
