@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import { useAuthContext } from "../auth/useAuthContext";
 import { ExtendedChallengeCard } from "./Challenges";
 import Leaderboard from "./Leaderboard";
+import PageContainer from "../components/layout/PageContainer";
 
 // ---------------------------------------------------------------------------
 // ChallengePage.jsx
@@ -94,11 +95,9 @@ const ChallengePage = () => {
   }
 
   return (
-    <Box
+    <PageContainer
+      maxWidth={980}
       sx={{
-        width: "100%",
-        maxWidth: 980,
-        mx: "auto",
         display: "flex",
         flexDirection: "column",
         gap: 4,
@@ -111,7 +110,7 @@ const ChallengePage = () => {
       />
 
       <Leaderboard challengeId={challengeId} initialData={data} />
-    </Box>
+    </PageContainer>
   );
 };
 

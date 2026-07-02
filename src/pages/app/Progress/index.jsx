@@ -20,6 +20,7 @@ import {
 } from "recharts"
 
 import UpgradeButton from "../../../billing/UpgradeButton"
+import PageHeader from "../../../components/layout/PageHeader"
 
 import {
   buildActionableInsight,
@@ -580,16 +581,18 @@ const Progress = () => {
 
   return (
     <Box>
-      {/* Header */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 800 }}>Progress</Typography>
-        <Chip
-          icon={<AutoAwesomeIcon sx={{ fontSize: 14 }} />}
-          label="Premium"
-          size="small"
-          sx={{ bgcolor: colors.softBlue, color: colors.primary, fontWeight: 700, ml: 1 }}
-        />
-      </Box>
+      <PageHeader
+        title="Progress"
+        titleAdornment={(
+          <Chip
+            icon={<AutoAwesomeIcon sx={{ fontSize: 14 }} />}
+            label="Premium"
+            size="small"
+            sx={{ bgcolor: colors.softBlue, color: colors.primary }}
+          />
+        )}
+        sx={{ mb: 3 }}
+      />
 
       {/* Hero Habit Readiness Score */}
       <HeroHabitScore score={readinessScore} habits={habits} now={now} />

@@ -1,6 +1,6 @@
 import { createTheme } from '@mui/material/styles'
 
-import { colors, fontFamily, radii } from './tokens'
+import { colors, fontFamily, radii, shadows } from './tokens'
 
 const theme = createTheme({
   palette: {
@@ -89,8 +89,17 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: radii.button,
+          minHeight: 40,
           textTransform: 'none',
           fontWeight: 700,
+          transition: 'background-color 160ms ease, border-color 160ms ease, transform 160ms ease',
+          '&:active': {
+            transform: 'scale(0.99)',
+          },
+          '&.Mui-focusVisible': {
+            outline: `3px solid ${colors.primary}`,
+            outlineOffset: 2,
+          },
         },
         sizeSmall: {
           padding: '8px 18px',
@@ -101,17 +110,154 @@ const theme = createTheme({
           fontSize: '1rem',
         },
         contained: {
-          boxShadow: 'none',
+          boxShadow: shadows.none,
+          '&:hover': {
+            boxShadow: shadows.none,
+          },
+        },
+        outlined: {
+          borderColor: colors.border,
+          '&:hover': {
+            borderColor: colors.primary,
+            backgroundColor: colors.softBlue,
+          },
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: radii.button,
+        },
+      },
+    },
+    MuiCard: {
+      defaultProps: {
+        elevation: 0,
+        variant: 'outlined',
+      },
+      styleOverrides: {
+        root: {
+          borderRadius: radii.card,
+          borderColor: colors.border,
+          backgroundColor: colors.surface,
+          boxShadow: shadows.none,
+        },
+      },
+    },
+    MuiCardContent: {
+      styleOverrides: {
+        root: {
+          padding: 24,
+          '&:last-child': {
+            paddingBottom: 24,
+          },
+        },
+      },
+    },
+    MuiPaper: {
+      defaultProps: {
+        elevation: 0,
+        variant: 'outlined',
+      },
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+        },
+        rounded: {
+          borderRadius: radii.card,
         },
         outlined: {
           borderColor: colors.border,
         },
       },
     },
-    MuiCard: {
+    MuiDialog: {
       styleOverrides: {
         root: {
-          borderRadius: radii.card,
+          '& .MuiBackdrop-root': {
+            backdropFilter: 'blur(4px)',
+            backgroundColor: 'rgba(15, 23, 42, 0.25)',
+          },
+        },
+        paper: {
+          border: `1px solid ${colors.border}`,
+          borderRadius: radii.dialog,
+          boxShadow: shadows.dialog,
+        },
+      },
+    },
+    MuiDialogTitle: {
+      styleOverrides: {
+        root: {
+          padding: '24px 24px 16px',
+          fontWeight: 900,
+        },
+      },
+    },
+    MuiDialogContent: {
+      styleOverrides: {
+        root: {
+          paddingLeft: 24,
+          paddingRight: 24,
+        },
+      },
+    },
+    MuiDialogActions: {
+      styleOverrides: {
+        root: {
+          gap: 8,
+          padding: '16px 24px 24px',
+        },
+      },
+    },
+    MuiTextField: {
+      defaultProps: {
+        variant: 'outlined',
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          borderRadius: radii.button,
+          fontSize: 15,
+          '& .MuiOutlinedInput-notchedOutline': {
+            borderColor: colors.border,
+          },
+          '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: colors.primary,
+          },
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: colors.primary,
+            borderWidth: 2,
+          },
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          '&.Mui-focused': {
+            color: colors.primary,
+          },
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          borderRadius: radii.pill,
+          fontWeight: 700,
+        },
+        outlined: {
+          borderColor: colors.border,
+        },
+      },
+    },
+    MuiDivider: {
+      styleOverrides: {
+        root: {
+          borderColor: colors.border,
         },
       },
     },

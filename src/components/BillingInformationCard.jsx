@@ -11,7 +11,7 @@ import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined'
 
 import UpgradeButton from '../billing/UpgradeButton'
 import { colors } from '../styles/tokens'
-import { cardSx, sectionTitleSx } from '../styles/recipes'
+import { sectionTitleSx } from '../styles/recipes'
 
 const formatBillingDate = (dateString) => {
   if (!dateString) return '—'
@@ -76,7 +76,7 @@ const BillingInformationCard = ({ user, paymentMethod }) => {
           Billing Information
         </Typography>
 
-        <Card sx={cardSx}>
+        <Card>
           <CardContent
             sx={{
               px: {
@@ -154,7 +154,7 @@ const BillingInformationCard = ({ user, paymentMethod }) => {
         Billing Information
       </Typography>
 
-      <Card sx={cardSx}>
+      <Card>
         <CardContent
           sx={{
             px: {

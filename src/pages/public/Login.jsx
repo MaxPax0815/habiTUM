@@ -28,18 +28,6 @@ const FieldLabel = ({ children }) => (
     </Typography>
 )
 
-const fieldSx = {
-    '& .MuiOutlinedInput-root': {
-        borderRadius: 2,
-        fontSize: 15,
-        '& fieldset': { borderColor: colors.border },
-        '&:hover fieldset': { borderColor: colors.primary },
-        '&.Mui-focused fieldset': { borderColor: colors.primary, borderWidth: 2 },
-    },
-    '& .MuiInputLabel-root.Mui-focused': { color: colors.primary },
-}
-
-
 const Login = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -125,14 +113,15 @@ const Login = () => {
                             required
                             autoComplete="email"
                             placeholder="tom.mueller@tum.de"
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <EmailOutlinedIcon sx={{ fontSize: 18, color: colors.muted }} />
-                                    </InputAdornment>
-                                ),
+                            slotProps={{
+                                input: {
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <EmailOutlinedIcon sx={{ fontSize: 18, color: colors.muted }} />
+                                        </InputAdornment>
+                                    ),
+                                },
                             }}
-                            sx={fieldSx}
                         />
                     </Box>
 
@@ -147,28 +136,29 @@ const Login = () => {
                             required
                             autoComplete="current-password"
                             placeholder="••••••••"
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <LockOutlinedIcon sx={{ fontSize: 18, color: colors.muted }} />
-                                    </InputAdornment>
-                                ),
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => setShowPassword((v) => !v)}
-                                            edge="end"
-                                            aria-label="toggle password visibility"
-                                        >
-                                            {showPassword
-                                                ? <VisibilityOff sx={{ fontSize: 18, color: colors.muted }} />
-                                                : <Visibility sx={{ fontSize: 18, color: colors.muted }} />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
+                            slotProps={{
+                                input: {
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <LockOutlinedIcon sx={{ fontSize: 18, color: colors.muted }} />
+                                        </InputAdornment>
+                                    ),
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => setShowPassword((v) => !v)}
+                                                edge="end"
+                                                aria-label="toggle password visibility"
+                                            >
+                                                {showPassword
+                                                    ? <VisibilityOff sx={{ fontSize: 18, color: colors.muted }} />
+                                                    : <Visibility sx={{ fontSize: 18, color: colors.muted }} />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                },
                             }}
-                            sx={fieldSx}
                         />
                     </Box>
 
@@ -186,22 +176,12 @@ const Login = () => {
                     <Button
                         type="submit"
                         variant="contained"
+                        size="large"
                         fullWidth
                         disabled={isLoading}
                         endIcon={<ArrowForwardIcon />}
                         sx={{
                             mt: 0.5,
-                            py: 1.5,
-                            borderRadius: 2,
-                            fontWeight: 700,
-                            fontSize: 15,
-                            bgcolor: colors.primary,
-                            boxShadow: '0 2px 12px rgba(0,102,255,0.25)',
-                            '&:hover': {
-                                bgcolor: '#0052CC',
-                                boxShadow: '0 4px 18px rgba(0,102,255,0.35)',
-                            },
-                            '&:active': { transform: 'scale(0.99)' },
                         }}
                     >
                         {isLoading ? 'Logging in…' : 'Log in'}

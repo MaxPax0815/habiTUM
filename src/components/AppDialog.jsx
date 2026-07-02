@@ -1,4 +1,4 @@
-import { Box, Dialog } from "@mui/material";
+import { Box, Dialog } from '@mui/material'
 
 // ---------------------------------------------------------------------------
 // AppDialog
@@ -11,37 +11,18 @@ const AppDialog = ({
   open,
   onClose,
   fullWidth = true,
-  maxWidth = "sm",
+  maxWidth = 'sm',
   contentSx = {},
   slotProps = {},
   ...dialogProps
 }) => {
-  const { backdrop: backdropSlotProps = {}, paper: paperSlotProps = {}, ...otherSlotProps } = slotProps;
-
   return (
     <Dialog
       open={open}
       onClose={onClose}
       fullWidth={fullWidth}
       maxWidth={maxWidth}
-      slotProps={{
-        ...otherSlotProps,
-        backdrop: {
-          ...backdropSlotProps,
-          sx: {
-            backdropFilter: "blur(4px)", // blurs the dashboard behind it
-            backgroundColor: "rgba(15,23,42,0.25)", // slight dim so the card pops
-            ...backdropSlotProps.sx,
-          },
-        },
-        paper: {
-          ...paperSlotProps,
-          sx: {
-            borderRadius: 3,
-            ...paperSlotProps.sx,
-          },
-        },
-      }}
+      slotProps={slotProps}
       {...dialogProps}
     >
       <Box sx={{ p: { xs: 2.5, sm: 3 }, ...contentSx }}>
@@ -49,6 +30,6 @@ const AppDialog = ({
       </Box>
     </Dialog>
   );
-};
+}
 
-export default AppDialog;
+export default AppDialog

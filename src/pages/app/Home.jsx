@@ -9,13 +9,14 @@ import isToday from "date-fns/isToday"
 import getDay from "date-fns/getDay"
 
 // MUI
-import { Box, Button, Dialog, Paper, Stack, Typography } from "@mui/material"
+import { Box, Button, Paper, Typography } from "@mui/material"
 import { colors } from '../../styles/tokens'
 
 // components
 import AppDialog from "../../components/AppDialog"
 import HabitDetails from "../../components/HabitDetails"
 import HabitForm from "../../components/HabitForm"
+import PageHeader from "../../components/layout/PageHeader"
 
 // Helpfunctions (outside of components since they don't need to access component state)
 
@@ -113,15 +114,11 @@ const Home = () => {
   
     return (
     <div className="home-page">
-      {/* Date + Greeting */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="body2" color="text.secondary">
-          {format(now, "EEEE, MMMM d")}
-        </Typography>
-        <Typography variant="h4" sx={{ fontWeight: 800, mt: 0.5 }}>
-          {greetingFor(now)}, {user?.firstName || "there"}.
-        </Typography>
-      </Box>
+      <PageHeader
+        eyebrow={format(now, "EEEE, MMMM d")}
+        title={`${greetingFor(now)}, ${user?.firstName || "there"}.`}
+        sx={{ mb: 3 }}
+      />
 
       {/* three Stat-Cards — laid out on the same 3-column grid as the dashboard below
           so the habit list lines up under the first two cards and the sidebar under the third */}

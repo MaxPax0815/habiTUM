@@ -4,6 +4,8 @@ import { Alert, Box, Button, CircularProgress, Paper, Typography } from '@mui/ma
 import { useAuthContext } from '../../auth/useAuthContext'
 import ChallengeCard from '../../challenges/Challenges'
 import { colors } from '../../styles/tokens'
+import PageContainer from '../../components/layout/PageContainer'
+import PageSection from '../../components/layout/PageSection'
 
 const avatarColors = [colors.primary, '#A21CAF', '#B91C1C', colors.secondary, colors.orange]
 const colorFor = (name) => avatarColors[(name?.charCodeAt(0) || 0) % avatarColors.length]
@@ -75,14 +77,14 @@ const CommunityDashboard = () => {
     }
   }
 
-  if (error) return <Box sx={{ maxWidth: 760, mx: 'auto' }}><Typography color="error">{error}</Typography></Box>
-  if (!community) return <Box sx={{ maxWidth: 760, mx: 'auto' }}><Typography>Loading…</Typography></Box>
+  if (error) return <PageContainer maxWidth={760}><Typography color="error">{error}</Typography></PageContainer>
+  if (!community) return <PageContainer maxWidth={760}><Typography>Loading…</Typography></PageContainer>
 
   const isMember = community.membershipStatus === 'accepted'
   const isCreator = community.myRole === 'creator'
 
   return (
-    <Box sx={{ maxWidth: 980, mx: 'auto', textAlign: 'left' }}>
+    <PageContainer maxWidth={980} sx={{ textAlign: 'left' }}>
       <Button
         onClick={() => navigate('/communities')}
         sx={{ color: 'text.secondary', mb: 2, px: 0 }}
@@ -132,41 +134,42 @@ const CommunityDashboard = () => {
       </Paper>
 
       {community.description && (
-        <Paper variant="outlined" sx={{ p: 3, borderRadius: 3, mb: 3 }}>
-          <Typography variant="overline" color="text.secondary">About</Typography>
+        <PageSection title="About" sx={{ mb: 3 }}>
+          <Paper variant="outlined" sx={{ p: 3, borderRadius: 3 }}>
           <Typography sx={{ mt: 0.5 }}>{community.description}</Typography>
-        </Paper>
+          </Paper>
+        </PageSection>
       )}
 
-      <Typography variant="overline" color="text.secondary">Challenges</Typography>
-      {challengesLoading ? (
-        <Box sx={{ display: 'grid', placeItems: 'center', py: 6 }}>
-          <CircularProgress size={28} />
-        </Box>
-      ) : challengesError ? (
-        <Alert severity="error" sx={{ mt: 1 }}>{challengesError}</Alert>
-      ) : challenges.length > 0 ? (
-        <Box
-          sx={{
-            mt: 1.5,
-            display: 'grid',
-            gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
-            gap: 2.5,
-          }}
-        >
-          {challenges.map((challenge) => (
-            <ChallengeCard key={challenge._id} challenge={challenge} />
-          ))}
-        </Box>
-      ) : (
-        <Paper variant="outlined" sx={{ p: 4, borderRadius: 3, textAlign: 'center', mt: 1 }}>
-          <span className="material-symbols-outlined" style={{ fontSize: 32, color: colors.muted }}>emoji_events</span>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            No challenges yet. Challenges for this community will appear here.
-          </Typography>
-        </Paper>
-      )}
-    </Box>
+      <PageSection title="Challenges" sx={{ mb: 0 }}>
+        {challengesLoading ? (
+          <Box sx={{ display: 'grid', placeItems: 'center', py: 6 }}>
+            <CircularProgress size={28} />
+          </Box>
+        ) : challengesError ? (
+          <Alert severity="error">{challengesError}</Alert>
+        ) : challenges.length > 0 ? (
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
+              gap: 2.5,
+            }}
+          >
+            {challenges.map((challenge) => (
+              <ChallengeCard key={challenge._id} challenge={challenge} />
+            ))}
+          </Box>
+        ) : (
+          <Paper variant="outlined" sx={{ p: 4, borderRadius: 3, textAlign: 'center' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: 32, color: colors.muted }}>emoji_events</span>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              No challenges yet. Challenges for this community will appear here.
+            </Typography>
+          </Paper>
+        )}
+      </PageSection>
+    </PageContainer>
   )
 }
 

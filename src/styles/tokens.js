@@ -26,10 +26,17 @@ export const avatarColors = [
 ]
 
 export const radii = {
-  base: 14,
-  button: 12,
-  card: 16,
+  base: 4,
+  small: '8px',
+  button: '12px',
+  card: '16px',
+  dialog: '16px',
   pill: '999px',
+}
+
+export const shadows = {
+  none: 'none',
+  dialog: '0 24px 56px rgba(7, 29, 53, 0.18)',
 }
 
 export const fontFamily = '"Inter", "Roboto", "Helvetica", "Arial", sans-serif'
