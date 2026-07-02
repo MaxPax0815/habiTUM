@@ -79,9 +79,12 @@ Response shapes to know:
 Frontend/src/
 ├── main.jsx                — provider tree root (Auth → Theme/CssBaseline → Habits → App)
 ├── App.jsx                 — BrowserRouter + all route definitions (the routing map above)
-├── theme.js                 — MUI theme + shared `colors` palette + shared sx snippets (pillButtonSx, cardSx, sectionTitleSx, centeredPageSx, avatarColors, etc.) — import from here, don't redefine colors locally (LandingPage.jsx is the one exception, see Known quirks)
-├── habits.css / App.css / index.css — legacy/global CSS; MUI sx props do almost all styling now (see Known quirks re: habits.css)
-├── styles/buttonSx.js        — pillButtonSx/outlinedPillButtonSx re-exported (duplicated from theme.js — see Known quirks)
+├── index.css               — global reset, CSS variables, body/root defaults, focus outline
+├── App.css                 — unused legacy Vite CSS; not imported by the application
+├── styles/
+│   ├── tokens.js             — raw design tokens: colors, radii, shadows, font family, avatar colors
+│   ├── theme.js              — the single MUI theme; maps tokens to palette/typography and component defaults
+│   └── recipes.js            — reusable `sx` combinations for exceptional patterns (pill buttons, centered pages, section labels)
 ├── auth/
 │   ├── AuthContext.jsx        — the Context + reducer + localStorage sync (described above)
 │   ├── useAuthContext.jsx     — safe accessor hook
@@ -94,10 +97,14 @@ Frontend/src/
 ├── layouts/
 │   ├── PublicLayout.jsx        — <Header/> + <Outlet/>, used for "/", "/login", "/signup"
 │   ├── AuthLayout.jsx           — centers its <Outlet/> (login/signup forms), nested inside PublicLayout
-│   └── AppLayout.jsx            — <Sidebar/> + centered max-width <Outlet/>, used for all authenticated app pages
+│   └── AppLayout.jsx            — <Sidebar/> + responsive main spacing + default PageContainer, used for authenticated pages
 ├── components/                 — shared, route-agnostic UI
-│   ├── AppCard.jsx               — the standard card wrapper (rounded, bordered, soft shadow) used across landing + app pages
-│   ├── AppDialog.jsx             — MUI Dialog wrapper with blurred backdrop, used for the habit-creation popup
+│   ├── layout/
+│   │   ├── PageContainer.jsx       — centers content at a default 1120px max width; accepts narrower page widths
+│   │   ├── PageHeader.jsx          — responsive semantic page heading with description/adornment/actions
+│   │   └── PageSection.jsx         — semantic section wrapper with consistent title/action/content spacing
+│   ├── AppCard.jsx               — standard theme-driven Card + responsive CardContent padding
+│   ├── AppDialog.jsx             — Dialog wrapper for custom padded content; backdrop/paper visuals come from the theme
 │   ├── Header.jsx                 — public-site header; adapts itself by route (landing nav vs. login/signup cross-link vs. back-arrow on other pages)
 │   ├── Sidebar.jsx                 — authenticated-app left nav; nav items depend on `user.accountType`
 │   ├── HabitForm.jsx                — create-habit form (used inside AppDialog from Home.jsx)
@@ -115,7 +122,7 @@ Frontend/src/
 │   └── Leaderboard.jsx                  — ranked participant table; can take `initialData` (avoids a second fetch when ChallengePage already has it) or fetch standalone by `challengeId`
 └── pages/
     ├── public/
-    │   ├── LandingPage.jsx              — marketing page; has its OWN local `colors`/`theme` (see Known quirks)
+    │   ├── LandingPage.jsx              — marketing page; consumes the shared tokens and global MUI theme
     │   ├── Login.jsx                     — email/password form → useLogin → navigate('/today')
     │   └── Signup.jsx                    — registration form (firstName/lastName/username/email/password/confirm) → useSignup → navigate('/today')
     └── app/
@@ -145,17 +152,22 @@ If the backend ever starts returning these metrics precomputed, this file's job 
 
 ## UI conventions
 
-- **Styling**: MUI `sx` props everywhere, driven by `theme.js`'s exported `colors` object (not just `theme.palette`) for anything not covered by MUI's semantic palette names (e.g. `colors.softBlue`, `colors.orange` for "break habit" accents). Reuse `cardSx`, `sectionTitleSx`, `pillButtonSx` from `theme.js` instead of re-typing `borderRadius`/`border`/`boxShadow` combos.
+- **Style architecture**: `styles/tokens.js` contains raw design decisions, `styles/theme.js` applies them globally to MUI, and `styles/recipes.js` contains reusable `sx` combinations. Only `main.jsx` imports the theme itself. Components import tokens or recipes, never the old deleted `src/theme.js`.
+- **MUI defaults**: Buttons and outlined inputs use a 12px radius. Cards, Papers, and Dialogs use a 16px radius and the shared divider border. Cards/Papers are outlined with no elevation by default. Chips are pill-shaped. Do not repeat these defaults in local `sx`; local overrides should express a real variant such as a selected border, status background, or compact non-surface element.
+- **Color usage**: Prefer semantic MUI names (`text.secondary`, `background.paper`, `divider`, `success.main`) where they fit. Import `colors` from `styles/tokens.js` for app-specific accents such as `softBlue`, `softOrange`, and break-habit orange. Do not create another page-local palette or theme.
+- **Page alignment**: Authenticated pages receive the standard 1120px `PageContainer` from `AppLayout`. Use `PageContainer` again only to intentionally narrow a page. Use `PageHeader` for normal page titles and `PageSection` for labelled content groups instead of rebuilding their spacing with ad-hoc Boxes.
+- **CSS**: `index.css` is the only imported global CSS file. `habits.css` was deleted because its bare `header`, `button`, and input selectors leaked into unrelated pages. Prefer the MUI theme and `sx`; if CSS is genuinely needed, scope every selector under a feature-specific class or use a CSS module.
+- **Recipes**: Use `pillButtonSx` only where a pill is intentional, `centeredPageSx` for auth layout, and `sectionTitleSx` for legacy/custom section labels that have not migrated to `PageSection`. Do not recreate the same recipe in a component.
 - **Icons**: MUI icon components (`@mui/icons-material`) for structural UI (nav, buttons), but the habit-tracking UI (`HabitDetails.jsx`, `Home.jsx` stat cards, `Progress/index.jsx`) uses inline `<span className="material-symbols-outlined">icon_name</span>` (Google Material Symbols font) instead — this is a deliberate mix, not an inconsistency to "fix"; match whichever pattern the file you're editing already uses.
 - **Forms**: plain controlled `useState` per field, manual `fetch` in a `handleSubmit`, no form library (no Formik/RHF). Error display is a plain `{error && <Typography color="error">{error}</Typography>}` and/or an `emptyFields` array used to redden specific `TextField`s (see `HabitForm.jsx`, `ChallengeForm.jsx`). Match this for new forms.
-- **Dialogs/popups**: wrap content in `<AppDialog>` (see `Home.jsx`'s create-habit flow) rather than a bare MUI `<Dialog>`, so backdrop blur/rounding stays consistent — `Profile.jsx`'s downgrade-confirmation dialog is the one place still using a raw `<Dialog>` directly.
+- **Dialogs/popups**: the global theme supplies backdrop blur, border, radius, and shadow to every MUI Dialog. Prefer `<AppDialog>` for form/custom content that also needs the shared responsive inner padding. A plain Dialog is acceptable when using standard `DialogTitle`, `DialogContent`, and `DialogActions` slots.
 - **Avatars/initials**: multiple independent "first letter of name → colored circle" implementations exist (`Sidebar.jsx`'s `initials`, `Communities.jsx`'s `CommunityAvatar`, `CommunityDashboard.jsx`'s inline version, `Leaderboard.jsx`'s `getInitial`/`getAvatarColor`) — each hashes a different source string (user name vs. community name vs. rank) so they haven't been unified into one component. Don't assume changing one changes the others.
 
 ## Known quirks (don't "fix" silently — they're either intentional or pre-existing, flag before touching)
 
-- **`habits.css` leaks global `header a { color: #333; text-decoration: none }`.** This is what forces `Header.jsx` to manually override the arrow-icon color with an inline `sx={{color: colors.surface}}` on the "Get Started" button's `endIcon` — see the `TODO` comment left in `Header.jsx` right above that button. If you touch `habits.css`, be aware it's scoped by tag name (`header`, not a class) so it affects every page, not just the habit dashboard its header comment claims.
-- **Two separate color/theme definitions.** `LandingPage.jsx` defines its own local `colors` object and its own `createTheme(...)` wrapped in a nested `<ThemeProvider>`, duplicating (and risking drifting from) `src/theme.js`. Everywhere else imports `colors`/`theme` from `theme.js`. If the palette changes, both places need updating unless someone consolidates `LandingPage.jsx` onto the shared theme.
-- **`styles/buttonSx.js` duplicates `pillButtonSx`/`outlinedPillButtonSx` already exported from `theme.js`.** Some files import from one, some from the other — check which one a file already uses before adding a third copy.
+- **`index.css` repeats token colors as CSS custom properties.** React/MUI styling uses `tokens.js`; the variables remain for body/reset/focus styles. If the palette changes, update both locations or introduce a generated bridge deliberately.
+- **`App.css` is unused legacy Vite CSS.** It is not imported. Remove it only as an explicit cleanup change rather than assuming it affects the current UI.
+- **Full ESLint is not clean.** Existing failures include context exports triggering the Fast Refresh rule, synchronous state updates in effects, conditional hooks in Progress, and `process` in `vite.config.js`. Styling changes should still run targeted lint plus `npm run build`; do not attribute these existing failures to the theme migration.
 - **`DowngradeButton.jsx` is an empty stub** (see Directory map above) — the real downgrade flow is inline in `Profile.jsx`.
 - **`ChallengeForm.jsx` has no entry point in the UI yet** — there's no "New Challenge" button wired up anywhere (Communities/CommunityDashboard don't render it). If asked to add challenge creation to the UI, this component already exists and just needs a trigger + navigation wired in.
 - **`useCommunites.js` and `requireCommunityCreatorAcsess.js`** (backend) are both intentionally-preserved typos in filenames that are imported by exact path elsewhere — renaming either requires updating every import site, not just the file.
@@ -166,5 +178,5 @@ If the backend ever starts returning these metrics precomputed, this file's job 
 2. Add a `<Route>` in `App.jsx` inside the matching layout block; follow the existing inline `user ? <X/> : <Navigate/>` pattern if it needs extra gating beyond "must be logged in" (e.g. premium-only, manager-only — see `/progress` and `/manager` for examples).
 3. If it needs a nav entry, add it to `Sidebar.jsx`'s `baseNavItems`/`managerNavItems`.
 4. Fetch data with a local `useState`/`useEffect`/`fetch` following the Authorization-header pattern above; only reach for Context if the data must be shared across more than one page at once.
-5. Style with `theme.js` colors/sx helpers, not new hardcoded hex values.
+5. Use `PageHeader` and `PageSection`, rely on MUI component defaults, and import app-specific values from `styles/tokens.js`/`styles/recipes.js`; do not add a local theme or broad global CSS.
 6. Update this file's directory map and routing map.

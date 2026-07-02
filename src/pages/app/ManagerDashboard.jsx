@@ -35,12 +35,9 @@ const ManagerDashboard = () => {
         {placeholderCards.map((card) => (
           <Paper
             key={card.title}
-            elevation={0}
             sx={{
               flex: '1 1 240px',
               p: 3,
-              borderRadius: 3,
-              border: `1px solid ${colors.border}`,
               backgroundColor: card.bg,
               opacity: 0.7,
             }}

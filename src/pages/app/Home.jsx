@@ -188,8 +188,6 @@ const Home = () => {
               mt: 1.5, mb: 4, py: 1.5,
               color: "text.secondary",
               bgcolor: "#f1f5f9",
-              borderRadius: 2,
-              textTransform: "none",
               "&:hover": { bgcolor: "#e2e8f0" },
             }}
           >
@@ -200,7 +198,7 @@ const Home = () => {
         {/* RIGHT: Active Challenges placeholder (real feature comes later) */}
         <Box>
           <Typography variant="overline" color="text.secondary">Active challenges</Typography>
-          <Paper variant="outlined" sx={{ p: 3, textAlign: "center", borderRadius: 2 }}>
+          <Paper variant="outlined" sx={{ p: 3, textAlign: "center" }}>
             <span className="material-symbols-outlined" style={{ fontSize: 32, color: colors.muted }}>
               emoji_events
             </span>

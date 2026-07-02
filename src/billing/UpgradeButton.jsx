@@ -2,7 +2,7 @@ import { Box, Button, Typography } from '@mui/material'
 import WorkspacePremiumOutlinedIcon from '@mui/icons-material/WorkspacePremiumOutlined'
 
 import { useBilling } from './useBillings'
-import { colors } from '../styles/tokens'
+import { colors, radii } from '../styles/tokens'
 
 /**
  * Reusable Upgrade Button.
@@ -31,7 +31,7 @@ const UpgradeButton = ({
         onClick={startCheckout}
         disabled={isLoading}
         sx={{
-          borderRadius: 999,
+          borderRadius: radii.pill,
           fontWeight: 800,
           py: 1,
           backgroundColor: colors.primary,

@@ -130,7 +130,7 @@ const HeroHabitScore = ({ score, habits, now }) => {
         borderColor: `${colors.primary}33`,
       }}
     >
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={3} alignItems="center">
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={3} sx={{ alignItems: "center" }}>
         {/* Circular gauge */}
         <Box sx={{ position: "relative", display: "inline-flex", flexShrink: 0 }}>
           {/* Grey track behind the coloured arc */}
@@ -869,7 +869,7 @@ const Progress = () => {
 
           {/* Best/worst day chips */}
           {!isWeekly && bestDay && worstDay && (
-            <Stack direction="row" spacing={1} sx={{ mt: 2 }} flexWrap="wrap">
+            <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: "wrap" }}>
               <Chip
                 label={`Best: ${bestDay.day} (${bestDay.rate}%)`}
                 size="small"

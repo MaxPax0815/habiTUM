@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Box, Button, InputBase, Paper, Typography } from '@mui/material'
 import { useAuthContext } from '../../auth/useAuthContext'
 import { useCommunities } from '../../hooks/useCommunites'
-import { colors } from '../../styles/tokens'
+import { colors, radii } from '../../styles/tokens'
 import PageContainer from '../../components/layout/PageContainer'
 import PageHeader from '../../components/layout/PageHeader'
 import PageSection from '../../components/layout/PageSection'
@@ -53,7 +53,7 @@ const Communities = () => {
       {/* Search */}
       <Paper
         variant="outlined"
-        sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 1, borderRadius: 3, mb: 4 }}
+        sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 1, borderRadius: radii.button, mb: 4 }}
       >
         <span className="material-symbols-outlined" style={{ color: colors.muted }}>search</span>
         <InputBase
@@ -69,7 +69,7 @@ const Communities = () => {
         actions={<Typography variant="caption" color="text.secondary">{joined.length} joined</Typography>}
       >
         {joined.length === 0 ? (
-          <Paper variant="outlined" sx={{ p: 5, textAlign: 'center', borderRadius: 3 }}>
+          <Paper variant="outlined" sx={{ p: 5, textAlign: 'center' }}>
             <span className="material-symbols-outlined" style={{ fontSize: 32, color: colors.muted }}>group</span>
             <Typography sx={{ fontWeight: 700, mt: 1 }}>No communities yet</Typography>
             <Typography variant="body2" color="text.secondary">Join a community below to get started.</Typography>
@@ -82,7 +82,7 @@ const Communities = () => {
                 variant="outlined"
                 onClick={() => navigate(`/communities/${c._id}`)}
                 sx={{
-                  display: 'flex', alignItems: 'center', gap: 2, p: 2, mb: 1.5, borderRadius: 3,
+                  display: 'flex', alignItems: 'center', gap: 2, p: 2, mb: 1.5,
                   cursor: 'pointer', '&:hover': { borderColor: colors.primary, bgcolor: colors.softBlue },
                 }}
               >
@@ -105,8 +105,7 @@ const Communities = () => {
           variant="outlined"
           sx={{
             position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            p: 2.5, borderRadius: 3,
-            bgcolor: colors.surface, opacity: canCreate ? 1 : 0.85,
+            p: 2.5, opacity: canCreate ? 1 : 0.85,
           }}
         >
         {/* lock badge sits on top of the card for free users */}
@@ -115,7 +114,7 @@ const Communities = () => {
             sx={{
               position: 'absolute', top: -12, left: 20,
               display: 'flex', alignItems: 'center', gap: 0.5,
-              px: 1, py: 0.25, borderRadius: 999,
+              px: 1, py: 0.25, borderRadius: radii.pill,
               bgcolor: colors.primaryDark, color: '#fff',
             }}
           >
@@ -154,7 +153,7 @@ const Communities = () => {
         actions={<Typography variant="caption" color="text.secondary">{discover.length} available</Typography>}
         sx={{ mb: 0 }}
       >
-        <Paper variant="outlined" sx={{ borderRadius: 3, overflow: 'hidden' }}>
+        <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
         {discover.length === 0 && (
           <Typography color="text.secondary" sx={{ p: 3, textAlign: 'center' }}>
             No communities to discover right now.

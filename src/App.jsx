@@ -21,10 +21,6 @@ import LandingPage from './pages/public/LandingPage'
 import Login from './pages/public/Login.jsx'
 import Signup from './pages/public/Signup.jsx'
 
-// styles for the habit feature (Navbar / dashboard layout)
-import './habits.css'
-
-
 function App() {
   const { user } = useAuthContext()
 

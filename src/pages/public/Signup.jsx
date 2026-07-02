@@ -121,7 +121,7 @@ const Signup = () => {
                     ))}
                 </Box>
 
-                <Divider sx={{ mb: 3, borderColor: colors.border }} />
+                <Divider sx={{ mb: 3 }} />
 
                 {/* Form */}
                 <Box

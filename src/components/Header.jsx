@@ -242,14 +242,7 @@ const Header = () => {
                                 to="/signup"
                                 variant="contained"
                                 size="small"
-                                /* There should not be a need for explicitly defining the color of the arrow icon.
-                                 It seems like the rules of the habit.css file also affect every other link
-===========================================================================================================
-
-                                    TODO: Please fix the habit.css 
-                                    
-===========================================================================================================*/
-                                endIcon={<ArrowForwardIcon sx={{color: colors.surface}}/>}
+                                endIcon={<ArrowForwardIcon />}
                                 sx={{
                                     ...pillButtonSx,
                                     backgroundColor: colors.primary,

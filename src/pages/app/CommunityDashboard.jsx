@@ -94,7 +94,7 @@ const CommunityDashboard = () => {
       </Button>
 
       {/* Header card */}
-      <Paper variant="outlined" sx={{ p: 3, borderRadius: 3, mb: 3, display: 'flex', alignItems: 'center', gap: 2.5 }}>
+      <Paper variant="outlined" sx={{ p: 3, mb: 3, display: 'flex', alignItems: 'center', gap: 2.5 }}>
         <Box
           sx={{
             width: 64, height: 64, borderRadius: 3, flexShrink: 0,
@@ -135,7 +135,7 @@ const CommunityDashboard = () => {
 
       {community.description && (
         <PageSection title="About" sx={{ mb: 3 }}>
-          <Paper variant="outlined" sx={{ p: 3, borderRadius: 3 }}>
+          <Paper variant="outlined" sx={{ p: 3 }}>
           <Typography sx={{ mt: 0.5 }}>{community.description}</Typography>
           </Paper>
         </PageSection>
@@ -161,7 +161,7 @@ const CommunityDashboard = () => {
             ))}
           </Box>
         ) : (
-          <Paper variant="outlined" sx={{ p: 4, borderRadius: 3, textAlign: 'center' }}>
+          <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
             <span className="material-symbols-outlined" style={{ fontSize: 32, color: colors.muted }}>emoji_events</span>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
               No challenges yet. Challenges for this community will appear here.

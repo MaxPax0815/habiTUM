@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Box, Button, InputBase, Paper, Typography } from '@mui/material'
 import { useCommunities } from '../../hooks/useCommunites'
-import { colors } from '../../styles/tokens'
+import { colors, radii } from '../../styles/tokens'
 import PageContainer from '../../components/layout/PageContainer'
 import PageHeader from '../../components/layout/PageHeader'
 
@@ -12,7 +12,7 @@ const VisibilityCard = ({ icon, title, subtitle, active, onClick }) => (
     variant="outlined"
     onClick={onClick}
     sx={{
-      flex: 1, p: 2, borderRadius: 3, cursor: 'pointer',
+      flex: 1, p: 2, cursor: 'pointer',
       borderColor: active ? colors.primary : colors.border,
       bgcolor: active ? colors.softBlue : colors.surface,
     }}
@@ -34,7 +34,7 @@ const Field = ({ label, children }) => (
 )
 
 const inputSx = {
-  border: `1px solid ${colors.border}`, borderRadius: 2, px: 2, py: 1.25, width: '100%',
+  border: `1px solid ${colors.border}`, borderRadius: radii.button, px: 2, py: 1.25, width: '100%',
 }
 
 const NewCommunity = () => {
@@ -73,7 +73,7 @@ const NewCommunity = () => {
         sx={{ mb: 3 }}
       />
 
-      <Paper variant="outlined" sx={{ p: 4, borderRadius: 3 }} component="form" onSubmit={handleSubmit}>
+      <Paper variant="outlined" sx={{ p: 4 }} component="form" onSubmit={handleSubmit}>
         <Field label="Community name">
           <InputBase sx={inputSx} placeholder="e.g. TUM Running Club"
             value={name} onChange={(e) => setName(e.target.value)} />

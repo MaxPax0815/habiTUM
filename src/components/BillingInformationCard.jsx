@@ -234,7 +234,6 @@ const BillingInformationCard = ({ user, paymentMethod }) => {
                 sx={{
                   height: 32,
                   px: 1.2,
-                  borderRadius: 999,
                   fontSize: '0.875rem',
                   fontWeight: 900,
                   color: colors.green,
