@@ -172,6 +172,25 @@ const Login = () => {
                         />
                     </Box>
 
+                    <Typography
+                        variant="body2"
+                        sx={{ textAlign: 'right', mt: -0.5 }}
+                    >
+                        <Typography
+                            component={RouterLink}
+                            to="/forgot-password"
+                            variant="body2"
+                            sx={{
+                                color: colors.textSecondary,
+                                fontSize: 13,
+                                textDecoration: 'none',
+                                '&:hover': { color: colors.primary, textDecoration: 'underline' },
+                            }}
+                        >
+                            Forgot password?
+                        </Typography>
+                    </Typography>
+
                     {error && (
                         <Typography variant="body2" sx={{ color: 'error.main', fontSize: 13 }}>
                             {error}
