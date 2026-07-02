@@ -20,6 +20,8 @@ import ChallengePage from './challenges/ChallengePage.jsx'
 import LandingPage from './pages/public/LandingPage'
 import Login from './pages/public/Login.jsx'
 import Signup from './pages/public/Signup.jsx'
+import ForgotPassword from './pages/public/ForgotPassword.jsx'
+import ResetPassword from './pages/public/ResetPassword.jsx'
 
 function App() {
   const { user } = useAuthContext()
@@ -32,13 +34,15 @@ function App() {
             <Route path="/" element={<LandingPage />} />
 
             <Route element={<AuthLayout />}>
-              <Route 
-                path="/login" 
-                element={!user ? <Login /> : <Navigate to={user.accountType === 'manager' ? '/manager' : '/today'} replace /> } 
+              <Route
+                path="/login"
+                element={!user ? <Login /> : <Navigate to={user.accountType === 'manager' ? '/manager' : '/today'} replace /> }
               />
-              <Route 
-                path="/signup" 
+              <Route
+                path="/signup"
                 element={!user ? <Signup /> : <Navigate to="/today" replace />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
             </Route>
           </Route>
 
