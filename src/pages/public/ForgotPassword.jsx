@@ -13,7 +13,7 @@ import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined'
 
 import { useForgotPassword } from '../../auth/useForgotPassword'
 import AppCard from '../../components/AppCard'
-import { colors } from '../../theme'
+import { colors } from '../../styles/tokens'
 
 const FieldLabel = ({ children }) => (
     <Typography
@@ -23,16 +23,6 @@ const FieldLabel = ({ children }) => (
         {children}
     </Typography>
 )
-
-const fieldSx = {
-    '& .MuiOutlinedInput-root': {
-        borderRadius: 2,
-        fontSize: 15,
-        '& fieldset': { borderColor: colors.border },
-        '&:hover fieldset': { borderColor: colors.primary },
-        '&.Mui-focused fieldset': { borderColor: colors.primary, borderWidth: 2 },
-    },
-}
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('')
@@ -115,14 +105,15 @@ const ForgotPassword = () => {
                                 required
                                 autoComplete="email"
                                 placeholder="tom.mueller@tum.de"
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <EmailOutlinedIcon sx={{ fontSize: 18, color: colors.muted }} />
-                                        </InputAdornment>
-                                    ),
+                                slotProps={{
+                                    input: {
+                                        startAdornment: (
+                                            <InputAdornment position="start">
+                                                <EmailOutlinedIcon sx={{ fontSize: 18, color: colors.muted }} />
+                                            </InputAdornment>
+                                        ),
+                                    },
                                 }}
-                                sx={fieldSx}
                             />
                         </Box>
 
@@ -135,23 +126,11 @@ const ForgotPassword = () => {
                         <Button
                             type="submit"
                             variant="contained"
+                            size="large"
                             fullWidth
                             disabled={isLoading}
                             endIcon={<ArrowForwardIcon />}
-                            sx={{
-                                mt: 0.5,
-                                py: 1.5,
-                                borderRadius: 2,
-                                fontWeight: 700,
-                                fontSize: 15,
-                                bgcolor: colors.primary,
-                                boxShadow: '0 2px 12px rgba(0,102,255,0.25)',
-                                '&:hover': {
-                                    bgcolor: '#0052CC',
-                                    boxShadow: '0 4px 18px rgba(0,102,255,0.35)',
-                                },
-                                '&:active': { transform: 'scale(0.99)' },
-                            }}
+                            sx={{ mt: 0.5 }}
                         >
                             {isLoading ? 'Sending…' : 'Send reset link'}
                         </Button>

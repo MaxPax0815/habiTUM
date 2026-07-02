@@ -35,7 +35,9 @@ BrowserRouter
 │   ├── "/"          → LandingPage
 │   └── AuthLayout (centers content)
 │       ├── "/login"  → Login   (redirects to /today or /manager if already authed)
-│       └── "/signup" → Signup  (redirects to /today if already authed)
+│       ├── "/signup" → Signup  (redirects to /today if already authed)
+│       ├── "/forgot-password" → ForgotPassword
+│       └── "/reset-password/:token" → ResetPassword
 └── AppLayout (renders <Sidebar user={user}/> + <Outlet/>) — only reachable if `user` is truthy, else redirected to /login
     ├── "/today"                → Home                  (habit list + create form)
     ├── "/communities"          → Communities            (browse/join/search)
@@ -89,6 +91,7 @@ Frontend/src/
 │   ├── AuthContext.jsx        — the Context + reducer + localStorage sync (described above)
 │   ├── useAuthContext.jsx     — safe accessor hook
 │   ├── useLogin.jsx / useSignup.jsx — POST /api/user/login|signup, persist + dispatch LOGIN
+│   ├── useForgotPassword.jsx / useResetPassword.jsx — request and complete password-reset flows
 │   └── useLogout.jsx           — clears localStorage, dispatches LOGOUT + HabitsContext SET_HABITS(null)
 ├── context/HabitsContext.jsx  — the Context + reducer (described above)
 ├── hooks/
@@ -124,7 +127,9 @@ Frontend/src/
     ├── public/
     │   ├── LandingPage.jsx              — marketing page; consumes the shared tokens and global MUI theme
     │   ├── Login.jsx                     — email/password form → useLogin → navigate('/today')
-    │   └── Signup.jsx                    — registration form (firstName/lastName/username/email/password/confirm) → useSignup → navigate('/today')
+    │   ├── Signup.jsx                    — registration form (firstName/lastName/username/email/password/confirm) → useSignup → navigate('/today')
+    │   ├── ForgotPassword.jsx            — requests a password-reset email
+    │   └── ResetPassword.jsx             — consumes the URL token and sets a new password
     └── app/
         ├── Home.jsx                      — "/today": greeting header, 3 stat cards, build/break habit lists, "+ Add habit" → AppDialog(HabitForm)
         ├── Communities.jsx                — "/communities": search + "your communities" + gated "create" CTA + "discover" list with Join buttons
