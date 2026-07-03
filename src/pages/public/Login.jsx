@@ -7,7 +7,7 @@ import {
     Typography,
 } from '@mui/material'
 import { useState } from 'react'
-import { Link as RouterLink, useNavigate } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router-dom'
 
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined'
@@ -34,16 +34,20 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false)
     const [success, setSuccess] = useState(false)
     const { login, error, isLoading } = useLogin()
-    const navigate = useNavigate()
 
     const handleSubmit = async (e) => {
         e.preventDefault()
         const ok = await login(email, password)
         if (ok) {
             setSuccess(true)
-            // Manager redirects to manager dashboard, regular users to today's habits page
-            // setTimeout(() => navigate(user.role === 'manager' ? '/manager-dashboard' : '/today'), 1000)
-            setTimeout(() => navigate('/today'), 1000)
+            // No navigate() here: App.jsx's "/login" route already renders
+            // <Navigate to="/today"/> the instant `user` becomes truthy, so this
+            // component redirects itself as soon as AuthContext updates. A
+            // setTimeout(navigate, 1000) used to run in parallel with that and
+            // was never cleared on unmount — it fired a second, stale redirect
+            // to /today a full second later regardless of where the user had
+            // since navigated (very noticeable at low Vite dev-server speeds,
+            // where the timer's execution gets pushed back several seconds).
         }
     }
 

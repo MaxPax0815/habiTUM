@@ -115,6 +115,18 @@ export const isCheckedInToday = (habit, now) => {
 }
 
 /**
+ * Days remaining in the current period after today.
+ * Daily habits always return 0 (the period is just "today").
+ * Weekly habits return how many days are left until Sunday (0 = today is Sunday).
+ * Used to soften the streak-at-risk warning early in a fresh week.
+ */
+export const computeDaysLeftInPeriod = (now, frequency) => {
+  if (frequency !== "weekly") return 0
+  const daysSinceMonday = (new Date(now).getDay() + 6) % 7
+  return 6 - daysSinceMonday
+}
+
+/**
  * Longest consecutive streak ever recorded.
  * Two check-in days count as consecutive when the gap is within 1.5x the
  * expected period, allowing slight timing variance and any-day-of-week
@@ -152,6 +164,26 @@ export const computeWeekdayRates = (checkins, created, now) => {
     ).length
     return { day: NAMES[jsDay], rate: total ? Math.round((hits / total) * 100) : 0 }
   })
+}
+
+/**
+ * Share of check-ins (0-100%, sums to ~100 across the week) that landed on
+ * each weekday, for weekly habits. Unlike computeWeekdayRates this is not a
+ * completion rate against an "expected" count — a weekly habit has no fixed
+ * weekday, so there is no meaningful pass/fail per day, only a distribution
+ * of which day the user tends to check in on.
+ * Returns [{ day: "Mon", rate: 85 }, ...] — same shape as computeWeekdayRates
+ * so it can be rendered with the same WeekdayBars component.
+ */
+export const computeCheckinDayDistribution = (checkins) => {
+  const NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  const counts = [0, 0, 0, 0, 0, 0, 0]
+  checkins.forEach(c => { counts[new Date(c.date).getDay()]++ })
+  const total = checkins.length
+  return [1, 2, 3, 4, 5, 6, 0].map(jsDay => ({
+    day: NAMES[jsDay],
+    rate: total ? Math.round((counts[jsDay] / total) * 100) : 0,
+  }))
 }
 
 /**
@@ -209,6 +241,53 @@ export const computeHeatmap = (checkins, created, now, maxDays = 90) => {
 }
 
 /**
+ * Week-grain analog of computeHeatmap, for weekly habits.
+ * Each cell represents one Monday-anchored week instead of one day.
+ * maxWeeks controls the look-back window (default 24, ~6 months) — same
+ * "fromCreation" behaviour as computeHeatmap when the habit is younger than that.
+ *
+ * checked comes directly from each checkin's periodKey (already Monday-anchored
+ * and unique per week server-side) rather than re-deriving it from raw dates.
+ *
+ * Returns:
+ *   cells          - [{ weekStart, weekEnd, checked }] one per week in the window
+ *   fromCreation   - true when the habit is younger than maxWeeks (caption: "Since <date>")
+ *   startDate      - first week's Monday rendered in the grid
+ *   completedCount - weeks checked in within the window (for the caption)
+ *   totalCount     - total weeks in the window (equals cells.length)
+ */
+export const computeWeeklyHeatmap = (checkins, created, now, maxWeeks = 24) => {
+  const weekStartOf = (date) => {
+    const d = new Date(date); d.setHours(0, 0, 0, 0)
+    const daysSinceMonday = (d.getDay() + 6) % 7
+    d.setDate(d.getDate() - daysSinceMonday)
+    return d
+  }
+
+  const createdWeek = weekStartOf(created)
+  const nowWeek      = weekStartOf(now)
+  const agoWeek       = new Date(nowWeek); agoWeek.setDate(agoWeek.getDate() - (maxWeeks - 1) * 7)
+  const startWeek    = createdWeek > agoWeek ? createdWeek : agoWeek
+
+  const checkedKeys = new Set(checkins.map(c => c.periodKey))
+  const count       = Math.round((nowWeek - startWeek) / (7 * 86400000)) + 1
+
+  const cells = Array.from({ length: count }, (_, i) => {
+    const weekStart = new Date(startWeek); weekStart.setDate(startWeek.getDate() + i * 7)
+    const weekEnd   = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6)
+    return { weekStart, weekEnd, checked: checkedKeys.has(buildPeriodKey(weekStart, "weekly")) }
+  })
+
+  return {
+    cells,
+    fromCreation: createdWeek > agoWeek,
+    startDate: startWeek,
+    completedCount: cells.filter(c => c.checked).length,
+    totalCount: count,
+  }
+}
+
+/**
  * Detects streak breaks (gaps > 1.5 periods between check-ins) and measures
  * how many days it took to resume after each one.
  * Returns { breaks, avgDays, details } where details is an array of individual
@@ -230,6 +309,19 @@ export const computeRecovery = (checkins, frequency) => {
     ? Math.round(details.reduce((a, b) => a + b, 0) / details.length * 10) / 10
     : 0
   return { breaks: details.length, avgDays: avg, details }
+}
+
+/**
+ * Formats a day count for display in the habit's own cadence unit:
+ * daily habits show whole days ("5d"), weekly habits convert to weeks
+ * rounded to 1 decimal ("1.4w") since a day count reads oddly for a
+ * once-a-week habit.
+ */
+export const formatPeriodDuration = (days, frequency) => {
+  if (frequency === "weekly") {
+    return `${Math.round((days / 7) * 10) / 10}w`
+  }
+  return `${days}d`
 }
 
 /**
