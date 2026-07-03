@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Alert, Box, Button, CircularProgress, Paper, Typography } from '@mui/material'
 import { useAuthContext } from '../../auth/useAuthContext'
 import ChallengeCard from '../../challenges/Challenges'
+import BackButton from '../../components/BackButton'
 import { colors } from '../../theme'
 
 const avatarColors = [colors.primary, '#A21CAF', '#B91C1C', colors.secondary, colors.orange]
@@ -95,13 +96,7 @@ const CommunityDashboard = () => {
 
   return (
     <Box sx={{ maxWidth: 980, mx: 'auto', textAlign: 'left' }}>
-      <Button
-        onClick={() => navigate('/communities')}
-        sx={{ color: 'text.secondary', mb: 2, px: 0 }}
-        startIcon={<span className="material-symbols-outlined">arrow_back</span>}
-      >
-        Back to Communities
-      </Button>
+      <BackButton text="Back to Communities" to="/communities" sx={{ mb: 0 }} />
 
       {/* Header card */}
       <Paper variant="outlined" sx={{ p: 3, borderRadius: 3, mb: 3, display: 'flex', alignItems: 'center', gap: 2.5 }}>

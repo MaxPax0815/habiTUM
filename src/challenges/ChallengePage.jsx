@@ -3,9 +3,10 @@ import { Alert, Box, CircularProgress, Paper, Typography } from "@mui/material";
 import { useParams } from "react-router-dom";
 
 import { useAuthContext } from "../auth/useAuthContext";
-import HabitDetails from "../components/HabitDetails";
 import { ExtendedChallengeCard } from "./Challenges";
 import Leaderboard from "./Leaderboard";
+import HabitDetails from "../components/HabitDetails";
+import BackButton from "../components/BackButton";
 
 // ---------------------------------------------------------------------------
 // ChallengePage.jsx
@@ -236,13 +237,21 @@ const ChallengePage = () => {
         gap: 4,
       }}
     >
-      <ExtendedChallengeCard
-        challenge={challenge}
-        currentUserRank={data.currentUserRank}
-        isJoined={challenge.isJoined}
-        onJoin={handleJoinChallenge}
-        onLeaveChallenge={handleLeaveChallenge}
-      />
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
+        <BackButton
+          text={`Back to ${challenge.community?.name || "Community"}`}
+          to={`/communities/${challenge.community?._id || challenge.community}`}
+          sx={{ mb: 0 }}
+        />
+
+        <ExtendedChallengeCard
+          challenge={challenge}
+          currentUserRank={data.currentUserRank}
+          isJoined={challenge.isJoined}
+          onJoin={handleJoinChallenge}
+          onLeaveChallenge={handleLeaveChallenge}
+        />
+      </Box>
 
       <Box>
         <Typography variant="overline" color="text.secondary">

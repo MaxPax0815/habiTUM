@@ -447,7 +447,16 @@ export const ExtendedChallengeCard = ({
 
         <Divider sx={{ my: 4, borderColor: colors.border }} />
 
-        <Stack direction="row" spacing={{ xs: 3, md: 6 }} flexWrap="wrap" useFlexGap>
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-evenly",
+            gap: { xs: 3, md: 6 },
+            flexWrap: "wrap",
+          }}
+        >
           <Stack direction="row" spacing={1.5} alignItems="center">
             <GroupsOutlinedIcon sx={{ fontSize: 28, color: colors.muted }} />
             <Typography sx={{ color: colors.textPrimary, fontSize: 20, fontWeight: 900 }}>
@@ -479,7 +488,7 @@ export const ExtendedChallengeCard = ({
               </Typography>
             </Stack>
           )}
-        </Stack>
+        </Box>
       </Box>
     </AppCard>
   );
