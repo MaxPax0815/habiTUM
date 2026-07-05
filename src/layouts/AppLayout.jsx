@@ -2,7 +2,8 @@ import { Outlet } from 'react-router-dom'
 import { Box } from '@mui/material'
 
 import Sidebar from '../components/Sidebar'
-import { colors } from '../theme'
+import PageContainer from '../components/layout/PageContainer'
+import { colors } from '../styles/tokens'
 import { useAuthContext } from '../auth/useAuthContext'
 
 const AppLayout = () => {
@@ -30,13 +31,9 @@ const AppLayout = () => {
           justifyContent: 'center'
         }}
       >
-        <Box
-          sx={{
-            width: '100%',
-            maxWidth: 1120
-          }} >
+        <PageContainer>
           <Outlet />
-        </Box>
+        </PageContainer>
       </Box>
     </Box>
   )

@@ -13,7 +13,10 @@ import {
   Box, Chip, CircularProgress, Divider,
   IconButton, Paper, Stack, Tooltip, Typography,
 } from "@mui/material"
-import { cardSx, colors, sectionTitleSx } from "../../../theme"
+
+import { colors } from '../../../styles/tokens'
+import { sectionTitleSx } from '../../../styles/recipes'
+
 
 import {
   CartesianGrid, Legend, Line, LineChart,
@@ -21,10 +24,13 @@ import {
 } from "recharts"
 
 import UpgradeButton from "../../../billing/UpgradeButton"
+import PageHeader from "../../../components/layout/PageHeader"
 
 import {
   buildActionableInsight,
   computeBestStreak,
+  computeCheckinDayDistribution,
+  computeDaysLeftInPeriod,
   computeHabitReadiness,
   computeHeatmap,
   computeMonthlyStats,
@@ -33,7 +39,9 @@ import {
   computeOverallRecovery,
   computeRecovery,
   computeWeekdayRates,
+  computeWeeklyHeatmap,
   computeWeeklyLineData,
+  formatPeriodDuration,
   getExpectedCount,
   getReadinessStatus,
   isCheckedInToday,
@@ -69,7 +77,7 @@ const InfoTooltip = ({ text }) => (
  * Pass infoText to show an (i) button explaining how the metric is calculated.
  */
 const StatCard = ({ label, value, sublabel, color = colors.primary, infoText }) => (
-  <Paper sx={{ ...cardSx, p: 2.5, flex: 1, minWidth: 120 }}>
+  <Paper sx={{ p: 2.5, flex: 1, minWidth: 120 }}>
     {/* Label row - info icon appears only when infoText is supplied */}
     <Box sx={{ display: "flex", alignItems: "center" }}>
       <Typography variant="caption" color="text.secondary">{label}</Typography>
@@ -79,6 +87,19 @@ const StatCard = ({ label, value, sublabel, color = colors.primary, infoText }) 
     {sublabel && <Typography variant="caption" color="text.secondary">{sublabel}</Typography>}
   </Paper>
 )
+
+/**
+ * Shared cell styling for both the daily Heatmap and the weekly WeeklyHeatmap,
+ * so the two calendar variants read as one visual system.
+ * For break habits, "checked" means a clean/slip day rather than done/missed.
+ */
+const heatmapCellSx = (checked, isBreak) => ({
+  aspectRatio: "1", borderRadius: 1,
+  bgcolor: checked ? (isBreak ? colors.green : colors.primary) : "#e2e8f0",
+  opacity: checked ? 1 : 0.45,
+  cursor: "default", transition: "opacity 0.15s",
+  "&:hover": { opacity: 0.85 },
+})
 
 
 // ---------------------------------------------------------------------------
@@ -115,19 +136,18 @@ const HeroHabitScore = ({ score, habits, now }) => {
 
   // Plain-language description shown in the (i) tooltip
   const pulseInfo =
-    "Habit Pulse (0–100) combines today's completions, your active streaks, " +
+    "Habit Pulse (0 to 100) combines today's completions, your active streaks, " +
     "and your long-term consistency across all habits. 100 = perfect on everything."
 
   return (
     <Paper
       sx={{
-        ...cardSx,
         p: 3, mb: 3,
         bgcolor: colors.softBlue,
         borderColor: `${colors.primary}33`,
       }}
     >
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={3} alignItems="center">
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={3} sx={{ alignItems: "center" }}>
         {/* Circular gauge */}
         <Box sx={{ position: "relative", display: "inline-flex", flexShrink: 0 }}>
           {/* Grey track behind the coloured arc */}
@@ -192,7 +212,7 @@ const SignalCard = ({ title, value, description, tone = "neutral", infoText }) =
     colors.primary
 
   return (
-    <Paper sx={{ ...cardSx, p: 2.5, flex: 1, minWidth: 160 }}>
+    <Paper sx={{ p: 2.5, flex: 1, minWidth: 160 }}>
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <Typography variant="caption" color="text.secondary">{title}</Typography>
         {infoText && <InfoTooltip text={infoText} />}
@@ -237,7 +257,6 @@ const HabitHealthRow = ({ habits, selectedId, onSelect, now }) => (
           key={habit._id}
           onClick={() => onSelect(habit._id)}
           sx={{
-            ...cardSx,
             p: 2, width: 160, flexShrink: 0, cursor: "pointer",
             borderColor: isSelected ? colors.primary : colors.border,
             borderWidth: isSelected ? 2 : 1,
@@ -292,7 +311,7 @@ const HabitHealthRow = ({ habits, selectedId, onSelect, now }) => (
 /** Shows the highest-priority personalized tip for the selected habit. */
 const CoachInsightCard = ({ insight }) => (
   <Paper
-    sx={{ ...cardSx, p: 3, mb: 3, bgcolor: colors.softBlue, borderColor: `${colors.primary}33` }}
+    sx={{ p: 3, mb: 3, bgcolor: colors.softBlue, borderColor: `${colors.primary}33` }}
   >
     <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-start" }}>
       <AutoAwesomeIcon sx={{ color: colors.primary, mt: 0.25, flexShrink: 0 }} />
@@ -396,7 +415,7 @@ const WeeklyLineChart = ({ data }) => {
 
       {hasFutureDays && (
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-          This week shown through today — future days are hidden
+          This week shown through today. Future days are hidden.
         </Typography>
       )}
     </Box>
@@ -436,7 +455,6 @@ const Heatmap = ({ cells, habitType, fromCreation, startDate, completedCount, to
       monthLabels[col] = format(cell.date, "MMM")
   })
 
-  const checkedColor = isBreak ? colors.green : colors.primary
   const checkedLabel = isBreak ? "Clean day" : "Done"
   const missedLabel  = isBreak ? "Slip day"  : "Missed"
   const consistency  = totalCount ? Math.round((completedCount / totalCount) * 100) : 0
@@ -479,13 +497,7 @@ const Heatmap = ({ cells, habitType, fromCreation, startDate, completedCount, to
           <Tooltip key={i}
             title={`${format(day.date, "MMM d")} · ${day.checked ? checkedLabel : missedLabel}`}
             placement="top">
-            <Box sx={{
-              aspectRatio: "1", borderRadius: 1,
-              bgcolor: day.checked ? checkedColor : "#e2e8f0",
-              opacity: day.checked ? 1 : 0.45,
-              cursor: "default", transition: "opacity 0.15s",
-              "&:hover": { opacity: 0.85 },
-            }} />
+            <Box sx={heatmapCellSx(day.checked, isBreak)} />
           </Tooltip>
         ))}
       </Box>
@@ -502,19 +514,110 @@ const Heatmap = ({ cells, habitType, fromCreation, startDate, completedCount, to
 
 
 // ---------------------------------------------------------------------------
+// Weekly calendar (one cell per week, for weekly-frequency habits)
+// ---------------------------------------------------------------------------
+
+// Fixed column count for the weekly heatmap grid (see WeeklyHeatmap below).
+const WEEKLY_HEATMAP_COLS = 6
+
+/**
+ * Week-grain counterpart to Heatmap, used for weekly habits.
+ * Each cell is one Monday-anchored week rather than one day, so — unlike the
+ * daily grid — cells aren't aligned to weekday columns; they just wrap left to
+ * right, oldest to newest, matching the daily heatmap's "newest bottom-right"
+ * reading order. Shares heatmapCellSx so both calendars look like one system.
+ *
+ * For regular habits: coloured cell = checked in that week, grey = missed.
+ * For break habits:   green = clean week (no slip), grey = slip week.
+ *
+ * Caption shows total window, completions, and consistency percentage.
+ */
+const WeeklyHeatmap = ({ cells, habitType, fromCreation, startDate, completedCount, totalCount }) => {
+  if (!cells.length) return null
+
+  const isBreak = habitType === "break"
+
+  // Column where each new month starts, so a light month label can sit above it
+  const monthLabels = {}
+  cells.forEach((cell, i) => {
+    const prev = i > 0 ? cells[i - 1].weekStart : null
+    if (i === 0 || (prev && cell.weekStart.getMonth() !== prev.getMonth()))
+      monthLabels[i] = format(cell.weekStart, "MMM")
+  })
+
+  const checkedLabel = isBreak ? "Clean week" : "Done"
+  const missedLabel  = isBreak ? "Slip week"  : "Missed"
+  const consistency  = totalCount ? Math.round((completedCount / totalCount) * 100) : 0
+
+  return (
+    <Box>
+      {/* Period summary above the grid */}
+      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 1 }}>
+        {fromCreation
+          ? `Since ${format(startDate, "MMM d, yyyy")}`
+          : `Last ${totalCount} weeks`
+        } · {completedCount}/{totalCount} completed · {consistency}% consistency
+      </Typography>
+
+      {/* Week cells wrap left-to-right, oldest to newest; no weekday alignment needed,
+          so a fixed column count (rather than the daily grid's weekday-driven 7) is
+          used instead. Fixed columns + gap:0.5 mirrors the daily Heatmap exactly:
+          every cell fills its own track fully, so gaps stay tight and uniform
+          instead of the cells floating inside oversized auto-fit tracks. 6 columns
+          keeps cells noticeably larger than the daily grid's day-cells (there are
+          far fewer of them) while still wrapping cleanly for longer habits. */}
+      <Box sx={{
+        display: "grid",
+        gridTemplateColumns: `repeat(${WEEKLY_HEATMAP_COLS}, 1fr)`,
+        gap: 0.5,
+      }}>
+        {cells.map((week, i) => (
+          <Box key={i} sx={{ position: "relative" }}>
+            {monthLabels[i] && (
+              <Typography variant="caption" color="text.secondary"
+                sx={{ position: "absolute", bottom: "100%", left: 0, fontSize: 10, whiteSpace: "nowrap" }}>
+                {monthLabels[i]}
+              </Typography>
+            )}
+            <Tooltip
+              title={`Week of ${format(week.weekStart, "MMM d")} to ${format(week.weekEnd, "MMM d")} · ${week.checked ? checkedLabel : missedLabel}`}
+              placement="top">
+              <Box sx={heatmapCellSx(week.checked, isBreak)} />
+            </Tooltip>
+          </Box>
+        ))}
+      </Box>
+
+      {/* Extra legend for break habits where color meaning differs */}
+      {isBreak && (
+        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
+          Green = clean week · grey = slip week
+        </Typography>
+      )}
+    </Box>
+  )
+}
+
+
+// ---------------------------------------------------------------------------
 // Weekday bar chart
 // ---------------------------------------------------------------------------
 
 /**
- * Horizontal bar per weekday showing historical completion rate for the
- * selected habit. Color: green ≥ 70%, orange ≥ 40%, red below 40%.
- * The percentage value is printed on the right side of each bar.
+ * Horizontal bar per weekday.
+ *
+ * variant="rate" (daily habits): historical completion rate against what was
+ * expected that weekday. Color: green ≥ 70%, orange ≥ 40%, red below 40%.
+ *
+ * variant="distribution" (weekly habits): share of check-ins that landed on
+ * each weekday — there's no "expected" weekday for a once-a-week habit, so
+ * bars use one neutral accent color rather than a pass/fail threshold.
  */
-const WeekdayBars = ({ data }) => (
+const WeekdayBars = ({ data, variant = "rate", caption = "Completion rate (%) per weekday" }) => (
   <Stack spacing={1}>
     {/* Y-axis label above the bars */}
     <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
-      Completion rate (%) per weekday
+      {caption}
     </Typography>
     {data.map(({ day, rate }) => (
       <Box key={day} sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -526,7 +629,9 @@ const WeekdayBars = ({ data }) => (
         <Box sx={{ flex: 1, bgcolor: "#e2e8f0", borderRadius: 2, overflow: "hidden", height: 8 }}>
           <Box sx={{
             height: "100%", width: `${rate}%`,
-            bgcolor: rate >= 70 ? colors.green : rate >= 40 ? colors.orange : "#fca5a5",
+            bgcolor: variant === "distribution"
+              ? colors.primary
+              : rate >= 70 ? colors.green : rate >= 40 ? colors.orange : "#fca5a5",
             borderRadius: 2, transition: "width 0.6s ease",
           }} />
         </Box>
@@ -603,34 +708,49 @@ const Progress = () => {
     if (habits?.length && !selectedId) setSelectedId(habits[0]._id)
   }, [habits, selectedId])
 
-  if (!isPremium) return <PaywallBanner />
-  if (!habits)    return <Typography p={4}>Loading...</Typography>
-  if (!habits.length) return (
-    <Typography p={4} color="text.secondary">
-      No habits yet — add some from Today to start tracking.
-    </Typography>
-  )
+  // Every hook below must run unconditionally on every render, even while habits
+  // is still null/empty or the user isn't premium — the early returns further
+  // down only gate which JSX renders, never the hooks themselves. Bailing out
+  // via `if (...) return` *before* declaring a hook is what used to crash this
+  // page: the first render (habits === null) called fewer hooks than the next
+  // render (habits loaded), which React reports as "Rendered more hooks than
+  // during the previous render." Each compute* call below is fed `habits || []`
+  // so it degrades to its own empty-state default instead of throwing.
 
   // Frozen once on mount so every calculation shares the same "now"
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const now = useMemo(() => new Date(), [])
 
   // ---- Portfolio-level metrics (all habits) ----
-  const readinessScore     = useMemo(() => computeHabitReadiness(habits, now),     [habits, now])
-  const overallConsistency = useMemo(() => computeOverallConsistency(habits, now),  [habits, now])
-  const overallMomentum    = useMemo(() => computeOverallMomentum(habits, now),     [habits, now])
-  const overallRecovery    = useMemo(() => computeOverallRecovery(habits),           [habits])
-  const weeklyLineData     = useMemo(() => computeWeeklyLineData(habits, now),       [habits, now])
+  const readinessScore     = useMemo(() => computeHabitReadiness(habits || [], now),     [habits, now])
+  const overallConsistency = useMemo(() => computeOverallConsistency(habits || [], now),  [habits, now])
+  const overallMomentum    = useMemo(() => computeOverallMomentum(habits || [], now),     [habits, now])
+  const overallRecovery    = useMemo(() => computeOverallRecovery(habits || []),           [habits])
+  const weeklyLineData     = useMemo(() => computeWeeklyLineData(habits || [], now),       [habits, now])
 
   // ---- Selected habit (defaults to first until the user clicks a card) ----
-  const selectedHabit = useMemo(
-    () => habits.find(h => h._id === selectedId) || habits[0],
-    [habits, selectedId]
-  )
+  const selectedHabit = useMemo(() => {
+    const list = habits || []
+    return list.find(h => h._id === selectedId) || list[0]
+  }, [habits, selectedId])
 
   // ---- Per-habit analytics — only recomputes when the selection changes ----
   const habitAnalytics = useMemo(() => {
-    const habit    = selectedHabit
+    const habit = selectedHabit
+    // No habit selected yet (habits still loading or empty) — nothing to
+    // analyze. The early returns below render a loading/empty state instead
+    // of the JSX that reads this, so these defaults are never actually shown.
+    if (!habit) {
+      return {
+        expected: 0, completed: 0, completionRate: 0, bestStreak: 0,
+        weekdayData: [],
+        heatmap: { cells: [], fromCreation: true, startDate: now, completedCount: 0, totalCount: 0 },
+        thisWeekRate: null, thisWeekSub: null, mostFrequentDay: null,
+        recovery: { breaks: 0, avgDays: 0, details: [] },
+        monthlyStats: { thisMonthRate: 0, bestRate: 0, bestLabel: null },
+        insight: null,
+      }
+    }
+
     const checkins = habit.checkins || []
     const created  = new Date(habit.createdAt)
     const expected = getExpectedCount(created, now, habit.frequency)
@@ -638,50 +758,79 @@ const Progress = () => {
     const completionRate = Math.min(100, Math.round(completed / expected * 100))
 
     // Use the server-computed bestStreak when available (it uses exact period logic)
-    const bestStreak   = habit.bestStreak ?? computeBestStreak(checkins, habit.frequency)
-    const weekdayData  = computeWeekdayRates(checkins, created, now)
-    // maxDays=45 keeps the heatmap compact enough to sit alongside the weekday bars
-    const heatmap      = computeHeatmap(checkins, created, now, 45)
+    const bestStreak    = habit.bestStreak ?? computeBestStreak(checkins, habit.frequency)
+    const isWeeklyHabit = habit.frequency === "weekly"
+
+    // Weekly habits get a day-of-week *distribution* (which day you tend to check
+    // in on) instead of a per-weekday completion *rate* — there's no "expected"
+    // weekday for a once-a-week habit. Both share the same { day, rate } shape,
+    // so the same WeekdayBars component renders either one.
+    const weekdayData = isWeeklyHabit
+      ? computeCheckinDayDistribution(checkins)
+      : computeWeekdayRates(checkins, created, now)
+
+    // Calendar: one cell per week for weekly habits, one cell per day otherwise.
+    // maxDays=45 / maxWeeks=24 both keep the calendar compact next to the second box.
+    const heatmap = isWeeklyHabit
+      ? computeWeeklyHeatmap(checkins, created, now, 24)
+      : computeHeatmap(checkins, created, now, 45)
+
     const recovery     = computeRecovery(checkins, habit.frequency)
     const monthlyStats = computeMonthlyStats(checkins, habit.frequency, now)
-    const insight      = buildActionableInsight(
+    const insight       = buildActionableInsight(
       habit, checkins, completionRate, weekdayData, recovery, bestStreak, now
     )
 
-    // This-week rate: count check-ins from Monday up to and including today
-    const todayN  = new Date(now); todayN.setHours(0, 0, 0, 0)
-    const dow     = todayN.getDay()
-    const weekMon = new Date(todayN); weekMon.setDate(todayN.getDate() - (dow === 0 ? 6 : dow - 1))
-    const daysElapsed = (dow === 0 ? 6 : dow - 1) + 1
-    const daySet  = new Set(checkins.map(c => { const d = new Date(c.date); d.setHours(0,0,0,0); return d.getTime() }))
-    let weekHits = 0
-    for (let i = 0; i < daysElapsed; i++) {
-      const d = new Date(weekMon); d.setDate(weekMon.getDate() + i)
-      if (daySet.has(d.getTime())) weekHits++
+    // Most common check-in weekday — weekly habits only, needs a few data points
+    // to be meaningful (otherwise a single check-in reads as a misleading "100%").
+    const mostFrequentDay = isWeeklyHabit && checkins.length >= 3
+      ? [...weekdayData].sort((a, b) => b.rate - a.rate)[0]
+      : null
+
+    // This-week rate — daily habits only; weekly habits show "Preferred day" instead
+    let thisWeekRate = null, thisWeekSub = null
+    if (!isWeeklyHabit) {
+      const todayN  = new Date(now); todayN.setHours(0, 0, 0, 0)
+      const dow     = todayN.getDay()
+      const weekMon = new Date(todayN); weekMon.setDate(todayN.getDate() - (dow === 0 ? 6 : dow - 1))
+      const daysElapsed = (dow === 0 ? 6 : dow - 1) + 1
+      const daySet  = new Set(checkins.map(c => { const d = new Date(c.date); d.setHours(0,0,0,0); return d.getTime() }))
+      let weekHits = 0
+      for (let i = 0; i < daysElapsed; i++) {
+        const d = new Date(weekMon); d.setDate(weekMon.getDate() + i)
+        if (daySet.has(d.getTime())) weekHits++
+      }
+      thisWeekRate = Math.min(100, Math.round(weekHits / daysElapsed * 100))
+      thisWeekSub  = `${weekHits} / ${daysElapsed} days`
     }
-    const weekExp      = habit.frequency === "weekly" ? 1 : daysElapsed
-    const thisWeekRate = Math.min(100, Math.round(weekHits / weekExp * 100))
-    const thisWeekSub  = habit.frequency === "weekly"
-      ? (weekHits >= 1 ? "Done ✓" : "Not yet this week")
-      : `${weekHits} / ${daysElapsed} days`
 
     return {
       expected, completed, completionRate,
-      bestStreak, weekdayData, heatmap, thisWeekRate, thisWeekSub,
+      bestStreak, weekdayData, heatmap, thisWeekRate, thisWeekSub, mostFrequentDay,
       recovery, monthlyStats, insight,
     }
   }, [selectedHabit, now])
 
-  const habit        = selectedHabit
-  const isWeekly     = habit.frequency === "weekly"
-  const isBreak      = habit.habitType === "break"
-  const streakUnit   = isWeekly ? "w" : "d"
-  const rateUnit     = isWeekly ? "weeks" : "days"
-  const checkedToday = isCheckedInToday(habit, now)
+  // All hooks have run by this point — safe to bail out of rendering now.
+  if (!isPremium) return <PaywallBanner />
+  if (!habits)    return <Typography p={4}>Loading...</Typography>
+  if (!habits.length) return (
+    <Typography p={4} color="text.secondary">
+      No habits yet. Add some from Today to start tracking.
+    </Typography>
+  )
+
+  const habit           = selectedHabit
+  const isWeekly        = habit.frequency === "weekly"
+  const isBreak         = habit.habitType === "break"
+  const streakUnit      = isWeekly ? "w" : "d"
+  const rateUnit        = isWeekly ? "weeks" : "days"
+  const checkedToday    = isCheckedInToday(habit, now)
+  const daysLeftInPeriod = computeDaysLeftInPeriod(now, habit.frequency)
 
   const {
     expected, completed, completionRate, bestStreak, weekdayData,
-    heatmap, thisWeekRate, thisWeekSub, recovery, monthlyStats, insight,
+    heatmap, thisWeekRate, thisWeekSub, mostFrequentDay, recovery, monthlyStats, insight,
   } = habitAnalytics
 
   const worstDay = isWeekly ? null : [...weekdayData].sort((a, b) => a.rate - b.rate)[0]
@@ -689,16 +838,18 @@ const Progress = () => {
 
   return (
     <Box>
-      {/* Page header */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
-        <Typography variant="h4" sx={{ fontWeight: 800 }}>Progress</Typography>
-        <Chip
-          icon={<AutoAwesomeIcon sx={{ fontSize: 14 }} />}
-          label="Premium"
-          size="small"
-          sx={{ bgcolor: colors.softBlue, color: colors.primary, fontWeight: 700, ml: 1 }}
-        />
-      </Box>
+      <PageHeader
+        title="Progress"
+        titleAdornment={(
+          <Chip
+            icon={<AutoAwesomeIcon sx={{ fontSize: 14 }} />}
+            label="Premium"
+            size="small"
+            sx={{ bgcolor: colors.softBlue, color: colors.primary }}
+          />
+        )}
+        sx={{ mb: 3 }}
+      />
 
       {/* 1. Habit Pulse — overall score for today */}
       <HeroHabitScore score={readinessScore} habits={habits} now={now} />
@@ -736,7 +887,7 @@ const Progress = () => {
           tone={overallRecovery.breaks === 0 ? "good" : overallRecovery.avgDays <= 2 ? "warning" : "bad"}
           infoText={
             "Recovery = average number of days between breaking a streak and checking in again. " +
-            "Fewer days is better — it means you bounce back quickly."
+            "Fewer days is better since it means you bounce back quickly."
           }
         />
       </Stack>
@@ -745,8 +896,8 @@ const Progress = () => {
 
       {/* 3. Weekly Performance line chart — only shown when daily habits exist */}
       {weeklyLineData.length > 0 && (
-        <Paper sx={{ ...cardSx, p: 3, mb: 4 }}>
-          <SectionTitle>Weekly Performance — all daily habits</SectionTitle>
+        <Paper sx={{ p: 3, mb: 4 }}>
+          <SectionTitle>Weekly Performance · all daily habits</SectionTitle>
           <WeeklyLineChart data={weeklyLineData} />
         </Paper>
       )}
@@ -767,9 +918,23 @@ const Progress = () => {
       {/* 5. Coach Insight */}
       <CoachInsightCard insight={insight} />
 
-      {/* 6. Streak status banner — at-risk warning or daily completion confirmation */}
+      {/* 6. Streak status banner — at-risk warning, informational reminder, or completion confirmation */}
       <Box sx={{ mb: 3 }}>
-        {!checkedToday && habit.streak > 0 && (
+        {/* Weekly, early in the week: a fresh period just started — informational, not urgent */}
+        {!checkedToday && habit.streak > 0 && isWeekly && daysLeftInPeriod > 1 && (
+          <Box sx={{
+            display: "flex", alignItems: "center", gap: 1,
+            bgcolor: colors.softBlue, border: `1px solid ${colors.primary}33`,
+            borderRadius: 2, px: 2, py: 1,
+          }}>
+            <InfoOutlinedIcon sx={{ color: colors.primary, fontSize: 18 }} />
+            <Typography variant="body2" color="text.secondary">
+              Not checked in yet this week. {daysLeftInPeriod} days left to protect your {habit.streak}{streakUnit} streak.
+            </Typography>
+          </Box>
+        )}
+        {/* Daily, or weekly with the period about to close — genuinely at risk */}
+        {!checkedToday && habit.streak > 0 && (!isWeekly || daysLeftInPeriod <= 1) && (
           <Box sx={{
             display: "flex", alignItems: "center", gap: 1,
             bgcolor: "#fffbeb", border: "1px solid #fbbf24",
@@ -777,7 +942,7 @@ const Progress = () => {
           }}>
             <WarningAmberIcon sx={{ color: colors.orange, fontSize: 18 }} />
             <Typography variant="body2" sx={{ color: "#92400e" }}>
-              Not checked in yet — your {habit.streak}{streakUnit} streak is at risk.
+              Not checked in yet. Your {habit.streak}{streakUnit} streak is at risk.
             </Typography>
           </Box>
         )}
@@ -789,7 +954,9 @@ const Progress = () => {
           }}>
             <CheckCircleOutlineIcon sx={{ color: colors.green, fontSize: 18 }} />
             <Typography variant="body2" sx={{ color: colors.green }}>
-              {isBreak ? "Kept clean today ✓" : "Checked in today ✓"}
+              {isBreak
+                ? `Kept clean ${isWeekly ? "this week" : "today"} ✓`
+                : `Checked in ${isWeekly ? "this week" : "today"} ✓`}
             </Typography>
           </Box>
         )}
@@ -835,37 +1002,69 @@ const Progress = () => {
               "The 'Best' label shows your highest monthly rate across all previous months."
             }
           />
-          {/* This week — completion rate from Monday through today */}
-          <StatCard
-            label="This week"
-            value={`${thisWeekRate}%`}
-            sublabel={thisWeekSub}
-            color={thisWeekRate >= 70 ? colors.green : thisWeekRate >= 40 ? colors.orange : "#e53e3e"}
-          />
+          {/* This week (daily) — completion rate from Monday through today.
+              Preferred day (weekly) — the weekday you most often check in on,
+              paired with the "By Check-in Day" distribution box below. */}
+          {isWeekly ? (
+            <StatCard
+              label="Preferred day"
+              value={mostFrequentDay ? mostFrequentDay.day : "N/A"}
+              sublabel={mostFrequentDay ? `${mostFrequentDay.rate}% of check-ins` : "Not enough data yet"}
+              infoText={
+                "The weekday you most often check in on for this habit, out of all your check-ins so far."
+              }
+            />
+          ) : (
+            <StatCard
+              label="This week"
+              value={`${thisWeekRate}%`}
+              sublabel={thisWeekSub}
+              color={thisWeekRate >= 70 ? colors.green : thisWeekRate >= 40 ? colors.orange : "#e53e3e"}
+            />
+          )}
         </Box>
       </Box>
 
-      {/* 8. Calendar heatmap + By Weekday bars — side by side on wider screens */}
+      {/* 8. Calendar heatmap + By Weekday/Check-in Day bars — side by side on wider screens */}
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2, mb: 3 }}>
-        <Paper sx={{ ...cardSx, p: 3 }}>
-          <SectionTitle>Calendar — last 45 days</SectionTitle>
-          <Heatmap
-            cells={heatmap.cells}
-            habitType={habit.habitType}
-            fromCreation={heatmap.fromCreation}
-            startDate={heatmap.startDate}
-            completedCount={heatmap.completedCount}
-            totalCount={heatmap.totalCount}
-          />
+        <Paper sx={{ p: 3 }}>
+          <SectionTitle>
+            Calendar · {heatmap.fromCreation
+              ? "since creation"
+              : isWeekly ? `last ${heatmap.totalCount} weeks` : `last ${heatmap.totalCount} days`}
+          </SectionTitle>
+          {isWeekly ? (
+            <WeeklyHeatmap
+              cells={heatmap.cells}
+              habitType={habit.habitType}
+              fromCreation={heatmap.fromCreation}
+              startDate={heatmap.startDate}
+              completedCount={heatmap.completedCount}
+              totalCount={heatmap.totalCount}
+            />
+          ) : (
+            <Heatmap
+              cells={heatmap.cells}
+              habitType={habit.habitType}
+              fromCreation={heatmap.fromCreation}
+              startDate={heatmap.startDate}
+              completedCount={heatmap.completedCount}
+              totalCount={heatmap.totalCount}
+            />
+          )}
         </Paper>
 
-        <Paper sx={{ ...cardSx, p: 3 }}>
-          <SectionTitle>By Weekday</SectionTitle>
-          <WeekdayBars data={weekdayData} />
+        <Paper sx={{ p: 3 }}>
+          <SectionTitle>{isWeekly ? "By Check-in Day" : "By Weekday"}</SectionTitle>
+          <WeekdayBars
+            data={weekdayData}
+            variant={isWeekly ? "distribution" : "rate"}
+            caption={isWeekly ? "Share of check-ins (%) per weekday" : "Completion rate (%) per weekday"}
+          />
 
-          {/* Best/worst day chips */}
+          {/* Best/worst day chips (daily) or most-common day chip (weekly) */}
           {!isWeekly && bestDay && worstDay && (
-            <Stack direction="row" spacing={1} sx={{ mt: 2 }} flexWrap="wrap">
+            <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: "wrap" }}>
               <Chip
                 label={`Best: ${bestDay.day} (${bestDay.rate}%)`}
                 size="small"
@@ -878,6 +1077,15 @@ const Progress = () => {
               />
             </Stack>
           )}
+          {isWeekly && mostFrequentDay && (
+            <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: "wrap" }}>
+              <Chip
+                label={`Most common: ${mostFrequentDay.day} (${mostFrequentDay.rate}%)`}
+                size="small"
+                sx={{ bgcolor: colors.softBlue, color: colors.primary }}
+              />
+            </Stack>
+          )}
 
           {/* Recovery detail — only shown when streak breaks exist */}
           {recovery.breaks > 0 && (
@@ -886,12 +1094,12 @@ const Progress = () => {
                 Recovery after streak breaks
               </Typography>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {recovery.breaks} break{recovery.breaks > 1 ? "s" : ""} · avg {recovery.avgDays.toFixed(1)}d to resume
+                {recovery.breaks} break{recovery.breaks > 1 ? "s" : ""} · avg {formatPeriodDuration(recovery.avgDays, habit.frequency)} to resume
               </Typography>
-              {/* One chip per break showing how many days it took to check in again */}
+              {/* One chip per break showing how long it took to check in again */}
               <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mt: 0.5 }}>
                 {recovery.details.slice(0, 6).map((d, i) => (
-                  <Chip key={i} label={`${d}d`} size="small"
+                  <Chip key={i} label={formatPeriodDuration(d, habit.frequency)} size="small"
                     sx={{ height: 20, fontSize: 11, bgcolor: "#f1f5f9" }} />
                 ))}
               </Box>

@@ -2,7 +2,8 @@ import { Box, Typography, Paper } from '@mui/material'
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined'
 import EmojiEventsOutlinedIcon from '@mui/icons-material/EmojiEventsOutlined'
 import { useAuthContext } from '../../auth/useAuthContext' // reads user from AuthContext to personalize the greeting
-import { colors } from '../../theme'
+import { colors } from '../../styles/tokens'
+import PageHeader from '../../components/layout/PageHeader'
 
 // preview cards for features not yet implemented; replace with real components when ready
 const placeholderCards = [
@@ -25,23 +26,18 @@ const ManagerDashboard = () => {
 
   return (
     <Box>
-      <Typography variant="h4" sx={{ fontWeight: 800, color: colors.textPrimary, mb: 0.5 }}>
-        Manager Dashboard
-      </Typography>
-      <Typography variant="body1" sx={{ color: colors.textSecondary, mb: 4 }}>
-        Welcome back, {user?.firstName}. Here's your manager overview.
-      </Typography>
+      <PageHeader
+        title="Manager Dashboard"
+        description={`Welcome back, ${user?.firstName || 'manager'}. Here's your manager overview.`}
+      />
 
       <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
         {placeholderCards.map((card) => (
           <Paper
             key={card.title}
-            elevation={0}
             sx={{
               flex: '1 1 240px',
               p: 3,
-              borderRadius: 3,
-              border: `1px solid ${colors.border}`,
               backgroundColor: card.bg,
               opacity: 0.7,
             }}

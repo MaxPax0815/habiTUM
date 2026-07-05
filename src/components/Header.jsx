@@ -3,8 +3,8 @@ import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
-import { colors } from "../theme"
-import { outlinedPillButtonSx, pillButtonSx } from "../styles/buttonSx";
+import { colors } from '../styles/tokens'
+import { outlinedPillButtonSx, pillButtonSx } from '../styles/recipes'
 
 // Source of truth for the landing page's in-page navigation.
 // Each `href` is an anchor (#features, #habits, #challenges) that scrolls to the
@@ -242,14 +242,7 @@ const Header = () => {
                                 to="/signup"
                                 variant="contained"
                                 size="small"
-                                /* There should not be a need for explicitly defining the color of the arrow icon.
-                                 It seems like the rules of the habit.css file also affect every other link
-===========================================================================================================
-
-                                    TODO: Please fix the habit.css 
-                                    
-===========================================================================================================*/
-                                endIcon={<ArrowForwardIcon sx={{color: colors.surface}}/>}
+                                endIcon={<ArrowForwardIcon />}
                                 sx={{
                                     ...pillButtonSx,
                                     backgroundColor: colors.primary,

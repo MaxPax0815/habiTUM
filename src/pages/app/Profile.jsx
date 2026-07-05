@@ -21,7 +21,11 @@ import { useBilling } from '../../billing/useBillings'
 import UpgradeButton from '../../billing/UpgradeButton'
 import PlanCard from '../../components/PlanCard'
 import BillingInformationCard from '../../components/BillingInformationCard'
-import { colors, pillButtonSx, sectionTitleSx, cardSx } from '../../theme'
+import PageContainer from '../../components/layout/PageContainer'
+import PageHeader from '../../components/layout/PageHeader'
+import PageSection from '../../components/layout/PageSection'
+import { colors } from '../../styles/tokens'
+import { pillButtonSx } from '../../styles/recipes'
 
 const formatDate = (dateString) => {
   if (!dateString) return '—'
@@ -89,34 +93,11 @@ const Profile = () => {
   }, [])
 
   return (
-    <Box
-      sx={{
-        width: '100%',
-        maxWidth: 1120,
-        mx: 'auto'
-      }}
-    >
-      <Box sx={{ mb: 4 }}>
-        <Typography
-          variant="h4"
-          component="h1"
-          sx={{
-            mb: 0.75,
-            color: 'text.primary'
-          }}
-        >
-          Account
-        </Typography>
-
-        <Typography
-          variant="body1"
-          sx={{
-            color: 'text.secondary'
-          }}
-        >
-          Manage your plan and billing information
-        </Typography>
-      </Box>
+    <PageContainer>
+      <PageHeader
+        title="Account"
+        description="Manage your plan and billing information"
+      />
 
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
@@ -124,12 +105,8 @@ const Profile = () => {
         </Alert>
       )}
 
-      <Box sx={{ mb: 4 }}>
-        <Typography component="h2" sx={sectionTitleSx}>
-          Account status
-        </Typography>
-
-        <Card sx={cardSx}>
+      <PageSection title="Account status">
+        <Card>
           <CardContent
             sx={{
               p: {
@@ -180,13 +157,9 @@ const Profile = () => {
               )}
           </CardContent>
         </Card>
-      </Box>
+      </PageSection>
 
-      <Box sx={{ mb: 3 }}>
-        <Typography component="h2" sx={sectionTitleSx}>
-          Plan
-        </Typography>
-
+      <PageSection title="Plan" sx={{ mb: 3 }}>
         <Box
           sx={{
             display: 'grid',
@@ -271,23 +244,15 @@ const Profile = () => {
             }
           />
         </Box>
-      </Box>
+      </PageSection>
 
       <BillingInformationCard user={user} />
 
       <Dialog
         open={downgradeDialogOpen}
         onClose={() => setDowngradeDialogOpen(false)}
-        PaperProps={{
-          sx: {
-            borderRadius: 4,
-            border: '1px solid',
-            borderColor: 'divider',
-            boxShadow: 'none'
-          }
-        }}
       >
-        <DialogTitle sx={{ fontWeight: 900 }}>
+        <DialogTitle>
           Downgrade scheduled
         </DialogTitle>
 
@@ -302,7 +267,7 @@ const Profile = () => {
           </DialogContentText>
         </DialogContent>
 
-        <DialogActions sx={{ px: 3, pb: 2 }}>
+        <DialogActions>
           <Button
             variant="contained"
             onClick={() => setDowngradeDialogOpen(false)}
@@ -315,7 +280,7 @@ const Profile = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </PageContainer>
   )
 }
 

@@ -23,7 +23,7 @@ import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { Link as RouterLink } from "react-router-dom";
 
 import AppCard from "../components/AppCard";
-import { colors } from "../theme";
+import { colors } from '../styles/tokens'
 
 // ---------------------------------------------------------------------------
 // Challenges.jsx
@@ -118,8 +118,6 @@ const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
     <AppCard
       sx={{
         minHeight: 280,
-        borderRadius: 3,
-        boxShadow: "none",
       }}
       contentSx={{
         height: "100%",
@@ -128,7 +126,7 @@ const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
         flexDirection: "column",
       }}
     >
-      <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
+      <Stack direction="row" spacing={2} sx={{ alignItems: "center", justifyContent: "space-between" }}>
         <Typography
           variant="body1"
           sx={{ color: colors.muted, fontWeight: 700, fontSize: { xs: 18, md: 20 } }}
@@ -142,7 +140,6 @@ const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
           sx={{
             height: 34,
             px: 1,
-            borderRadius: 999,
             bgcolor: colors.softOrange,
             color: colors.orange,
             fontSize: 18,
@@ -179,18 +176,17 @@ const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
       <Stack
         direction="row"
         spacing={2.5}
-        flexWrap="wrap"
         useFlexGap
-        sx={{ mt: 3.5, color: colors.muted }}
+        sx={{ mt: 3.5, color: colors.muted, flexWrap: "wrap" }}
       >
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
           <GroupsOutlinedIcon sx={{ fontSize: 22 }} />
           <Typography sx={{ fontSize: { xs: 16, md: 18 }, fontWeight: 700 }}>
             {formatParticipants(participantCount)}
           </Typography>
         </Stack>
 
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
           <AccessTimeOutlinedIcon sx={{ fontSize: 22 }} />
           <Typography sx={{ fontSize: { xs: 16, md: 18 }, fontWeight: 700 }}>
             {daysLeft === null ? "No end date" : `${daysLeft}d left`}
@@ -198,7 +194,7 @@ const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
         </Stack>
       </Stack>
 
-      <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap sx={{ mt: "auto", pt: 4 }}>
+      <Stack direction="row" spacing={1.5} useFlexGap sx={{ mt: "auto", pt: 4, flexWrap: "wrap" }}>
         <Button
           variant="outlined"
           {...(challengeId
@@ -211,16 +207,9 @@ const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
           sx={{
             px: 2.5,
             py: 1.2,
-            borderRadius: 2,
             color: colors.textSecondary,
-            borderColor: colors.border,
             fontSize: 18,
             fontWeight: 800,
-            bgcolor: colors.surface,
-            "&:hover": {
-              borderColor: colors.primary,
-              bgcolor: colors.softBlue,
-            },
           }}
         >
           View
@@ -287,9 +276,7 @@ export const ExtendedChallengeCard = ({
       sx={{
         width: "100%",
         minHeight: 260,
-        borderRadius: 3,
         border: isJoined ? `2px solid ${colors.primary}` : undefined,
-        boxShadow: "none",
       }}
       contentSx={{
         p: { xs: 3, md: 4 },
@@ -316,7 +303,6 @@ export const ExtendedChallengeCard = ({
               label={community}
               sx={{
                 height: 32,
-                borderRadius: 999,
                 bgcolor: colors.softBlue,
                 color: colors.primary,
                 fontSize: 15,
@@ -329,7 +315,6 @@ export const ExtendedChallengeCard = ({
               label={difficulty}
               sx={{
                 height: 32,
-                borderRadius: 999,
                 bgcolor: colors.softOrange,
                 color: colors.orange,
                 fontSize: 15,

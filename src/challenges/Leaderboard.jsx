@@ -16,7 +16,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import WhatshotIcon from "@mui/icons-material/Whatshot";
 
 import { useAuthContext } from "../auth/useAuthContext";
-import { avatarColors, colors } from "../theme";
+import { avatarColors, colors, radii } from '../styles/tokens'
 
 // ---------------------------------------------------------------------------
 // Leaderboard.jsx
@@ -130,8 +130,8 @@ const Leaderboard = ({ challengeId, initialData }) => {
       <TableContainer
         sx={{
           border: `1px solid ${colors.border}`,
-          borderRadius: 2,
-          bgcolor: colors.surface,
+          borderRadius: radii.card,
+          bgcolor: 'background.paper',
           overflow: "hidden",
         }}
       >

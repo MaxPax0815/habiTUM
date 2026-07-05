@@ -4,7 +4,7 @@ import { ThemeProvider, CssBaseline } from '@mui/material'
 
 import './index.css'
 import App from './App.jsx'
-import theme from './theme'
+import theme from './styles/theme'
 
 import { HabitsContextProvider } from './context/HabitsContext'
 import { AuthContextProvider } from './auth/AuthContext.jsx'

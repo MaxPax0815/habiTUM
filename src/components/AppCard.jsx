@@ -1,16 +1,10 @@
-import { Card, CardContent } from "@mui/material";
-import { colors } from "../theme";
+import { Card, CardContent } from '@mui/material'
 
 const AppCard = ({ children, sx = {}, contentSx = {} }) => {
   return (
     <Card
-      elevation={0}
       sx={{
-        height: "100%",
-        borderRadius: 3,
-        border: `1px solid ${colors.border}`,
-        backgroundColor: colors.surface,
-        boxShadow: "0 10px 24px rgba(7, 29, 53, 0.06)",
+        height: '100%',
         ...sx,
       }}
     >
@@ -19,6 +13,6 @@ const AppCard = ({ children, sx = {}, contentSx = {} }) => {
       </CardContent>
     </Card>
   );
-};
+}
 
-export default AppCard;
+export default AppCard

@@ -7,7 +7,7 @@ import {
     Typography,
 } from '@mui/material'
 import { useState } from 'react'
-import { Link as RouterLink, useNavigate } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router-dom'
 
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined'
@@ -17,7 +17,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff'
 
 import { useLogin } from '../../auth/useLogin'
 import AppCard from '../../components/AppCard'
-import { colors } from '../../theme'
+import { colors } from '../../styles/tokens'
 
 const FieldLabel = ({ children }) => (
     <Typography
@@ -28,34 +28,26 @@ const FieldLabel = ({ children }) => (
     </Typography>
 )
 
-const fieldSx = {
-    '& .MuiOutlinedInput-root': {
-        borderRadius: 2,
-        fontSize: 15,
-        '& fieldset': { borderColor: colors.border },
-        '&:hover fieldset': { borderColor: colors.primary },
-        '&.Mui-focused fieldset': { borderColor: colors.primary, borderWidth: 2 },
-    },
-    '& .MuiInputLabel-root.Mui-focused': { color: colors.primary },
-}
-
-
 const Login = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [success, setSuccess] = useState(false)
     const { login, error, isLoading } = useLogin()
-    const navigate = useNavigate()
 
     const handleSubmit = async (e) => {
         e.preventDefault()
         const ok = await login(email, password)
         if (ok) {
             setSuccess(true)
-            // Manager redirects to manager dashboard, regular users to today's habits page
-            // setTimeout(() => navigate(user.role === 'manager' ? '/manager-dashboard' : '/today'), 1000)
-            setTimeout(() => navigate('/today'), 1000)
+            // No navigate() here: App.jsx's "/login" route already renders
+            // <Navigate to="/today"/> the instant `user` becomes truthy, so this
+            // component redirects itself as soon as AuthContext updates. A
+            // setTimeout(navigate, 1000) used to run in parallel with that and
+            // was never cleared on unmount — it fired a second, stale redirect
+            // to /today a full second later regardless of where the user had
+            // since navigated (very noticeable at low Vite dev-server speeds,
+            // where the timer's execution gets pushed back several seconds).
         }
     }
 
@@ -125,14 +117,15 @@ const Login = () => {
                             required
                             autoComplete="email"
                             placeholder="tom.mueller@tum.de"
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <EmailOutlinedIcon sx={{ fontSize: 18, color: colors.muted }} />
-                                    </InputAdornment>
-                                ),
+                            slotProps={{
+                                input: {
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <EmailOutlinedIcon sx={{ fontSize: 18, color: colors.muted }} />
+                                        </InputAdornment>
+                                    ),
+                                },
                             }}
-                            sx={fieldSx}
                         />
                     </Box>
 
@@ -147,30 +140,50 @@ const Login = () => {
                             required
                             autoComplete="current-password"
                             placeholder="••••••••"
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <LockOutlinedIcon sx={{ fontSize: 18, color: colors.muted }} />
-                                    </InputAdornment>
-                                ),
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => setShowPassword((v) => !v)}
-                                            edge="end"
-                                            aria-label="toggle password visibility"
-                                        >
-                                            {showPassword
-                                                ? <VisibilityOff sx={{ fontSize: 18, color: colors.muted }} />
-                                                : <Visibility sx={{ fontSize: 18, color: colors.muted }} />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
+                            slotProps={{
+                                input: {
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <LockOutlinedIcon sx={{ fontSize: 18, color: colors.muted }} />
+                                        </InputAdornment>
+                                    ),
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => setShowPassword((v) => !v)}
+                                                edge="end"
+                                                aria-label="toggle password visibility"
+                                            >
+                                                {showPassword
+                                                    ? <VisibilityOff sx={{ fontSize: 18, color: colors.muted }} />
+                                                    : <Visibility sx={{ fontSize: 18, color: colors.muted }} />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                },
                             }}
-                            sx={fieldSx}
                         />
                     </Box>
+
+                    <Typography
+                        variant="body2"
+                        sx={{ textAlign: 'right', mt: -0.5 }}
+                    >
+                        <Typography
+                            component={RouterLink}
+                            to="/forgot-password"
+                            variant="body2"
+                            sx={{
+                                color: colors.textSecondary,
+                                fontSize: 13,
+                                textDecoration: 'none',
+                                '&:hover': { color: colors.primary, textDecoration: 'underline' },
+                            }}
+                        >
+                            Forgot password?
+                        </Typography>
+                    </Typography>
 
                     {error && (
                         <Typography variant="body2" sx={{ color: 'error.main', fontSize: 13 }}>
@@ -186,22 +199,12 @@ const Login = () => {
                     <Button
                         type="submit"
                         variant="contained"
+                        size="large"
                         fullWidth
                         disabled={isLoading}
                         endIcon={<ArrowForwardIcon />}
                         sx={{
                             mt: 0.5,
-                            py: 1.5,
-                            borderRadius: 2,
-                            fontWeight: 700,
-                            fontSize: 15,
-                            bgcolor: colors.primary,
-                            boxShadow: '0 2px 12px rgba(0,102,255,0.25)',
-                            '&:hover': {
-                                bgcolor: '#0052CC',
-                                boxShadow: '0 4px 18px rgba(0,102,255,0.35)',
-                            },
-                            '&:active': { transform: 'scale(0.99)' },
                         }}
                     >
                         {isLoading ? 'Logging in…' : 'Log in'}

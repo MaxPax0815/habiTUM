@@ -9,13 +9,14 @@ import isToday from "date-fns/isToday"
 import getDay from "date-fns/getDay"
 
 // MUI
-import { Box, Button, Dialog, Paper, Stack, Typography } from "@mui/material"
-import { colors } from "../../theme"
+import { Box, Button, Paper, Typography } from "@mui/material"
+import { colors } from '../../styles/tokens'
 
 // components
 import AppDialog from "../../components/AppDialog"
 import HabitDetails from "../../components/HabitDetails"
 import HabitForm from "../../components/HabitForm"
+import PageHeader from "../../components/layout/PageHeader"
 
 // Helpfunctions (outside of components since they don't need to access component state)
 
@@ -113,15 +114,11 @@ const Home = () => {
   
     return (
     <div className="home-page">
-      {/* Date + Greeting */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="body2" color="text.secondary">
-          {format(now, "EEEE, MMMM d")}
-        </Typography>
-        <Typography variant="h4" sx={{ fontWeight: 800, mt: 0.5 }}>
-          {greetingFor(now)}, {user?.firstName || "there"}.
-        </Typography>
-      </Box>
+      <PageHeader
+        eyebrow={format(now, "EEEE, MMMM d")}
+        title={`${greetingFor(now)}, ${user?.firstName || "there"}.`}
+        sx={{ mb: 3 }}
+      />
 
       {/* three Stat-Cards — laid out on the same 3-column grid as the dashboard below
           so the habit list lines up under the first two cards and the sidebar under the third */}
@@ -191,8 +188,6 @@ const Home = () => {
               mt: 1.5, mb: 4, py: 1.5,
               color: "text.secondary",
               bgcolor: "#f1f5f9",
-              borderRadius: 2,
-              textTransform: "none",
               "&:hover": { bgcolor: "#e2e8f0" },
             }}
           >
@@ -203,7 +198,7 @@ const Home = () => {
         {/* RIGHT: Active Challenges placeholder (real feature comes later) */}
         <Box>
           <Typography variant="overline" color="text.secondary">Active challenges</Typography>
-          <Paper variant="outlined" sx={{ p: 3, textAlign: "center", borderRadius: 2 }}>
+          <Paper variant="outlined" sx={{ p: 3, textAlign: "center" }}>
             <span className="material-symbols-outlined" style={{ fontSize: 32, color: colors.muted }}>
               emoji_events
             </span>
