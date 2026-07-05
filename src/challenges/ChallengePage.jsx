@@ -173,7 +173,6 @@ const ChallengePage = () => {
 
   const handleLeaveChallenge = async () => {
     if (!challengeId || !user || !challenge?.isJoined) return;
-    if (!window.confirm("Leave this challenge?")) return;
 
     setError(null);
 
