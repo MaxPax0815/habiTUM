@@ -64,7 +64,10 @@ const CommunityDashboard = () => {
   const handleLeave = async () => {
     const authHeader = { 'Authorization': `Bearer ${token}` }
     const res = await fetch(`/api/communities/${id}/leave`, { method: 'DELETE', headers: authHeader })
-    if (res.ok) fetchCommunity() // refresh so the button flips back to "Join"
+    if (res.ok) {
+      fetchCommunity() // refresh so the button flips back to "Join"
+      fetchCommunityChallenges() // refresh challenge cards after automatic challenge leave
+    }
   }
 
   const handleJoinChallenge = async (challengeId) => {
@@ -164,7 +167,11 @@ const CommunityDashboard = () => {
             }}
           >
             {challenges.map((challenge) => (
-              <ChallengeCard key={challenge._id} challenge={challenge} />
+              <ChallengeCard
+                key={challenge._id}
+                challenge={challenge}
+                onJoin={() => handleJoinChallenge(challenge._id)}
+              />
             ))}
           </Box>
         ) : (
