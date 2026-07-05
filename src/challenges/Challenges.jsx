@@ -71,7 +71,7 @@ const getChallengeCommunity = (challenge) =>
 const getChallengeDifficulty = (challenge) =>
   challenge?.difficulty || "medium";
 
-const ChallengeJoinButton = ({ isJoined = false, sx = {}, ...buttonProps }) => {
+const ChallengeJoinButton = ({ isJoined = false, label, sx = {}, ...buttonProps }) => {
   const joined = Boolean(isJoined);
   const { "&:hover": hoverSx, ...buttonSx } = sx;
 
@@ -97,7 +97,7 @@ const ChallengeJoinButton = ({ isJoined = false, sx = {}, ...buttonProps }) => {
       }}
       {...buttonProps}
     >
-      {joined ? "Joined" : "Join Challenge"}
+      {label || (joined ? "Joined" : "Join Challenge")}
     </Button>
   );
 };
@@ -110,6 +110,7 @@ const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
   const participantCount = getParticipantCount(challenge);
   const challengeId = challenge?._id || challenge?.id;
   const joined = Boolean(isJoined ?? challenge?.isJoined);
+  const showJoinAction = joined || Boolean(onJoin);
 
   const category = getChallengeCategory(challenge);
   const difficulty = getChallengeDifficulty(challenge);
@@ -194,7 +195,17 @@ const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
         </Stack>
       </Stack>
 
-      <Stack direction="row" spacing={1.5} useFlexGap sx={{ mt: "auto", pt: 4, flexWrap: "wrap" }}>
+      <Box
+        sx={{
+          mt: "auto",
+          pt: 4,
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 1.5,
+          alignItems: "stretch",
+          justifyContent: showJoinAction ? "flex-start" : "center",
+        }}
+      >
         <Button
           variant="outlined"
           {...(challengeId
@@ -210,19 +221,24 @@ const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
             color: colors.textSecondary,
             fontSize: 18,
             fontWeight: 800,
+            flex: showJoinAction ? "1 1 150px" : "0 0 auto",
+            minWidth: 120,
           }}
         >
           View
         </Button>
 
-        <ChallengeJoinButton
-          isJoined={joined}
-          onClick={joined ? undefined : onJoin}
-          sx={{
-            minWidth: { xs: "100%", sm: 280 },
-          }}
-        />
-      </Stack>
+        {showJoinAction && (
+          <ChallengeJoinButton
+            isJoined={joined}
+            onClick={joined ? undefined : onJoin}
+            sx={{
+              flex: "1 1 220px",
+              minWidth: { xs: "100%", sm: 220 },
+            }}
+          />
+        )}
+      </Box>
     </AppCard>
   );
 };
@@ -234,6 +250,7 @@ export const ExtendedChallengeCard = ({
   challenge,
   currentUserRank,
   isJoined = false,
+  isCommunityMember = true,
   onJoin,
   canManageChallenge = false,
   onManageChallenge,
@@ -249,6 +266,7 @@ export const ExtendedChallengeCard = ({
   const hasLeaveAction = Boolean(isJoined && onLeaveChallenge);
   const hasActionMenu = Boolean(isJoined && (hasManageAction || hasLeaveAction));
   const isActionMenuOpen = Boolean(actionAnchorEl);
+  const canJoinChallenge = Boolean(isCommunityMember);
 
   const community = getChallengeCommunity(challenge);
   const difficulty = getChallengeDifficulty(challenge);
@@ -422,7 +440,9 @@ export const ExtendedChallengeCard = ({
         {!isJoined && (
           <ChallengeJoinButton
             isJoined={false}
-            onClick={onJoin}
+            disabled={!canJoinChallenge}
+            label={canJoinChallenge ? undefined : "Join community first"}
+            onClick={canJoinChallenge ? onJoin : undefined}
             sx={{
               mt: 3,
               minWidth: { xs: "100%", sm: 260 },

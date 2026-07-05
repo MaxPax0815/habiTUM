@@ -23,6 +23,7 @@ const ChallengePage = () => {
   const [habitsError, setHabitsError] = useState(null);
   const [habitsLoading, setHabitsLoading] = useState(Boolean(challengeId));
   const [isLoading, setIsLoading] = useState(Boolean(challengeId));
+  const [communityMembershipStatus, setCommunityMembershipStatus] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -125,6 +126,49 @@ const ChallengePage = () => {
     };
   }, [data]);
 
+  const communityId = challenge?.community?._id || challenge?.community;
+  const isCommunityMember = communityMembershipStatus === "accepted";
+
+  useEffect(() => {
+    if (!communityId || !user) {
+      setCommunityMembershipStatus(null);
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    let isActive = true;
+
+    const fetchCommunityMembership = async () => {
+      try {
+        const response = await fetch(`/api/communities/${communityId}`, {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+          signal: controller.signal,
+        });
+        const json = await response.json();
+
+        if (!response.ok) {
+          throw new Error(json.error || "Could not load community membership.");
+        }
+
+        if (isActive) {
+          setCommunityMembershipStatus(json.membershipStatus || null);
+        }
+      } catch (fetchError) {
+        if (fetchError.name === "AbortError" || !isActive) return;
+        setCommunityMembershipStatus(null);
+      }
+    };
+
+    fetchCommunityMembership();
+
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, [communityId, user]);
+
   const buildChallengeHabits = challengeHabits.filter((habit) => habit.habitType === "build");
   const breakChallengeHabits = challengeHabits.filter((habit) => habit.habitType === "break");
 
@@ -148,6 +192,10 @@ const ChallengePage = () => {
 
   const handleJoinChallenge = async () => {
     if (!challengeId || !user || challenge?.isJoined) return;
+    if (!isCommunityMember) {
+      setError("Join this community before joining its challenges.");
+      return;
+    }
 
     setError(null);
 
@@ -246,6 +294,7 @@ const ChallengePage = () => {
           challenge={challenge}
           currentUserRank={data.currentUserRank}
           isJoined={challenge.isJoined}
+          isCommunityMember={isCommunityMember}
           onJoin={handleJoinChallenge}
           onLeaveChallenge={handleLeaveChallenge}
         />

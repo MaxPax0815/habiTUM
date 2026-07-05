@@ -71,6 +71,11 @@ const CommunityDashboard = () => {
   }
 
   const handleJoinChallenge = async (challengeId) => {
+    if (community?.membershipStatus !== 'accepted') {
+      setChallengesError('Join this community before joining its challenges.')
+      return
+    }
+
     const authHeader = { 'Authorization': `Bearer ${token}` }
     const res = await fetch(`/api/challenges/${challengeId}/join`, { method: 'POST', headers: authHeader })
 
@@ -170,7 +175,7 @@ const CommunityDashboard = () => {
               <ChallengeCard
                 key={challenge._id}
                 challenge={challenge}
-                onJoin={() => handleJoinChallenge(challenge._id)}
+                onJoin={isMember ? () => handleJoinChallenge(challenge._id) : undefined}
               />
             ))}
           </Box>
