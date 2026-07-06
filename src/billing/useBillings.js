@@ -52,6 +52,40 @@ export const useBilling = () => {
     }
   }
 
+  const confirmCheckoutSession = async (sessionId) => {
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch('/api/billing/confirm-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`
+        },
+        body: JSON.stringify({ sessionId })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Could not confirm checkout.')
+      }
+
+      dispatch({
+        type: 'UPDATE_USER',
+        payload: data
+      })
+
+      return data
+    } catch (error) {
+      setError(error.message)
+      throw error
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const scheduleCancellation = async () => {
     setIsLoading(true)
     setError(null)
@@ -80,6 +114,7 @@ export const useBilling = () => {
 
   return {
     startCheckout,
+    confirmCheckoutSession,
     scheduleCancellation,
     refreshCurrentUser,
     isLoading,

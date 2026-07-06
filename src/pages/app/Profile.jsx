@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Alert,
   Box,
@@ -67,6 +67,7 @@ const Profile = () => {
 
   const {
     scheduleCancellation,
+    confirmCheckoutSession,
     refreshCurrentUser,
     isLoading,
     error
@@ -75,6 +76,7 @@ const Profile = () => {
   const isPremium = user?.subscription === 'premium'
   const cancellationScheduled = Boolean(user?.subscriptionCancelAtPeriodEnd)
   const [downgradeDialogOpen, setDowngradeDialogOpen] = useState(false)
+  const checkoutSyncStarted = useRef(false)
 
   const accountStatusLabel = isPremium ? 'Premium Account' : 'Normal Account'
 
@@ -88,7 +90,24 @@ const Profile = () => {
   }
 
   useEffect(() => {
-    refreshCurrentUser().catch(() => {})
+    if (checkoutSyncStarted.current) return
+    checkoutSyncStarted.current = true
+
+    const searchParams = new URLSearchParams(window.location.search)
+    const checkoutSucceeded = searchParams.get('checkout') === 'success'
+    const sessionId = searchParams.get('session_id')
+
+    const syncUser = async () => {
+      if (checkoutSucceeded && sessionId) {
+        await confirmCheckoutSession(sessionId)
+        window.history.replaceState({}, '', window.location.pathname)
+        return
+      }
+
+      await refreshCurrentUser()
+    }
+
+    syncUser().catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
