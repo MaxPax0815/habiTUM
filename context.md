@@ -91,7 +91,7 @@ Frontend/src/
 │   ├── AuthContext.jsx        — the Context + reducer + localStorage sync (described above)
 │   ├── useAuthContext.jsx     — safe accessor hook
 │   ├── useLogin.jsx / useSignup.jsx — POST /api/user/login|signup, persist + dispatch LOGIN
-│   ├── useForgotPassword.jsx / useResetPassword.jsx — request and complete password-reset flows
+│   ├── useForgotPassword.jsx / useResetPassword.jsx — request a demo reset token and complete the one-time-token flow
 │   └── useLogout.jsx           — clears localStorage, dispatches LOGOUT + HabitsContext SET_HABITS(null)
 ├── context/HabitsContext.jsx  — the Context + reducer (described above)
 ├── hooks/
@@ -128,7 +128,7 @@ Frontend/src/
     │   ├── LandingPage.jsx              — marketing page; consumes the shared tokens and global MUI theme
     │   ├── Login.jsx                     — email/password form → useLogin → navigate('/today')
     │   ├── Signup.jsx                    — registration form (firstName/lastName/username/email/password/confirm) → useSignup → navigate('/today')
-    │   ├── ForgotPassword.jsx            — requests a password-reset email
+    │   ├── ForgotPassword.jsx            — validates an email and redirects directly to its demo reset form
     │   └── ResetPassword.jsx             — consumes the URL token and sets a new password
     └── app/
         ├── Home.jsx                      — "/today": greeting header, 3 stat cards, build/break habit lists, "+ Add habit" → AppDialog(HabitForm)
