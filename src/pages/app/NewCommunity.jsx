@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { Box, Button, InputBase, Paper, Typography } from '@mui/material'
 import { useCommunities } from '../../hooks/useCommunites'
 import { colors, radii } from '../../styles/tokens'
-import PageContainer from '../../components/layout/PageContainer'
 import PageHeader from '../../components/layout/PageHeader'
+import { sectionTitleSx } from '../../styles/recipes'
 
 // One selectable visibility card (Public / Private). Highlights when active.
 const VisibilityCard = ({ icon, title, subtitle, active, onClick }) => (
@@ -28,7 +28,7 @@ const VisibilityCard = ({ icon, title, subtitle, active, onClick }) => (
 // Reusable labelled field used for both the name input and the goal textarea.
 const Field = ({ label, children }) => (
   <Box sx={{ mb: 3 }}>
-    <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 1 }}>{label}</Typography>
+    <Typography component="h2" sx={sectionTitleSx}>{label}</Typography>
     {children}
   </Box>
 )
@@ -58,7 +58,7 @@ const NewCommunity = () => {
   }
 
   return (
-    <PageContainer maxWidth={640} sx={{ textAlign: 'left' }}>
+    <Box sx={{ textAlign: 'left' }}>
       <Button
         onClick={() => navigate('/communities')}
         sx={{ color: 'text.secondary', mb: 1, px: 0 }}
@@ -70,10 +70,9 @@ const NewCommunity = () => {
       <PageHeader
         title="New Community"
         description="Start your own accountability community."
-        sx={{ mb: 3 }}
       />
 
-      <Paper variant="outlined" sx={{ p: 4 }} component="form" onSubmit={handleSubmit}>
+      <Paper variant="outlined" sx={{ p: 4, maxWidth: 640 }} component="form" onSubmit={handleSubmit}>
         <Field label="Community name">
           <InputBase sx={inputSx} placeholder="e.g. TUM Running Club"
             value={name} onChange={(e) => setName(e.target.value)} />
@@ -106,7 +105,7 @@ const NewCommunity = () => {
 
         {error && <Typography sx={{ color: 'crimson', mt: 2 }}>{error}</Typography>}
       </Paper>
-    </PageContainer>
+    </Box>
   )
 }
 

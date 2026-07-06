@@ -255,6 +255,7 @@ export const ExtendedChallengeCard = ({
   canManageChallenge = false,
   onManageChallenge,
   onLeaveChallenge,
+  showHeading = true,
 }) => {
   const [actionAnchorEl, setActionAnchorEl] = useState(null);
   const daysLeft = getDaysLeft(challenge?.ends);
@@ -413,29 +414,33 @@ export const ExtendedChallengeCard = ({
           )}
         </Menu>
 
-        <Typography
-          variant="h4"
-          sx={{
-            mt: 2.5,
-            color: colors.textPrimary,
-            fontWeight: 900,
-            lineHeight: 1.15,
-            fontSize: { xs: 28, md: 34 },
-          }}
-        >
-          {challenge?.title || "Untitled challenge"}
-        </Typography>
+        {showHeading && (
+          <>
+            <Typography
+              variant="h4"
+              sx={{
+                mt: 2.5,
+                color: colors.textPrimary,
+                fontWeight: 900,
+                lineHeight: 1.15,
+                fontSize: { xs: 28, md: 34 },
+              }}
+            >
+              {challenge?.title || "Untitled challenge"}
+            </Typography>
 
-        <Typography
-          sx={{
-            mt: 2.5,
-            color: colors.textSecondary,
-            fontSize: { xs: 18, md: 20 },
-            lineHeight: 1.45,
-          }}
-        >
-          {challenge?.description || "No description yet."}
-        </Typography>
+            <Typography
+              sx={{
+                mt: 2.5,
+                color: colors.textSecondary,
+                fontSize: { xs: 18, md: 20 },
+                lineHeight: 1.45,
+              }}
+            >
+              {challenge?.description || "No description yet."}
+            </Typography>
+          </>
+        )}
 
         {!isJoined && (
           <ChallengeJoinButton

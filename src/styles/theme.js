@@ -92,6 +92,7 @@ const theme = createTheme({
           minHeight: 40,
           textTransform: 'none',
           fontWeight: 700,
+          whiteSpace: 'nowrap',
           transition: 'background-color 160ms ease, border-color 160ms ease, transform 160ms ease',
           '&:active': {
             transform: 'scale(0.99)',
@@ -258,6 +259,18 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderColor: colors.border,
+        },
+      },
+    },
+    MuiLinearProgress: {
+      styleOverrides: {
+        root: {
+          height: 6,
+          borderRadius: radii.pill,
+          backgroundColor: colors.progressTrack,
+        },
+        bar: {
+          borderRadius: radii.pill,
         },
       },
     },

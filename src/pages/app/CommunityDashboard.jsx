@@ -6,6 +6,7 @@ import ChallengeCard from '../../challenges/Challenges'
 import { colors } from '../../styles/tokens'
 import BackButton from '../../components/BackButton'
 import PageContainer from '../../components/layout/PageContainer'
+import PageHeader from '../../components/layout/PageHeader'
 import PageSection from '../../components/layout/PageSection'
 
 const avatarColors = [colors.primary, '#A21CAF', '#B91C1C', colors.secondary, colors.orange]
@@ -106,30 +107,28 @@ const CommunityDashboard = () => {
 
   return (
 
-    <PageContainer maxWidth={980} sx={{ textAlign: 'left' }}>
+    <Box sx={{ textAlign: 'left' }}>
       <BackButton text="Back to Communities" to="/communities" sx={{ mb: 0 }} />
-      {/* Header card */}
-      <Paper variant="outlined" sx={{ p: 3, mb: 3, display: 'flex', alignItems: 'center', gap: 2.5 }}>
-        <Box
-          sx={{
-            width: 64, height: 64, borderRadius: 3, flexShrink: 0,
-            display: 'grid', placeItems: 'center',
-            bgcolor: colorFor(community.name), color: '#fff', fontWeight: 800, fontSize: 28,
-          }}
-        >
-          {(community.name?.[0] || '?').toUpperCase()}
-        </Box>
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="h5" sx={{ fontWeight: 800 }}>{community.name}</Typography>
-            <span className="material-symbols-outlined" style={{ color: colors.muted, fontSize: 20 }}>
-              {community.isPrivate ? 'lock' : 'public'}
-            </span>
+      <PageHeader
+        title={community.name}
+        description={`${community.memberCount} members`}
+        titleAdornment={(
+          <span className="material-symbols-outlined" style={{ color: colors.muted, fontSize: 20 }}>
+            {community.isPrivate ? 'lock' : 'public'}
+          </span>
+        )}
+        leading={(
+          <Box
+            sx={{
+              width: 64, height: 64, borderRadius: 3, flexShrink: 0,
+              display: 'grid', placeItems: 'center',
+              bgcolor: colorFor(community.name), color: '#fff', fontWeight: 800, fontSize: 28,
+            }}
+          >
+            {(community.name?.[0] || '?').toUpperCase()}
           </Box>
-          <Typography color="text.secondary">{community.memberCount} members</Typography>
-        </Box>
-        {/* Creator → Delete; other members → Leave; non-members → Join */}
-        {isCreator ? (
+        )}
+        actions={isCreator ? (
           <Button
             variant="outlined" color="error" onClick={handleDelete}
             startIcon={<span className="material-symbols-outlined">delete</span>}
@@ -146,12 +145,12 @@ const CommunityDashboard = () => {
         ) : (
           <Button variant="contained" onClick={handleJoin}>Join</Button>
         )}
-      </Paper>
+      />
 
       {community.description && (
         <PageSection title="About" sx={{ mb: 3 }}>
           <Paper variant="outlined" sx={{ p: 3 }}>
-          <Typography sx={{ mt: 0.5 }}>{community.description}</Typography>
+            <Typography sx={{ mt: 0.5 }}>{community.description}</Typography>
           </Paper>
         </PageSection>
       )}
@@ -188,7 +187,7 @@ const CommunityDashboard = () => {
           </Paper>
         )}
       </PageSection>
-    </PageContainer>
+    </Box>
   )
 }
 

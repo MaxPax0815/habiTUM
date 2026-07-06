@@ -16,6 +16,7 @@ import {
 import { useAuthContext } from "../auth/useAuthContext";
 import AppCard from "../components/AppCard";
 import { colors } from '../styles/tokens'
+import { sectionTitleSx } from '../styles/recipes'
 
 // ---------------------------------------------------------------------------
 // ChallengeForm.jsx
@@ -126,11 +127,8 @@ const ChallengeForm = ({
 
       <AppCard sx={{ boxShadow: "none" }} contentSx={{ p: { xs: 2.5, sm: 3 } }}>
         <Stack spacing={3}>
-          <Stack spacing={1.5}>
-            <Typography
-              variant="overline"
-              sx={{ color: colors.muted, fontWeight: 900, letterSpacing: "0.16em" }}
-            >
+          <Stack spacing={0}>
+            <Typography component="h2" sx={sectionTitleSx}>
               Challenge
             </Typography>
             <TextField
@@ -144,11 +142,8 @@ const ChallengeForm = ({
 
           <Divider />
 
-          <Stack spacing={1.5}>
-            <Typography
-              variant="overline"
-              sx={{ color: colors.muted, fontWeight: 900, letterSpacing: "0.16em" }}
-            >
+          <Stack spacing={0}>
+            <Typography component="h2" sx={sectionTitleSx}>
               Short description
             </Typography>
             <TextField
@@ -161,11 +156,8 @@ const ChallengeForm = ({
             />
           </Stack>
 
-          <Stack spacing={1.5}>
-            <Typography
-              variant="overline"
-              sx={{ color: colors.muted, fontWeight: 900, letterSpacing: "0.16em" }}
-            >
+          <Stack spacing={0}>
+            <Typography component="h2" sx={sectionTitleSx}>
               Difficulty
             </Typography>
             <FormControl fullWidth>
@@ -187,11 +179,8 @@ const ChallengeForm = ({
 
           <Divider />
 
-          <Stack spacing={1.5}>
-            <Typography
-              variant="overline"
-              sx={{ color: colors.muted, fontWeight: 900, letterSpacing: "0.16em" }}
-            >
+          <Stack spacing={0}>
+            <Typography component="h2" sx={sectionTitleSx}>
               Duration
             </Typography>
 

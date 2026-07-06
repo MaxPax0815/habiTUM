@@ -4,7 +4,6 @@ import { Box, Button, InputBase, Paper, Typography } from '@mui/material'
 import { useAuthContext } from '../../auth/useAuthContext'
 import { useCommunities } from '../../hooks/useCommunites'
 import { colors, radii } from '../../styles/tokens'
-import PageContainer from '../../components/layout/PageContainer'
 import PageHeader from '../../components/layout/PageHeader'
 import PageSection from '../../components/layout/PageSection'
 
@@ -43,11 +42,10 @@ const Communities = () => {
   const discover = communities.filter((c) => c.membershipStatus !== 'accepted' && matches(c))
 
   return (
-    <PageContainer maxWidth={760} sx={{ textAlign: 'left' }}>
+    <Box sx={{ textAlign: 'left' }}>
       <PageHeader
         title="Communities"
         description="Connect with people building better habits together."
-        sx={{ mb: 3 }}
       />
 
       {/* Search */}
@@ -188,7 +186,7 @@ const Communities = () => {
         ))}
         </Paper>
       </PageSection>
-    </PageContainer>
+    </Box>
   )
 }
 

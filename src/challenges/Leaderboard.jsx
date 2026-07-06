@@ -17,6 +17,7 @@ import WhatshotIcon from "@mui/icons-material/Whatshot";
 
 import { useAuthContext } from "../auth/useAuthContext";
 import { avatarColors, colors, radii } from '../styles/tokens'
+import { sectionTitleSx } from '../styles/recipes'
 
 // ---------------------------------------------------------------------------
 // Leaderboard.jsx
@@ -113,17 +114,7 @@ const Leaderboard = ({ challengeId, initialData }) => {
 
   return (
     <Box>
-      <Typography
-        variant="overline"
-        sx={{
-          display: "block",
-          mb: 1.5,
-          color: colors.muted,
-          fontWeight: 900,
-          fontSize: 18,
-          letterSpacing: "0.16em",
-        }}
-      >
+      <Typography component="h2" sx={sectionTitleSx}>
         Leaderboard — Ranked by Streak
       </Typography>
 

@@ -42,6 +42,24 @@ export const sectionTitleSx = {
   textAlign: 'left',
 }
 
+// Keeps progress indicators visually identical wherever they appear in cards.
+export const progressTrackSx = {
+  height: 6,
+  borderRadius: radii.pill,
+  overflow: 'hidden',
+  backgroundColor: colors.progressTrack,
+  '& .MuiLinearProgress-bar': {
+    borderRadius: radii.pill,
+  },
+}
+
+// Reserves a stable action column in repeated card rows and prevents label wrapping.
+export const cardActionButtonSx = {
+  minWidth: 112,
+  flexShrink: 0,
+  whiteSpace: 'nowrap',
+}
+
 // Centers a page vertically and horizontally with responsive outer spacing.
 export const centeredPageSx = {
   minHeight: 'calc(100vh - 48px)',

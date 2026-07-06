@@ -5,7 +5,8 @@ import { useParams } from "react-router-dom";
 import { useAuthContext } from "../auth/useAuthContext";
 import { ExtendedChallengeCard } from "./Challenges";
 import Leaderboard from "./Leaderboard";
-import PageContainer from "../components/layout/PageContainer";
+import PageHeader from "../components/layout/PageHeader";
+import { sectionTitleSx } from "../styles/recipes";
 import HabitDetails from "../components/HabitDetails";
 import BackButton from "../components/BackButton";
 
@@ -275,8 +276,7 @@ const ChallengePage = () => {
   }
 
   return (
-    <PageContainer
-      maxWidth={980}
+    <Box
       sx={{
         display: "flex",
         flexDirection: "column",
@@ -290,6 +290,11 @@ const ChallengePage = () => {
           sx={{ mb: 0 }}
         />
 
+        <PageHeader
+          title={challenge.title || "Challenge"}
+          description={challenge.description || "No description yet."}
+        />
+
         <ExtendedChallengeCard
           challenge={challenge}
           currentUserRank={data.currentUserRank}
@@ -297,11 +302,12 @@ const ChallengePage = () => {
           isCommunityMember={isCommunityMember}
           onJoin={handleJoinChallenge}
           onLeaveChallenge={handleLeaveChallenge}
+          showHeading={false}
         />
       </Box>
 
       <Box>
-        <Typography variant="overline" color="text.secondary">
+        <Typography component="h2" sx={sectionTitleSx}>
           Challenge habits
         </Typography>
 
@@ -331,13 +337,9 @@ const ChallengePage = () => {
 
             {breakChallengeHabits.length > 0 && (
               <>
-                <Typography
-                  variant="overline"
-                  color="text.secondary"
-                  sx={{ display: "block", textAlign: "left", mt: 3 }}
-                >
-                  Break habits
-                </Typography>
+                <Box sx={{ mt: 3 }}>
+                  <Typography component="h2" sx={sectionTitleSx}>Break habits</Typography>
+                </Box>
                 {breakChallengeHabits.map((habit) => (
                   <HabitDetails
                     key={habit._id}
@@ -360,7 +362,7 @@ const ChallengePage = () => {
       </Box>
 
       <Leaderboard challengeId={challengeId} initialData={data} />
-    </PageContainer>
+    </Box>
   );
 };
 

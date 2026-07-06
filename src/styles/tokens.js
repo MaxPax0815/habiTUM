@@ -11,6 +11,8 @@ export const colors = {
   softBlue: '#EAF2FF',
   softOrange: '#FFF1E8',
   softGreen: '#E9FFF5',
+  softNeutral: '#F1F5F9',
+  progressTrack: '#E2E8F0',
   orange: '#FF7A1A',
   green: '#00A86B',
 }

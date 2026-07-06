@@ -11,6 +11,7 @@ import getDay from "date-fns/getDay"
 // MUI
 import { Box, Button, Paper, Typography } from "@mui/material"
 import { colors } from '../../styles/tokens'
+import { sectionTitleSx } from '../../styles/recipes'
 
 // components
 import AppDialog from "../../components/AppDialog"
@@ -117,7 +118,6 @@ const Home = () => {
       <PageHeader
         eyebrow={format(now, "EEEE, MMMM d")}
         title={`${greetingFor(now)}, ${user?.firstName || "there"}.`}
-        sx={{ mb: 3 }}
       />
 
       {/* three Stat-Cards — laid out on the same 3-column grid as the dashboard below
@@ -162,18 +162,19 @@ const Home = () => {
       >
         {/* LEFT: build habits, then break habits, then add button — spans the two left columns */}
         <Box sx={{ gridColumn: { md: "span 2" } }}>
-              <Typography variant="overline" color="text.secondary" sx={{ display: "block", textAlign: "left" }}>
-              Build habits
-              </Typography>          {buildHabits.map(habit => (
+          <Typography component="h2" sx={sectionTitleSx}>
+            Build habits
+          </Typography>
+          {buildHabits.map(habit => (
             <HabitDetails habit={habit} key={habit._id} />
           ))}
 
           {/* break habits -> heading + list only render when at least one exists */}
           {breakHabits.length > 0 && (
             <>
-              <Typography variant="overline" color="text.secondary" sx={{ display: "block", textAlign: "left", mt: 3 }}>
-              Break habits
-              </Typography>
+              <Box sx={{ mt: 3 }}>
+                <Typography component="h2" sx={sectionTitleSx}>Break habits</Typography>
+              </Box>
               {breakHabits.map(habit => (
                 <HabitDetails habit={habit} key={habit._id} />
               ))}
@@ -187,8 +188,8 @@ const Home = () => {
             sx={{
               mt: 1.5, mb: 4, py: 1.5,
               color: "text.secondary",
-              bgcolor: "#f1f5f9",
-              "&:hover": { bgcolor: "#e2e8f0" },
+              bgcolor: colors.softNeutral,
+              "&:hover": { bgcolor: colors.progressTrack },
             }}
           >
             + Add another habit
@@ -197,7 +198,7 @@ const Home = () => {
 
         {/* RIGHT: Active Challenges placeholder (real feature comes later) */}
         <Box>
-          <Typography variant="overline" color="text.secondary">Active challenges</Typography>
+          <Typography component="h2" sx={sectionTitleSx}>Active challenges</Typography>
           <Paper variant="outlined" sx={{ p: 3, textAlign: "center" }}>
             <span className="material-symbols-outlined" style={{ fontSize: 32, color: colors.muted }}>
               emoji_events

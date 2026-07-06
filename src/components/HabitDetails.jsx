@@ -13,10 +13,10 @@ import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
 import LinearProgress from '@mui/material/LinearProgress'
 import Paper from '@mui/material/Paper'
-import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 
 import { colors } from '../styles/tokens'
+import { cardActionButtonSx, progressTrackSx } from '../styles/recipes'
 
 const HabitDetails = ({
   habit,
@@ -76,8 +76,19 @@ const HabitDetails = ({
   }
 
   return (
-    <Paper sx={{ p: 2, mb: 1.5 }}>
-      <Stack direction="row" sx={{ alignItems: 'center' }} spacing={1.5}>
+    <Paper sx={{ p: 2, mb: 1.5, minHeight: 92 }}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: {
+            xs: 'auto minmax(0, 1fr) auto',
+            sm: 'auto minmax(0, 1fr) auto 112px auto',
+          },
+          alignItems: 'center',
+          columnGap: 1.5,
+          rowGap: 1.5,
+        }}
+      >
         {/* circle that toggles done / not done */}
         <Checkbox
           checked={done}
@@ -93,20 +104,23 @@ const HabitDetails = ({
 
         {/* title + optional motivation + progress bar */}
         <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-          <Typography sx={{ textDecoration: done ? 'line-through' : 'none', fontWeight: 500 }}>
-            {habit.title}
-          </Typography>
-          {habit.content && (
-            <Typography variant="body2" color="text.secondary" noWrap>
-              {habit.content}
+          <Box sx={{ minHeight: 42 }}>
+            <Typography noWrap sx={{ textDecoration: done ? 'line-through' : 'none', fontWeight: 500 }}>
+              {habit.title}
             </Typography>
-          )}
+            {habit.content && (
+              <Typography variant="body2" color="text.secondary" noWrap>
+                {habit.content}
+              </Typography>
+            )}
+          </Box>
           <LinearProgress
             variant="determinate"
             value={done ? 100 : 0}
             color={isBreak ? 'warning' : 'primary'}
             sx={{
-              mt: 1, height: 6, borderRadius: 5,
+              ...progressTrackSx,
+              mt: 0.75,
               ...(isBreak && { '& .MuiLinearProgress-bar': { backgroundColor: colors.orange } }),
             }}
           />
@@ -124,7 +138,10 @@ const HabitDetails = ({
             </span>
           }
           label={`${habit.streak}${habit.frequency === 'weekly' ? 'w' : 'd'}`}
-          sx={isBreak ? { color: colors.orange, bgcolor: colors.softOrange, fontWeight: 700 } : undefined}
+          sx={{
+            gridColumn: 3,
+            ...(isBreak && { color: colors.orange, bgcolor: colors.softOrange, fontWeight: 700 }),
+          }}
         />
 
         {/* mark done / undo — break habits use the orange "Still clean" action */}
@@ -135,26 +152,28 @@ const HabitDetails = ({
               disabled={actionsDisabled}
               onClick={done ? handleUndo : handleMarkDone}
               sx={{
+                ...cardActionButtonSx,
+                gridColumn: { xs: 2, sm: 4 },
                 color: colors.orange,
                 borderColor: colors.orange,
                 '&:hover': { borderColor: colors.orange, backgroundColor: colors.softOrange },
               }}
             >
-              {done ? 'Undo' : 'Mark Done'}
+              {done ? 'Undo' : 'Mark done'}
             </Button>
           )
           : (done
-            ? <Button variant="outlined" disabled={actionsDisabled} onClick={handleUndo}>Undo</Button>
-            : <Button variant="contained" disabled={actionsDisabled} onClick={handleMarkDone}>Mark done</Button>)}
+            ? <Button variant="outlined" disabled={actionsDisabled} onClick={handleUndo} sx={{ ...cardActionButtonSx, gridColumn: { xs: 2, sm: 4 } }}>Undo</Button>
+            : <Button variant="contained" disabled={actionsDisabled} onClick={handleMarkDone} sx={{ ...cardActionButtonSx, gridColumn: { xs: 2, sm: 4 } }}>Mark done</Button>)}
 
         {/* delete */}
         {showDelete && (
-          <IconButton disabled={actionsDisabled} onClick={handleDelete} aria-label="delete">
+          <IconButton disabled={actionsDisabled} onClick={handleDelete} aria-label="delete" sx={{ gridColumn: { xs: 3, sm: 5 } }}>
             <span className="material-symbols-outlined">delete</span>
           </IconButton>
         )}
 
-      </Stack>
+      </Box>
     </Paper>
   )
 }

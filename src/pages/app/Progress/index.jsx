@@ -55,7 +55,7 @@ import {
 
 /** Section heading shown above each dashboard area — uses the app-wide sectionTitleSx. */
 const SectionTitle = ({ children }) => (
-  <Typography sx={{ ...sectionTitleSx, display: "block", mb: 1.5 }}>
+  <Typography component="h2" sx={sectionTitleSx}>
     {children}
   </Typography>
 )
@@ -77,7 +77,7 @@ const InfoTooltip = ({ text }) => (
  * Pass infoText to show an (i) button explaining how the metric is calculated.
  */
 const StatCard = ({ label, value, sublabel, color = colors.primary, infoText }) => (
-  <Paper sx={{ p: 2.5, flex: 1, minWidth: 120 }}>
+  <Paper sx={{ p: 2.5, flex: 1, minWidth: 120, minHeight: 132 }}>
     {/* Label row - info icon appears only when infoText is supplied */}
     <Box sx={{ display: "flex", alignItems: "center" }}>
       <Typography variant="caption" color="text.secondary">{label}</Typography>
@@ -212,7 +212,7 @@ const SignalCard = ({ title, value, description, tone = "neutral", infoText }) =
     colors.primary
 
   return (
-    <Paper sx={{ p: 2.5, flex: 1, minWidth: 160 }}>
+    <Paper sx={{ p: 2.5, flex: 1, minWidth: 160, minHeight: 148 }}>
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <Typography variant="caption" color="text.secondary">{title}</Typography>
         {infoText && <InfoTooltip text={infoText} />}
@@ -257,7 +257,8 @@ const HabitHealthRow = ({ habits, selectedId, onSelect, now }) => (
           key={habit._id}
           onClick={() => onSelect(habit._id)}
           sx={{
-            p: 2, width: 160, flexShrink: 0, cursor: "pointer",
+            p: 2, width: 160, height: 158, flexShrink: 0, cursor: "pointer",
+            display: "flex", flexDirection: "column",
             borderColor: isSelected ? colors.primary : colors.border,
             borderWidth: isSelected ? 2 : 1,
             bgcolor: isSelected ? colors.softBlue : "background.paper",
@@ -266,7 +267,7 @@ const HabitHealthRow = ({ habits, selectedId, onSelect, now }) => (
           }}
         >
           {/* Name + status icon */}
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1 }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1, minHeight: 34 }}>
             <Typography variant="caption" sx={{
               fontWeight: 700, lineHeight: 1.3,
               overflow: "hidden", display: "-webkit-box",
@@ -288,7 +289,7 @@ const HabitHealthRow = ({ habits, selectedId, onSelect, now }) => (
             {habit.habitType === "break" ? "clean streak" : "streak"}
           </Typography>
           {/* All-time completion bar */}
-          <Box sx={{ mt: 1.5, bgcolor: "#e2e8f0", borderRadius: 2, overflow: "hidden", height: 5 }}>
+          <Box sx={{ mt: "auto", bgcolor: colors.progressTrack, borderRadius: 2, overflow: "hidden", height: 6, flexShrink: 0 }}>
             <Box sx={{
               height: "100%", width: `${rate}%`,
               bgcolor: barColor, borderRadius: 2, transition: "width 0.6s ease",
@@ -670,6 +671,20 @@ const PaywallBanner = () => (
   </Box>
 )
 
+const ProgressHeader = () => (
+  <PageHeader
+    title="Progress"
+    titleAdornment={(
+      <Chip
+        icon={<AutoAwesomeIcon sx={{ fontSize: 14 }} />}
+        label="Premium"
+        size="small"
+        sx={{ bgcolor: colors.softBlue, color: colors.primary }}
+      />
+    )}
+  />
+)
+
 
 // ---------------------------------------------------------------------------
 // Main Progress page
@@ -812,12 +827,24 @@ const Progress = () => {
   }, [selectedHabit, now])
 
   // All hooks have run by this point — safe to bail out of rendering now.
-  if (!isPremium) return <PaywallBanner />
-  if (!habits)    return <Typography p={4}>Loading...</Typography>
+  if (!isPremium) return <Box><ProgressHeader /><PaywallBanner /></Box>
+  if (!habits) return (
+    <Box>
+      <ProgressHeader />
+      <Box sx={{ display: "grid", placeItems: "center", minHeight: 240 }}>
+        <CircularProgress size={28} />
+      </Box>
+    </Box>
+  )
   if (!habits.length) return (
-    <Typography p={4} color="text.secondary">
-      No habits yet. Add some from Today to start tracking.
-    </Typography>
+    <Box>
+      <ProgressHeader />
+      <Paper sx={{ p: 4, textAlign: "center" }}>
+        <Typography color="text.secondary">
+          No habits yet. Add some from Today to start tracking.
+        </Typography>
+      </Paper>
+    </Box>
   )
 
   const habit           = selectedHabit
@@ -838,18 +865,7 @@ const Progress = () => {
 
   return (
     <Box>
-      <PageHeader
-        title="Progress"
-        titleAdornment={(
-          <Chip
-            icon={<AutoAwesomeIcon sx={{ fontSize: 14 }} />}
-            label="Premium"
-            size="small"
-            sx={{ bgcolor: colors.softBlue, color: colors.primary }}
-          />
-        )}
-        sx={{ mb: 3 }}
-      />
+      <ProgressHeader />
 
       {/* 1. Habit Pulse — overall score for today */}
       <HeroHabitScore score={readinessScore} habits={habits} now={now} />
@@ -906,7 +922,7 @@ const Progress = () => {
 
       {/* 4. Habit selector — click a card to drill into that habit's analytics */}
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5 }}>Habit Analytics</Typography>
+        <SectionTitle>Habit Analytics</SectionTitle>
         <HabitHealthRow
           habits={habits}
           selectedId={selectedId || habit._id}

@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material'
+import { sectionTitleSx } from '../../styles/recipes'
 
 // Groups a labelled page section with consistent header and content spacing.
 const PageSection = ({
@@ -9,7 +10,6 @@ const PageSection = ({
   description,
   sx = {},
   title,
-  titleVariant = 'overline',
 }) => (
   <Box component={component} sx={{ mb: 4, ...sx }}>
     {(title || description || actions) && (
@@ -19,12 +19,12 @@ const PageSection = ({
           alignItems: 'baseline',
           justifyContent: 'space-between',
           gap: 2,
-          mb: 1.5,
+          mb: 0,
         }}
       >
         <Box sx={{ minWidth: 0 }}>
           {title && (
-            <Typography component="h2" variant={titleVariant} sx={{ color: 'text.secondary' }}>
+            <Typography component="h2" sx={sectionTitleSx}>
               {title}
             </Typography>
           )}
