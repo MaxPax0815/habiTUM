@@ -10,22 +10,27 @@ export const useResetPassword = () => {
         setError(null)
         setSuccess(false)
 
-        const response = await fetch(`/api/user/reset-password/${token}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password }),
-        })
-        const json = await response.json()
+        try {
+            const response = await fetch(`/api/user/reset-password/${encodeURIComponent(token)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password }),
+            })
+            const json = await response.json().catch(() => ({}))
 
-        setIsLoading(false)
+            if (!response.ok) {
+                setError(json.error || 'Could not reset the password.')
+                return false
+            }
 
-        if (!response.ok) {
-            setError(json.error)
+            setSuccess(true)
+            return true
+        } catch {
+            setError('Could not reach the server. Please try again.')
             return false
+        } finally {
+            setIsLoading(false)
         }
-
-        setSuccess(true)
-        return true
     }
 
     return { resetPassword, isLoading, error, success }

@@ -6,7 +6,7 @@ import {
     Typography,
 } from '@mui/material'
 import { useState } from 'react'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink, useNavigate } from 'react-router-dom'
 
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined'
@@ -25,12 +25,17 @@ const FieldLabel = ({ children }) => (
 )
 
 const ForgotPassword = () => {
+    const navigate = useNavigate()
     const [email, setEmail] = useState('')
-    const { forgotPassword, isLoading, error, success } = useForgotPassword()
+    const { forgotPassword, isLoading, error } = useForgotPassword()
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        await forgotPassword(email)
+        const resetToken = await forgotPassword(email)
+
+        if (resetToken) {
+            navigate(`/reset-password/${encodeURIComponent(resetToken)}`, { replace: true })
+        }
     }
 
     return (
@@ -64,15 +69,60 @@ const ForgotPassword = () => {
                         Forgot Password
                     </Typography>
                     <Typography variant="body1" sx={{ color: colors.textSecondary, lineHeight: 1.6 }}>
-                        Enter your email and we'll send you a reset link.
+                        Enter your email to continue to the password reset form.
                     </Typography>
                 </Box>
 
-                {success ? (
-                    <Box sx={{ textAlign: 'center' }}>
-                        <Typography variant="body2" sx={{ color: colors.green, fontSize: 14, mb: 3 }}>
-                            If that email is registered, a reset link has been sent. Check your inbox.
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+                >
+                    <Box>
+                        <FieldLabel>Email address</FieldLabel>
+                        <TextField
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            fullWidth
+                            size="small"
+                            required
+                            autoComplete="email"
+                            placeholder="tom.mueller@tum.de"
+                            slotProps={{
+                                input: {
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <EmailOutlinedIcon sx={{ fontSize: 18, color: colors.muted }} />
+                                        </InputAdornment>
+                                    ),
+                                },
+                            }}
+                        />
+                    </Box>
+
+                    {error && (
+                        <Typography variant="body2" sx={{ color: 'error.main', fontSize: 13 }}>
+                            {error}
                         </Typography>
+                    )}
+
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        size="large"
+                        fullWidth
+                        disabled={isLoading}
+                        endIcon={<ArrowForwardIcon />}
+                        sx={{ mt: 0.5 }}
+                    >
+                        {isLoading ? 'Checking…' : 'Continue'}
+                    </Button>
+
+                    <Typography
+                        variant="body2"
+                        sx={{ textAlign: 'center', mt: 0.5, color: colors.textSecondary, fontSize: 14 }}
+                    >
                         <Typography
                             component={RouterLink}
                             to="/login"
@@ -87,75 +137,8 @@ const ForgotPassword = () => {
                         >
                             ← Back to login
                         </Typography>
-                    </Box>
-                ) : (
-                    <Box
-                        component="form"
-                        onSubmit={handleSubmit}
-                        sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-                    >
-                        <Box>
-                            <FieldLabel>Email address</FieldLabel>
-                            <TextField
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                fullWidth
-                                size="small"
-                                required
-                                autoComplete="email"
-                                placeholder="tom.mueller@tum.de"
-                                slotProps={{
-                                    input: {
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <EmailOutlinedIcon sx={{ fontSize: 18, color: colors.muted }} />
-                                            </InputAdornment>
-                                        ),
-                                    },
-                                }}
-                            />
-                        </Box>
-
-                        {error && (
-                            <Typography variant="body2" sx={{ color: 'error.main', fontSize: 13 }}>
-                                {error}
-                            </Typography>
-                        )}
-
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            size="large"
-                            fullWidth
-                            disabled={isLoading}
-                            endIcon={<ArrowForwardIcon />}
-                            sx={{ mt: 0.5 }}
-                        >
-                            {isLoading ? 'Sending…' : 'Send reset link'}
-                        </Button>
-
-                        <Typography
-                            variant="body2"
-                            sx={{ textAlign: 'center', mt: 0.5, color: colors.textSecondary, fontSize: 14 }}
-                        >
-                            <Typography
-                                component={RouterLink}
-                                to="/login"
-                                variant="body2"
-                                sx={{
-                                    color: colors.primary,
-                                    fontWeight: 700,
-                                    fontSize: 14,
-                                    textDecoration: 'none',
-                                    '&:hover': { textDecoration: 'underline' },
-                                }}
-                            >
-                                ← Back to login
-                            </Typography>
-                        </Typography>
-                    </Box>
-                )}
+                    </Typography>
+                </Box>
             </AppCard>
         </Box>
     )

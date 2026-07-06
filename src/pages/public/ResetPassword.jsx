@@ -39,12 +39,21 @@ const ResetPassword = () => {
         e.preventDefault()
         setClientError(null)
 
+        if (!token) {
+            setClientError('The reset link is invalid.')
+            return
+        }
+
         if (password !== confirmPassword) {
             setClientError('Passwords do not match.')
             return
         }
 
-        await resetPassword(token, password)
+        const didReset = await resetPassword(token, password)
+        if (didReset) {
+            setPassword('')
+            setConfirmPassword('')
+        }
     }
 
     const passwordField = (label, value, setter, autocomplete) => (
@@ -149,6 +158,9 @@ const ResetPassword = () => {
                     >
                         {passwordField('New password', password, setPassword, 'new-password')}
                         {passwordField('Confirm new password', confirmPassword, setConfirmPassword, 'new-password')}
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                            Use at least 4 characters, including a lowercase letter and a number.
+                        </Typography>
 
                         {(clientError || error) && (
                             <Box>
