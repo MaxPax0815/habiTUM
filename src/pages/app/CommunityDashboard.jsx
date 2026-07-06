@@ -8,6 +8,7 @@ import BackButton from '../../components/BackButton'
 import PageContainer from '../../components/layout/PageContainer'
 import PageHeader from '../../components/layout/PageHeader'
 import PageSection from '../../components/layout/PageSection'
+import ActivityFeed from '../../feed/ActivityFeed'
 
 const avatarColors = [colors.primary, '#A21CAF', '#B91C1C', colors.secondary, colors.orange]
 const colorFor = (name) => avatarColors[(name?.charCodeAt(0) || 0) % avatarColors.length]
@@ -187,6 +188,9 @@ const CommunityDashboard = () => {
           </Paper>
         )}
       </PageSection>
+
+      {/* live activity feed — fully self-contained (data, spacing, states); keyed so switching communities resets the stream */}
+      {isMember && <ActivityFeed key={id} communityId={id} />}
     </Box>
   )
 }
