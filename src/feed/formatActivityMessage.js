@@ -15,7 +15,7 @@ export const formatActivityMessage = (activity) => {
     return [
       { text: '🔥 ' },
       { text: actorName, bold: true },
-      { text: ` hit a ${streak}-${unit} streak on ` },
+      { text: ` hit a ${streak} ${unit} streak on ` },
       { text: habitTitle, italic: true },
     ]
   }
@@ -26,9 +26,9 @@ export const formatActivityMessage = (activity) => {
     { text: habitTitle, italic: true },
   ]
 
-  // "1 day in a row" reads like a bug — only show the suffix from streak 2 up.
+  // "for 1 day in a row" reads like a bug, so the suffix starts at streak 2.
   if (streak > 1) {
-    segments.push({ text: ` — ${streak} ${unit}s in a row` })
+    segments.push({ text: ` for ${streak} ${unit}s in a row` })
   }
 
   return segments

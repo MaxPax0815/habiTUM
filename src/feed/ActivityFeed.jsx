@@ -129,7 +129,7 @@ const ActivityFeed = ({ communityId, enabled = true }) => {
             </span>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
               No activity yet. When someone checks into one of this community&apos;s
-              challenges, it shows up here — live.
+              challenges, it shows up here live.
             </Typography>
           </Box>
         ) : (
