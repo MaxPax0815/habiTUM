@@ -27,14 +27,21 @@ const FieldLabel = ({ children }) => (
 const ForgotPassword = () => {
     const navigate = useNavigate()
     const [email, setEmail] = useState('')
+    const [submitted, setSubmitted] = useState(false)
     const { forgotPassword, isLoading, error } = useForgotPassword()
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        const resetToken = await forgotPassword(email)
+        setSubmitted(false)
+        const result = await forgotPassword(email)
 
-        if (resetToken) {
-            navigate(`/reset-password/${encodeURIComponent(resetToken)}`, { replace: true })
+        // Anti-enumeration: only an existing account yields a token to
+        // continue with; every other accepted request shows the same neutral
+        // confirmation, so the form never reveals whether an email is registered.
+        if (result?.resetToken) {
+            navigate(`/reset-password/${encodeURIComponent(result.resetToken)}`, { replace: true })
+        } else if (result) {
+            setSubmitted(true)
         }
     }
 
@@ -104,6 +111,12 @@ const ForgotPassword = () => {
                     {error && (
                         <Typography variant="body2" sx={{ color: 'error.main', fontSize: 13 }}>
                             {error}
+                        </Typography>
+                    )}
+
+                    {submitted && !error && (
+                        <Typography variant="body2" sx={{ color: colors.textSecondary, fontSize: 13 }}>
+                            If an account exists for this email, the password reset has been prepared.
                         </Typography>
                     )}
 
