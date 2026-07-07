@@ -105,11 +105,11 @@ const ActivityItem = ({ activity }) => {
 // CommunityDashboard, where it renders as a full-width section below the
 // challenges. Keep it that way: the dashboard layout is under active rework
 // and a one-line integration keeps merge conflicts trivial.
-const ActivityFeed = ({ communityId, enabled = true }) => {
-  const { activities, hasMore, loading, error, status, loadMore } = useCommunityFeed(communityId, enabled)
+const ActivityFeed = ({ communityId, challengeId = null, title = 'Live activity', enabled = true }) => {
+  const { activities, hasMore, loading, error, status, loadMore } = useCommunityFeed(communityId, { challengeId, enabled })
 
   return (
-    <PageSection title="Live activity" actions={statusChip(status)} sx={{ mt: 4, mb: 0 }}>
+    <PageSection title={title} actions={statusChip(status)} sx={{ mt: 4, mb: 0 }}>
       {feedAnimations}
       {/* aria-live: screen readers announce items arriving over the stream */}
       <Paper
@@ -133,8 +133,9 @@ const ActivityFeed = ({ communityId, enabled = true }) => {
               bolt
             </span>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              No activity yet. When someone checks into one of this community&apos;s
-              challenges, it shows up here live.
+              {challengeId
+                ? 'No activity yet. When someone checks into this challenge, it shows up here live.'
+                : 'No activity yet. When someone checks into one of this community’s challenges, it shows up here live.'}
             </Typography>
           </Box>
         ) : (

@@ -9,6 +9,7 @@ import PageHeader from "../components/layout/PageHeader";
 import { sectionTitleSx } from "../styles/recipes";
 import HabitDetails from "../components/HabitDetails";
 import BackButton from "../components/BackButton";
+import ActivityFeed from "../feed/ActivityFeed";
 
 // ---------------------------------------------------------------------------
 // ChallengePage.jsx
@@ -362,6 +363,11 @@ const ChallengePage = () => {
       </Box>
 
       <Leaderboard challengeId={challengeId} initialData={data} />
+
+      {/* challenge-scoped live feed; self-contained one-liner (see ActivityFeed) */}
+      {isCommunityMember && challenge.community?._id && (
+        <ActivityFeed key={challengeId} communityId={challenge.community._id} challengeId={challengeId} title="Challenge activity" />
+      )}
     </Box>
   );
 };

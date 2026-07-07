@@ -16,7 +16,10 @@ import { useAuthContext } from '../auth/useAuthContext'
 const MAX_BACKOFF_MS = 15000
 const INITIAL_BACKOFF_MS = 1000
 
-export const useCommunityFeed = (communityId, enabled = true) => {
+// Options: { challengeId } narrows the feed to one challenge (ChallengePage
+// mini-feed). The REST fetch filters server-side; live events arrive for the
+// whole community (one shared stream) and are filtered client-side.
+export const useCommunityFeed = (communityId, { challengeId = null, enabled = true } = {}) => {
   const { user } = useAuthContext()
   const token = user?.token
 
@@ -51,7 +54,10 @@ export const useCommunityFeed = (communityId, enabled = true) => {
     }
 
     const prependLive = (activity) => {
+      // Remember every seen id (drives reconnect catch-up) but only display
+      // activities matching this feed's scope.
       rememberNewest(activity._id)
+      if (challengeId && activity.challenge !== challengeId) return
       setActivities((prev) => (
         prev.some((existing) => existing._id === activity._id)
           ? prev
@@ -101,7 +107,8 @@ export const useCommunityFeed = (communityId, enabled = true) => {
 
     const loadInitial = async () => {
       try {
-        const res = await fetch(`/api/communities/${communityId}/feed`, { headers: authHeader })
+        const params = challengeId ? `?challenge=${challengeId}` : ''
+        const res = await fetch(`/api/communities/${communityId}/feed${params}`, { headers: authHeader })
         const json = await res.json()
         if (!res.ok) throw new Error(json.error || 'Could not load the activity feed.')
         setActivities(json.activities)
@@ -122,14 +129,16 @@ export const useCommunityFeed = (communityId, enabled = true) => {
       clearTimeout(retryTimerRef.current)
       sourceRef.current?.close()
     }
-  }, [communityId, token, enabled])
+  }, [communityId, challengeId, token, enabled])
 
   const loadMore = useCallback(async () => {
     const oldest = activities[activities.length - 1]
     if (!oldest) return
     try {
+      const params = new URLSearchParams({ before: oldest._id })
+      if (challengeId) params.set('challenge', challengeId)
       const res = await fetch(
-        `/api/communities/${communityId}/feed?before=${oldest._id}`,
+        `/api/communities/${communityId}/feed?${params}`,
         { headers: { Authorization: `Bearer ${token}` } }
       )
       const json = await res.json()
@@ -142,7 +151,7 @@ export const useCommunityFeed = (communityId, enabled = true) => {
     } catch (err) {
       setError(err.message)
     }
-  }, [activities, communityId, token])
+  }, [activities, communityId, challengeId, token])
 
   return { activities, hasMore, loading, error, status, loadMore }
 }

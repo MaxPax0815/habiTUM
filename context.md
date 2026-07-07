@@ -121,12 +121,12 @@ Frontend/src/
 │   ├── UpgradeButton.jsx             — starts Stripe Checkout via useBilling().startCheckout, redirects to session.url
 │   └── DowngradeButton.jsx           — currently an empty stub file (1 line) — downgrade UI actually lives inline in Profile.jsx (`handleDowngradeClick` + a confirmation Dialog). Don't assume this file is used.
 ├── feed/                            — live community activity feed (SSE)
-│   ├── useCommunityFeed.js           — initial REST fetch + ticket exchange + EventSource; manual reconnect with fresh ticket + exponential backoff (the single-use ticket makes the browser's built-in retry useless); dedupes by _id; holds per-community state, so consumers remount it via key={communityId} instead of expecting a reset
+│   ├── useCommunityFeed.js           — initial REST fetch + ticket exchange + EventSource; manual reconnect with fresh ticket + exponential backoff (the single-use ticket makes the browser's built-in retry useless); dedupes by _id; optional { challengeId } narrows to one challenge (REST filters server-side, live events client-side); holds per-community state, so consumers remount it via key instead of expecting a reset
 │   ├── formatActivityMessage.js      — pure meta→segments formatter ("Anna just checked into *X* — 5 days in a row"; no suffix at streak ≤ 1; milestone variant); unit from meta.frequency (days/weeks)
-│   └── ActivityFeed.jsx              — feed panel: Live/Reconnecting status chip, initials avatars, flash highlight on live arrivals, Load more (cursor pagination)
+│   └── ActivityFeed.jsx              — feed panel: Live/Reconnecting status chip, initials avatars, flash highlight on live arrivals, Load more (cursor pagination); props communityId + optional challengeId/title; fully self-contained so pages integrate it with ONE JSX line (CommunityDashboard full feed, ChallengePage challenge-scoped mini-feed)
 ├── challenges/
 │   ├── Challenges.jsx                 — exports default `ChallengeCard` (compact, grid) and named `ExtendedChallengeCard` (full-width, used on ChallengePage)
-│   ├── ChallengePage.jsx               — route target for /challenges/:challengeId; fetches the leaderboard endpoint (which also returns the challenge itself) and renders ExtendedChallengeCard + Leaderboard
+│   ├── ChallengePage.jsx               — route target for /challenges/:challengeId; fetches the leaderboard endpoint (which also returns the challenge itself) and renders ExtendedChallengeCard + Leaderboard + a challenge-scoped ActivityFeed one-liner (members only)
 │   ├── ChallengeForm.jsx                — create-challenge form (POST /api/challenges); not yet linked from any page's UI — no "New Challenge" button exists in Communities/CommunityDashboard yet, so this form is currently dead code reachable only by direct usage
 │   └── Leaderboard.jsx                  — ranked participant table; can take `initialData` (avoids a second fetch when ChallengePage already has it) or fetch standalone by `challengeId`
 └── pages/
