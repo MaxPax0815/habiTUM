@@ -99,20 +99,25 @@ const ActivityItem = ({ activity }) => {
   )
 }
 
-// The community's live activity feed — challenge-habit checkins only, pushed
-// over SSE. Rendered as a sticky right rail on desktop (see CommunityDashboard)
-// and stacked below the challenges on mobile.
+// The community's live activity feed: challenge-habit checkins only, pushed
+// over SSE. Fully self-contained (data fetching, spacing, loading/error/empty
+// states) so consumers integrate it with a single JSX line — see
+// CommunityDashboard, where it renders as a full-width section below the
+// challenges. Keep it that way: the dashboard layout is under active rework
+// and a one-line integration keeps merge conflicts trivial.
 const ActivityFeed = ({ communityId, enabled = true }) => {
   const { activities, hasMore, loading, error, status, loadMore } = useCommunityFeed(communityId, enabled)
 
   return (
-    <PageSection title="Live activity" actions={statusChip(status)} sx={{ mb: 0 }}>
+    <PageSection title="Live activity" actions={statusChip(status)} sx={{ mt: 4, mb: 0 }}>
       {feedAnimations}
+      {/* aria-live: screen readers announce items arriving over the stream */}
       <Paper
         variant="outlined"
+        aria-live="polite"
         sx={{
           p: 1,
-          maxHeight: { lg: 'calc(100vh - 180px)' },
+          maxHeight: 480,
           overflowY: 'auto',
         }}
       >
