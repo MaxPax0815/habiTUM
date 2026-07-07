@@ -10,6 +10,7 @@ import { sectionTitleSx } from "../styles/recipes";
 import HabitDetails from "../components/HabitDetails";
 import BackButton from "../components/BackButton";
 import ActivityFeed from "../feed/ActivityFeed";
+import FeedRailLayout from "../feed/FeedRailLayout";
 
 // ---------------------------------------------------------------------------
 // ChallengePage.jsx
@@ -277,6 +278,13 @@ const ChallengePage = () => {
   }
 
   return (
+    // FeedRailLayout: challenge-scoped feed as sticky right rail on desktop,
+    // stacked below on mobile; layout logic lives in the feed module.
+    <FeedRailLayout
+      feed={isCommunityMember && challenge.community?._id && (
+        <ActivityFeed key={challengeId} communityId={challenge.community._id} challengeId={challengeId} title="Challenge activity" />
+      )}
+    >
     <Box
       sx={{
         display: "flex",
@@ -363,12 +371,8 @@ const ChallengePage = () => {
       </Box>
 
       <Leaderboard challengeId={challengeId} initialData={data} />
-
-      {/* challenge-scoped live feed; self-contained one-liner (see ActivityFeed) */}
-      {isCommunityMember && challenge.community?._id && (
-        <ActivityFeed key={challengeId} communityId={challenge.community._id} challengeId={challengeId} title="Challenge activity" />
-      )}
     </Box>
+    </FeedRailLayout>
   );
 };
 

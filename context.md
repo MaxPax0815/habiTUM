@@ -122,7 +122,8 @@ Frontend/src/
 │   └── DowngradeButton.jsx           — currently an empty stub file (1 line) — downgrade UI actually lives inline in Profile.jsx (`handleDowngradeClick` + a confirmation Dialog). Don't assume this file is used.
 ├── feed/                            — live community activity feed (SSE)
 │   ├── useCommunityFeed.js           — initial REST fetch + ticket exchange + EventSource; manual reconnect with fresh ticket + exponential backoff (the single-use ticket makes the browser's built-in retry useless); dedupes by _id; optional { challengeId } narrows to one challenge (REST filters server-side, live events client-side); holds per-community state, so consumers remount it via key instead of expecting a reset
-│   ├── formatActivityMessage.js      — pure meta→segments formatter ("Anna just checked into *X* — 5 days in a row"; no suffix at streak ≤ 1; milestone variant); unit from meta.frequency (days/weeks)
+│   ├── formatActivityMessage.js      — pure meta→segments formatter ("Anna just checked into *X* — 5 days in a row"; no suffix at streak ≤ 1; streak %7 === 0 renders the celebratory 🔥 variant of the SAME checkin message — separate milestone items are legacy-only); unit from meta.frequency (days/weeks)
+│   ├── FeedRailLayout.jsx            — sticky right-rail layout (stacked below on mobile); pages wrap their existing JSX and pass the feed as a prop, keeping the merge-conflict surface minimal
 │   └── ActivityFeed.jsx              — feed panel: Live/Reconnecting status chip, initials avatars, flash highlight on live arrivals, Load more (cursor pagination); props communityId + optional challengeId/title; fully self-contained so pages integrate it with ONE JSX line (CommunityDashboard full feed, ChallengePage challenge-scoped mini-feed)
 ├── challenges/
 │   ├── Challenges.jsx                 — exports default `ChallengeCard` (compact, grid) and named `ExtendedChallengeCard` (full-width, used on ChallengePage)
@@ -140,7 +141,7 @@ Frontend/src/
         ├── Home.jsx                      — "/today": greeting header, 3 stat cards, build/break habit lists, "+ Add habit" → AppDialog(HabitForm)
         ├── Communities.jsx                — "/communities": search + "your communities" + gated "create" CTA + "discover" list with Join buttons
         ├── NewCommunity.jsx                — "/communities/new": name/description/visibility form
-        ├── CommunityDashboard.jsx          — "/communities/:id": header (join/leave/delete depending on role), About, challenges grid, then the live ActivityFeed as a full-width section below (members only; the feed is one self-contained line in the JSX on purpose — keep it that way to avoid merge conflicts with layout work)
+        ├── CommunityDashboard.jsx          — "/communities/:id": header (join/leave/delete depending on role), About, challenges grid, with the live ActivityFeed as a sticky right rail via FeedRailLayout (members only; the page only wraps its JSX and passes the feed prop — keep it that way to avoid merge conflicts with layout work)
         ├── ManagerDashboard.jsx             — "/manager": placeholder cards ("Coming soon") — not yet a real feature
         ├── Profile.jsx                      — "/profile": account status, Standard/Premium PlanCards, BillingInformationCard, downgrade confirmation dialog
         └── Progress/

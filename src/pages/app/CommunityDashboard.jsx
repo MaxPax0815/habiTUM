@@ -9,6 +9,7 @@ import PageContainer from '../../components/layout/PageContainer'
 import PageHeader from '../../components/layout/PageHeader'
 import PageSection from '../../components/layout/PageSection'
 import ActivityFeed from '../../feed/ActivityFeed'
+import FeedRailLayout from '../../feed/FeedRailLayout'
 
 const avatarColors = [colors.primary, '#A21CAF', '#B91C1C', colors.secondary, colors.orange]
 const colorFor = (name) => avatarColors[(name?.charCodeAt(0) || 0) % avatarColors.length]
@@ -107,7 +108,9 @@ const CommunityDashboard = () => {
   const isCreator = community.myRole === 'creator'
 
   return (
-
+    // FeedRailLayout: feed as sticky right rail on desktop, stacked below on
+    // mobile; all layout logic lives in the feed module, not in this page.
+    <FeedRailLayout feed={isMember && <ActivityFeed key={id} communityId={id} />}>
     <Box sx={{ textAlign: 'left' }}>
       <BackButton text="Back to Communities" to="/communities" sx={{ mb: 0 }} />
       <PageHeader
@@ -189,9 +192,8 @@ const CommunityDashboard = () => {
         )}
       </PageSection>
 
-      {/* live activity feed — fully self-contained (data, spacing, states); keyed so switching communities resets the stream */}
-      {isMember && <ActivityFeed key={id} communityId={id} />}
     </Box>
+    </FeedRailLayout>
   )
 }
 

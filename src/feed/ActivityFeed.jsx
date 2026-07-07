@@ -109,7 +109,10 @@ const ActivityFeed = ({ communityId, challengeId = null, title = 'Live activity'
   const { activities, hasMore, loading, error, status, loadMore } = useCommunityFeed(communityId, { challengeId, enabled })
 
   return (
-    <PageSection title={title} actions={statusChip(status)} sx={{ mt: 4, mb: 0 }}>
+    // mt: spacing when stacked below content on mobile; in the desktop right
+    // rail (FeedRailLayout) the section is top-aligned and gets a tall,
+    // viewport-bound scroll area instead.
+    <PageSection title={title} actions={statusChip(status)} sx={{ mt: { xs: 4, lg: 0 }, mb: 0 }}>
       {feedAnimations}
       {/* aria-live: screen readers announce items arriving over the stream */}
       <Paper
@@ -117,7 +120,7 @@ const ActivityFeed = ({ communityId, challengeId = null, title = 'Live activity'
         aria-live="polite"
         sx={{
           p: 1,
-          maxHeight: 480,
+          maxHeight: { xs: 480, lg: 'calc(100vh - 160px)' },
           overflowY: 'auto',
         }}
       >
