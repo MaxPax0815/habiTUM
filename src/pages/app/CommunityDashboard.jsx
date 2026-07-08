@@ -12,6 +12,51 @@ import PageSection from '../../components/layout/PageSection'
 const avatarColors = [colors.primary, '#A21CAF', '#B91C1C', colors.secondary, colors.orange]
 const colorFor = (name) => avatarColors[(name?.charCodeAt(0) || 0) % avatarColors.length]
 
+const CommunityLogo = ({ community }) => (
+  <Box
+    sx={{
+      width: 76,
+      height: 76,
+      borderRadius: 3,
+      flexShrink: 0,
+      display: 'grid',
+      placeItems: 'center',
+      border: `1px solid ${colors.border}`,
+      bgcolor: colors.surface,
+      overflow: 'hidden',
+    }}
+  >
+    {community.logoUrl ? (
+      <Box
+        component="img"
+        src={community.logoUrl}
+        alt={`${community.name} logo`}
+        sx={{
+          width: '74%',
+          height: '74%',
+          objectFit: 'contain',
+          display: 'block',
+        }}
+      />
+    ) : (
+      <Box
+        sx={{
+          width: '100%',
+          height: '100%',
+          display: 'grid',
+          placeItems: 'center',
+          bgcolor: colorFor(community.name),
+          color: '#fff',
+          fontWeight: 800,
+          fontSize: 30,
+        }}
+      >
+        {(community.name?.[0] || '?').toUpperCase()}
+      </Box>
+    )}
+  </Box>
+)
+
 const CommunityDashboard = () => {
   const { id } = useParams()
   const { user } = useAuthContext()
@@ -109,43 +154,36 @@ const CommunityDashboard = () => {
 
     <Box sx={{ textAlign: 'left' }}>
       <BackButton text="Back to Communities" to="/communities" sx={{ mb: 0 }} />
-      <PageHeader
-        title={community.name}
-        description={`${community.memberCount} members`}
-        titleAdornment={(
-          <span className="material-symbols-outlined" style={{ color: colors.muted, fontSize: 20 }}>
-            {community.isPrivate ? 'lock' : 'public'}
-          </span>
-        )}
-        leading={(
-          <Box
-            sx={{
-              width: 64, height: 64, borderRadius: 3, flexShrink: 0,
-              display: 'grid', placeItems: 'center',
-              bgcolor: colorFor(community.name), color: '#fff', fontWeight: 800, fontSize: 28,
-            }}
-          >
-            {(community.name?.[0] || '?').toUpperCase()}
-          </Box>
-        )}
-        actions={isCreator ? (
-          <Button
-            variant="outlined" color="error" onClick={handleDelete}
-            startIcon={<span className="material-symbols-outlined">delete</span>}
-          >
-            Delete
-          </Button>
-        ) : isMember ? (
-          <Button
-            variant="outlined" onClick={handleLeave}
-            startIcon={<span className="material-symbols-outlined">logout</span>}
-          >
-            Leave
-          </Button>
-        ) : (
-          <Button variant="contained" onClick={handleJoin}>Join</Button>
-        )}
-      />
+      <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 }, mb: 4 }}>
+        <PageHeader
+          title={community.name}
+          description={`${community.memberCount} members`}
+          sx={{ mb: 0 }}
+          titleAdornment={(
+            <span className="material-symbols-outlined" style={{ color: colors.muted, fontSize: 20 }}>
+              {community.isPrivate ? 'lock' : 'public'}
+            </span>
+          )}
+          leading={<CommunityLogo community={community} />}
+          actions={isCreator ? (
+            <Button
+              variant="outlined" color="error" onClick={handleDelete}
+              startIcon={<span className="material-symbols-outlined">delete</span>}
+            >
+              Delete
+            </Button>
+          ) : isMember ? (
+            <Button
+              variant="outlined" onClick={handleLeave}
+              startIcon={<span className="material-symbols-outlined">logout</span>}
+            >
+              Leave
+            </Button>
+          ) : (
+            <Button variant="contained" onClick={handleJoin}>Join</Button>
+          )}
+        />
+      </Paper>
 
       {community.description && (
         <PageSection title="About" sx={{ mb: 3 }}>

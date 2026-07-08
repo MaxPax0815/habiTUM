@@ -12,16 +12,39 @@ import PageSection from '../../components/layout/PageSection'
 const avatarColors = [colors.primary, '#A21CAF', '#B91C1C', colors.secondary, colors.orange]
 const colorFor = (name) => avatarColors[(name?.charCodeAt(0) || 0) % avatarColors.length]
 
-// Small reusable circle avatar showing the first letter of the community name.
-const CommunityAvatar = ({ name, size = 44 }) => (
+// Small reusable logo slot showing the community logo or the first letter.
+const CommunityAvatar = ({ logoUrl, name, size = 44 }) => (
   <Box
     sx={{
       width: size, height: size, borderRadius: 2, flexShrink: 0,
       display: 'grid', placeItems: 'center',
-      bgcolor: colorFor(name), color: '#fff', fontWeight: 800,
+      border: `1px solid ${colors.border}`,
+      bgcolor: colors.surface,
+      overflow: 'hidden',
     }}
   >
-    {(name?.[0] || '?').toUpperCase()}
+    {logoUrl ? (
+      <Box
+        component="img"
+        src={logoUrl}
+        alt={`${name} logo`}
+        sx={{ width: '72%', height: '72%', objectFit: 'contain', display: 'block' }}
+      />
+    ) : (
+      <Box
+        sx={{
+          width: '100%',
+          height: '100%',
+          display: 'grid',
+          placeItems: 'center',
+          bgcolor: colorFor(name),
+          color: '#fff',
+          fontWeight: 800,
+        }}
+      >
+        {(name?.[0] || '?').toUpperCase()}
+      </Box>
+    )}
   </Box>
 )
 
@@ -84,7 +107,7 @@ const Communities = () => {
                   cursor: 'pointer', '&:hover': { borderColor: colors.primary, bgcolor: colors.softBlue },
                 }}
               >
-                <CommunityAvatar name={c.name} />
+                <CommunityAvatar logoUrl={c.logoUrl} name={c.name} />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography sx={{ fontWeight: 700 }}>{c.name}</Typography>
                   <Typography variant="body2" color="text.secondary" noWrap>{c.description}</Typography>
@@ -165,7 +188,7 @@ const Communities = () => {
               borderTop: i === 0 ? 'none' : `1px solid ${colors.border}`,
             }}
           >
-            <CommunityAvatar name={c.name} />
+            <CommunityAvatar logoUrl={c.logoUrl} name={c.name} />
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography sx={{ fontWeight: 700 }}>{c.name}</Typography>
               <Typography variant="body2" color="text.secondary" noWrap>{c.description}</Typography>
