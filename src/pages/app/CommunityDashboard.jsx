@@ -11,7 +11,9 @@ import {
 } from '@mui/material'
 import { useAuthContext } from '../../auth/useAuthContext'
 import ChallengeCard from '../../challenges/Challenges'
+import ChallengeForm from '../../challenges/ChallengeForm'
 import { colors } from '../../styles/tokens'
+import AppDialog from '../../components/AppDialog'
 import BackButton from '../../components/BackButton'
 import CommunityPostCard from '../../components/CommunityPostCard'
 import CommunityPostDialog from '../../components/CommunityPostDialog'
@@ -84,6 +86,7 @@ const CommunityDashboard = () => {
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false)
   const [postDialogKey, setPostDialogKey] = useState(0)
   const [postSubmitting, setPostSubmitting] = useState(false)
+  const [isChallengeDialogOpen, setIsChallengeDialogOpen] = useState(false) // creator-only "New Challenge" popup
   const [error, setError] = useState(null)
 
   const token = user.token
@@ -389,7 +392,19 @@ const CommunityDashboard = () => {
         )}
       </PageSection>
 
-      <PageSection title="Challenges" sx={{ mb: 0 }}>
+      <PageSection
+        title="Challenges"
+        sx={{ mb: 0 }}
+        actions={isCreator && (
+          <Button
+            variant="contained"
+            onClick={() => setIsChallengeDialogOpen(true)}
+            startIcon={<span className="material-symbols-outlined">add</span>}
+          >
+            New Challenge
+          </Button>
+        )}
+      >
         {challengesLoading ? (
           <Box sx={{ display: 'grid', placeItems: 'center', py: 6 }}>
             <CircularProgress size={28} />
@@ -430,6 +445,16 @@ const CommunityDashboard = () => {
           submitting={postSubmitting}
           challenges={challenges}
         />
+
+      {/* Creator-only: create a challenge for this community. Reuses the same
+          ChallengeForm as the manager dashboard; refetches the cards on success. */}
+      <AppDialog open={isChallengeDialogOpen} onClose={() => setIsChallengeDialogOpen(false)}>
+        <ChallengeForm
+          communityId={id}
+          onChallengeCreated={fetchCommunityChallenges}
+          onClose={() => setIsChallengeDialogOpen(false)}
+        />
+      </AppDialog>
     </Box>
     </FeedRailLayout>
   )
