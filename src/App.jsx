@@ -8,7 +8,6 @@ import PublicLayout from './layouts/PublicLayout.jsx'
 
 // App pages 
 import Communities from './pages/app/Communities'
-import NewCommunity from './pages/app/NewCommunity'
 import CommunityDashboard from './pages/app/CommunityDashboard'
 import CommunityUpdatesPage from './pages/app/CommunityUpdatesPage'
 import Home from './pages/app/Home'
@@ -55,7 +54,6 @@ function App() {
             <Route path="/challenges/:challengeId" element={<ChallengePage />} />
             <Route path="/progress" element={<Progress />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/communities/new" element={<NewCommunity />} />
             <Route path="/communities/:id/updates" element={<CommunityUpdatesPage />} />
             <Route path="/communities/:id" element={<CommunityDashboard />} /> 
 

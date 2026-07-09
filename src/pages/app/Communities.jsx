@@ -4,8 +4,10 @@ import { Box, Button, InputBase, Paper, Typography } from '@mui/material'
 import { useAuthContext } from '../../auth/useAuthContext'
 import { useCommunities } from '../../hooks/useCommunites'
 import { colors, radii } from '../../styles/tokens'
+import AppDialog from '../../components/AppDialog'
 import PageHeader from '../../components/layout/PageHeader'
 import PageSection from '../../components/layout/PageSection'
+import CommunityForm from './CommunityForm'
 
 // Deterministic avatar colour from the community name so each one looks distinct
 // without storing a colour (logo/brand colour are deferred to a later version).
@@ -53,6 +55,7 @@ const Communities = () => {
   const { communities, fetchCommunities, joinCommunity } = useCommunities()
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false) // create-community popup
 
   const canCreate = user.accountType === 'manager' || user.subscription === 'premium'
 
@@ -154,7 +157,7 @@ const Communities = () => {
         </Box>
 
         {canCreate ? (
-          <Button variant="outlined" onClick={() => navigate('/communities/new')}>
+          <Button variant="outlined" onClick={() => setIsCreateDialogOpen(true)}>
             + Create Community
           </Button>
         ) : (
@@ -209,6 +212,15 @@ const Communities = () => {
         ))}
         </Paper>
       </PageSection>
+
+      {/* Create-community popup — same dialog/blur behaviour as the habit and
+          challenge forms. On success, open the new community's page. */}
+      <AppDialog open={isCreateDialogOpen} onClose={() => setIsCreateDialogOpen(false)}>
+        <CommunityForm
+          onCreated={(community) => navigate(`/communities/${community._id}`)}
+          onClose={() => setIsCreateDialogOpen(false)}
+        />
+      </AppDialog>
     </Box>
   )
 }

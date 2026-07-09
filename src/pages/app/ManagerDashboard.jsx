@@ -4,7 +4,7 @@
 // numbers describe the manager's communities instead of personal habits.
 // All data comes from one endpoint via useManagerOverview (GET /api/manager/overview).
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
@@ -16,7 +16,9 @@ import {
 
 import { useAuthContext } from '../../auth/useAuthContext'
 import { useManagerOverview } from '../../hooks/useManagerOverview'
+import AppDialog from '../../components/AppDialog'
 import PageHeader from '../../components/layout/PageHeader'
+import CommunityForm from './CommunityForm'
 import { colors } from '../../styles/tokens'
 import { sectionTitleSx } from '../../styles/recipes'
 
@@ -303,6 +305,7 @@ const ManagerDashboard = () => {
   const { user } = useAuthContext()
   const { overview, loading, error, fetchOverview } = useManagerOverview()
   const navigate = useNavigate()
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false) // create-community popup
 
   // Load the overview once on mount — same pattern as Communities.jsx.
   useEffect(() => { fetchOverview() }, [fetchOverview])
@@ -342,10 +345,19 @@ const ManagerDashboard = () => {
           Create your first community and set up challenges to see engagement
           analytics for your members here.
         </Typography>
-        <Button variant="contained" onClick={() => navigate('/communities/new')}>
+        <Button variant="contained" onClick={() => setIsCreateDialogOpen(true)}>
           Create a community
         </Button>
       </Paper>
+
+      {/* Create-community popup — same dialog/blur behaviour as the other forms.
+          On success, open the new community's manager detail page. */}
+      <AppDialog open={isCreateDialogOpen} onClose={() => setIsCreateDialogOpen(false)}>
+        <CommunityForm
+          onCreated={(community) => navigate(`/manager/communities/${community._id}`)}
+          onClose={() => setIsCreateDialogOpen(false)}
+        />
+      </AppDialog>
     </Box>
   )
 
