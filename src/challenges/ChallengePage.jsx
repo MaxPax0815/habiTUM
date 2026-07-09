@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Box, CircularProgress, Paper, Typography } from "@mui/material";
+import { Alert, Box, Button, CircularProgress, Paper, Typography } from "@mui/material";
 import { useParams } from "react-router-dom";
 
 import { useAuthContext } from "../auth/useAuthContext";
@@ -7,7 +7,9 @@ import { ExtendedChallengeCard } from "./Challenges";
 import Leaderboard from "./Leaderboard";
 import PageHeader from "../components/layout/PageHeader";
 import { sectionTitleSx } from "../styles/recipes";
+import AppDialog from "../components/AppDialog";
 import HabitDetails from "../components/HabitDetails";
+import HabitForm from "../components/HabitForm";
 import BackButton from "../components/BackButton";
 import ActivityFeed from "../feed/ActivityFeed";
 import FeedRailLayout from "../feed/FeedRailLayout";
@@ -27,6 +29,8 @@ const ChallengePage = () => {
   const [habitsLoading, setHabitsLoading] = useState(Boolean(challengeId));
   const [isLoading, setIsLoading] = useState(Boolean(challengeId));
   const [communityMembershipStatus, setCommunityMembershipStatus] = useState(null);
+  const [communityRole, setCommunityRole] = useState(null);
+  const [showHabitForm, setShowHabitForm] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -130,13 +134,15 @@ const ChallengePage = () => {
   }, [data]);
 
   const communityId = challenge?.community?._id || challenge?.community;
-  const isCommunityMember = communityMembershipStatus === "accepted";
+  // Derived from communityId so no state reset is needed when it goes away —
+  // without a community, both flags are simply false.
+  const isCommunityMember = Boolean(communityId) && communityMembershipStatus === "accepted";
+  // Only the community's creator gets the "Add habit" button — the backend
+  // enforces the same rule on POST /api/challenges/:id/habits.
+  const isCommunityCreator = Boolean(communityId) && communityRole === "creator";
 
   useEffect(() => {
-    if (!communityId || !user) {
-      setCommunityMembershipStatus(null);
-      return undefined;
-    }
+    if (!communityId || !user) return undefined;
 
     const controller = new AbortController();
     let isActive = true;
@@ -157,10 +163,12 @@ const ChallengePage = () => {
 
         if (isActive) {
           setCommunityMembershipStatus(json.membershipStatus || null);
+          setCommunityRole(json.myRole || null);
         }
       } catch (fetchError) {
         if (fetchError.name === "AbortError" || !isActive) return;
         setCommunityMembershipStatus(null);
+        setCommunityRole(null);
       }
     };
 
@@ -247,6 +255,12 @@ const ChallengePage = () => {
     }
   };
 
+  // A newly created habit comes back in the same enriched shape as the
+  // fetched list (empty checkins, zeroed progress), so it can be appended.
+  const handleChallengeHabitCreated = (newHabit) => {
+    setChallengeHabits((currentHabits) => [...currentHabits, newHabit]);
+  };
+
   const handleChallengeHabitUpdated = (updatedHabit) => {
     setChallengeHabits((currentHabits) =>
       currentHabits.map((habit) => habit._id === updatedHabit._id ? updatedHabit : habit)
@@ -316,9 +330,17 @@ const ChallengePage = () => {
       </Box>
 
       <Box>
-        <Typography component="h2" sx={sectionTitleSx}>
-          Challenge habits
-        </Typography>
+        {/* Section heading with the creator-only "Add habit" action on the right */}
+        <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 2 }}>
+          <Typography component="h2" sx={sectionTitleSx}>
+            Challenge habits
+          </Typography>
+          {isCommunityCreator && (
+            <Button variant="outlined" size="small" onClick={() => setShowHabitForm(true)}>
+              + Add habit
+            </Button>
+          )}
+        </Box>
 
         {!challenge.isJoined && challengeHabits.length > 0 && (
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -371,6 +393,16 @@ const ChallengePage = () => {
       </Box>
 
       <Leaderboard challengeId={challengeId} initialData={data} />
+
+      {/* Creator-only: add a habit to this challenge. Reuses the personal
+          HabitForm in challenge mode (POSTs to /api/challenges/:id/habits). */}
+      <AppDialog open={showHabitForm} onClose={() => setShowHabitForm(false)} maxWidth="sm">
+        <HabitForm
+          challengeId={challengeId}
+          onHabitCreated={handleChallengeHabitCreated}
+          onClose={() => setShowHabitForm(false)}
+        />
+      </AppDialog>
     </Box>
     </FeedRailLayout>
   );
