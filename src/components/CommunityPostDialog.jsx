@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
+  Box,
   Button,
   Checkbox,
   Dialog,
@@ -50,13 +51,10 @@ const CommunityPostDialog = ({ challenges = [], onClose, onSubmit, open, submitt
       onClose={onClose}
       fullWidth
       maxWidth="sm"
-      PaperProps={{
-        component: 'form',
-        onSubmit: handleSubmit,
-      }}
     >
-      <DialogTitle>New community post</DialogTitle>
-      <DialogContent sx={{ display: 'grid', gap: 2, pt: 1 }}>
+      <Box component="form" onSubmit={handleSubmit}>
+        <DialogTitle>New community post</DialogTitle>
+        <DialogContent sx={{ display: 'grid', gap: 2, pt: 1 }}>
         <TextField
           label="Title"
           value={postForm.title}
@@ -104,13 +102,14 @@ const CommunityPostDialog = ({ challenges = [], onClose, onSubmit, open, submitt
           control={<Checkbox checked={postForm.pinned} onChange={handlePostFormChange('pinned')} />}
           label="Pin this post"
         />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button type="submit" variant="contained" disabled={!postForm.title.trim() || submitting}>
-          Post
-        </Button>
-      </DialogActions>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button type="submit" variant="contained" disabled={!postForm.title.trim() || submitting}>
+            Post
+          </Button>
+        </DialogActions>
+      </Box>
     </Dialog>
   )
 }
