@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Box, Button, InputBase, Paper, Typography } from '@mui/material'
+import { useAuthContext } from '../../auth/useAuthContext'
 import { useCommunities } from '../../hooks/useCommunites'
 import { colors, radii } from '../../styles/tokens'
 import { sectionTitleSx } from '../../styles/recipes'
@@ -17,7 +18,7 @@ const VisibilityCard = ({ icon, title, subtitle, active, onClick }) => (
     variant="outlined"
     onClick={onClick}
     sx={{
-      flex: 1, p: 2, cursor: 'pointer',
+      flex: 1, p: 2, cursor: onClick ? 'pointer' : 'default',
       borderColor: active ? colors.primary : colors.border,
       bgcolor: active ? colors.softBlue : colors.surface,
     }}
@@ -43,19 +44,34 @@ const inputSx = {
 }
 
 const CommunityForm = ({ onCreated, onClose }) => {
+  const { user } = useAuthContext()
   const { createCommunity } = useCommunities()
+
+  // Only managers may create public communities; premium users are limited to
+  // private, invite-only ones (also enforced on the backend).
+  const canCreatePublic = user?.accountType === 'manager'
 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const [isPrivate, setIsPrivate] = useState(false)
+  const [logoUrl, setLogoUrl] = useState('')
+  const [logoError, setLogoError] = useState(false)
+  const [isPrivate, setIsPrivate] = useState(!canCreatePublic)
   const [error, setError] = useState(null)
   const [submitting, setSubmitting] = useState(false)
+
+  const trimmedLogoUrl = logoUrl.trim()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
     setSubmitting(true)
-    const { ok, data } = await createCommunity({ name, description, isPrivate })
+    // logoUrl is optional; send undefined when blank so the schema default applies.
+    const { ok, data } = await createCommunity({
+      name,
+      description,
+      isPrivate,
+      logoUrl: trimmedLogoUrl || undefined,
+    })
     setSubmitting(false)
     if (ok) {
       onCreated?.(data)
@@ -85,15 +101,60 @@ const CommunityForm = ({ onCreated, onClose }) => {
           value={description} onChange={(e) => setDescription(e.target.value)} />
       </Field>
 
-      <Field label="Visibility">
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <VisibilityCard icon="public" title="Public"
-            subtitle="Anyone can find and join this community."
-            active={!isPrivate} onClick={() => setIsPrivate(false)} />
-          <VisibilityCard icon="lock" title="Private"
-            subtitle="Only invited members can join."
-            active={isPrivate} onClick={() => setIsPrivate(true)} />
+      <Field label="Logo URL (optional)">
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          {/* Live preview: the linked image, or the community's first letter as a
+              fallback (also used when the URL is empty or fails to load). */}
+          <Box
+            sx={{
+              width: 48, height: 48, borderRadius: radii.button, flexShrink: 0,
+              border: `1px solid ${colors.border}`, overflow: 'hidden',
+              display: 'grid', placeItems: 'center',
+              bgcolor: colors.softBlue, color: colors.primary, fontWeight: 800,
+            }}
+          >
+            {trimmedLogoUrl && !logoError ? (
+              <Box component="img" src={trimmedLogoUrl} alt="Logo preview"
+                onError={() => setLogoError(true)}
+                sx={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            ) : (
+              (name.trim()[0] || '?').toUpperCase()
+            )}
+          </Box>
+          <InputBase
+            sx={inputSx}
+            placeholder="https://example.com/logo.png"
+            value={logoUrl}
+            onChange={(e) => { setLogoUrl(e.target.value); setLogoError(false) }}
+          />
         </Box>
+        {trimmedLogoUrl && logoError && (
+          <Typography variant="caption" sx={{ display: 'block', mt: 1, color: colors.orange }}>
+            Couldn't load an image from that URL. You can still create the community and change it later.
+          </Typography>
+        )}
+      </Field>
+
+      <Field label="Visibility">
+        {canCreatePublic ? (
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <VisibilityCard icon="public" title="Public"
+              subtitle="Anyone can find and join this community."
+              active={!isPrivate} onClick={() => setIsPrivate(false)} />
+            <VisibilityCard icon="lock" title="Private"
+              subtitle="Hidden from Discover — members join via an invite link."
+              active={isPrivate} onClick={() => setIsPrivate(true)} />
+          </Box>
+        ) : (
+          <>
+            <VisibilityCard icon="lock" title="Private"
+              subtitle="Hidden from Discover — members join via an invite link."
+              active />
+            <Typography variant="caption" sx={{ display: 'block', mt: 1, color: colors.muted }}>
+              Premium communities are always private. Share an invite link to add members.
+            </Typography>
+          </>
+        )}
       </Field>
 
       <Box sx={{ display: 'flex', gap: 1.5, mt: 1 }}>
