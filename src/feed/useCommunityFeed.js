@@ -47,16 +47,14 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
 
     const authHeader = { Authorization: `Bearer ${token}` }
 
-    const rememberNewest = (id) => {
-      if (!lastEventIdRef.current || id > lastEventIdRef.current) {
-        lastEventIdRef.current = id
-      }
+    const rememberCursor = (cursor) => {
+      if (cursor) lastEventIdRef.current = cursor
     }
 
-    const prependLive = (activity) => {
+    const prependLive = (activity, eventCursor) => {
       // Remember every seen id (drives reconnect catch-up) but only display
       // activities matching this feed's scope.
-      rememberNewest(activity._id)
+      rememberCursor(eventCursor || activity.feedEventId || activity._id)
       if (challengeId && activity.challenge !== challengeId) return
       setActivities((prev) => (
         prev.some((existing) => existing._id === activity._id)
@@ -83,10 +81,11 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
           setStatus('live')
         }
         source.addEventListener('activity', (event) => {
-          prependLive(JSON.parse(event.data))
+          prependLive(JSON.parse(event.data), event.lastEventId)
         })
         source.addEventListener('activity_removed', (event) => {
           const { activityId } = JSON.parse(event.data)
+          rememberCursor(event.lastEventId)
           setActivities((prev) => prev.filter((activity) => activity._id !== activityId))
         })
         source.onerror = () => {
@@ -111,15 +110,15 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
         const res = await fetch(`/api/communities/${communityId}/feed${params}`, { headers: authHeader })
         const json = await res.json()
         if (!res.ok) throw new Error(json.error || 'Could not load the activity feed.')
-        setActivities(json.activities)
+        setActivities(json.activities || [])
         setHasMore(json.hasMore)
-        if (json.activities.length > 0) rememberNewest(json.activities[0]._id)
+        rememberCursor(json.feedCursor || json.activities?.[0]?.feedEventId || json.activities?.[0]?._id)
+        connectStream()
       } catch (err) {
         setError(err.message)
       } finally {
         setLoading(false)
       }
-      connectStream()
     }
 
     loadInitial()
