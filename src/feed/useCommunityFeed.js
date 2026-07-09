@@ -1,24 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuthContext } from '../auth/useAuthContext'
 
-// Live community activity feed:
-//   1. initial page via GET /api/communities/:id/feed (normal Bearer fetch)
-//   2. live updates via SSE — but EventSource cannot send an Authorization
-//      header, so we first exchange the JWT for a 30s single-use ticket
-//      (POST /api/feed/ticket) and open the stream with ?ticket=...
-//
-// Reconnection: the browser's built-in EventSource retry is useless to us
-// because the ticket dies on first use — a reconnect with the same URL is
-// always 401. So on error we close the source, fetch a FRESH ticket, and
-// reopen with ?lastEventId=<newest seen id> (exponential backoff, capped),
-// which the server uses to replay anything we missed while disconnected.
-// Live items are deduped by _id because a replay can overlap the initial fetch.
-const MAX_BACKOFF_MS = 15000
-const INITIAL_BACKOFF_MS = 1000
+// Near-live community activity feed:
+//   1. initial page via GET /api/communities/:id/feed
+//   2. lightweight polling every 5s via /feed/updates?since=<feedCursor>
+// Polling is intentionally simpler than SSE for the free MongoDB tier: no
+// stream tickets, no persistent EventSource, and no MongoDB change stream.
+const POLL_INTERVAL_MS = 5000
 
 // Options: { challengeId } narrows the feed to one challenge (ChallengePage
-// mini-feed). The REST fetch filters server-side; live events arrive for the
-// whole community (one shared stream) and are filtered client-side.
+// mini-feed). Both the initial fetch and polling update fetch filter server-side.
 export const useCommunityFeed = (communityId, { challengeId = null, enabled = true } = {}) => {
   const { user } = useAuthContext()
   const token = user?.token
@@ -30,10 +21,6 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
   // 'connecting' | 'live' | 'reconnecting'
   const [status, setStatus] = useState('connecting')
 
-  const sourceRef = useRef(null)
-  const retryTimerRef = useRef(null)
-  const backoffRef = useRef(INITIAL_BACKOFF_MS)
-  const stoppedRef = useRef(false)
   const lastEventIdRef = useRef(null)
 
   // NOTE: this hook holds per-community state and does not reset it when
@@ -42,8 +29,10 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
   useEffect(() => {
     if (!communityId || !token || !enabled) return
 
-    stoppedRef.current = false
-    backoffRef.current = INITIAL_BACKOFF_MS
+    let stopped = false
+    let pollTimer = null
+    let activeController = null
+    let inFlight = false
 
     const authHeader = { Authorization: `Bearer ${token}` }
 
@@ -51,82 +40,125 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
       if (cursor) lastEventIdRef.current = cursor
     }
 
-    const prependLive = (activity, eventCursor) => {
-      // Remember every seen id (drives reconnect catch-up) but only display
-      // activities matching this feed's scope.
-      rememberCursor(eventCursor || activity.feedEventId || activity._id)
-      if (challengeId && activity.challenge !== challengeId) return
-      setActivities((prev) => (
-        prev.some((existing) => existing._id === activity._id)
-          ? prev
-          : [{ ...activity, isLive: true }, ...prev]
-      ))
+    const feedParams = (extraParams = {}) => {
+      const params = new URLSearchParams(extraParams)
+      if (challengeId) params.set('challenge', challengeId)
+      const query = params.toString()
+      return query ? `?${query}` : ''
     }
 
-    const connectStream = async () => {
-      if (stoppedRef.current) return
-      try {
-        const ticketRes = await fetch('/api/feed/ticket', { method: 'POST', headers: authHeader })
-        if (!ticketRes.ok) throw new Error('ticket request failed')
-        const { ticket } = await ticketRes.json()
-        if (stoppedRef.current) return
+    const requestJson = async (url, fallbackMessage) => {
+      const controller = new AbortController()
+      activeController = controller
+      const res = await fetch(url, { headers: authHeader, signal: controller.signal })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || fallbackMessage)
+      return json
+    }
 
-        const params = new URLSearchParams({ ticket })
-        if (lastEventIdRef.current) params.set('lastEventId', lastEventIdRef.current)
-        const source = new EventSource(`/api/communities/${communityId}/feed/stream?${params}`)
-        sourceRef.current = source
+    const mergeUpdates = (updates) => {
+      if (!updates?.length) return
 
-        source.onopen = () => {
-          backoffRef.current = INITIAL_BACKOFF_MS
-          setStatus('live')
+      setActivities((prev) => {
+        let next = prev
+
+        for (const activity of updates) {
+          if (activity.revoked) {
+            next = next.filter((existing) => existing._id !== activity._id)
+            continue
+          }
+
+          const liveActivity = { ...activity, isLive: true }
+          const existingIndex = next.findIndex((existing) => existing._id === activity._id)
+          if (existingIndex === -1) {
+            next = [liveActivity, ...next]
+          } else {
+            next = next.map((existing) => (
+              existing._id === activity._id ? liveActivity : existing
+            ))
+          }
         }
-        source.addEventListener('activity', (event) => {
-          prependLive(JSON.parse(event.data), event.lastEventId)
-        })
-        source.addEventListener('activity_removed', (event) => {
-          const { activityId } = JSON.parse(event.data)
-          rememberCursor(event.lastEventId)
-          setActivities((prev) => prev.filter((activity) => activity._id !== activityId))
-        })
-        source.onerror = () => {
-          source.close()
-          scheduleReconnect()
-        }
-      } catch {
-        scheduleReconnect()
+
+        return next
+      })
+    }
+
+    const schedulePoll = () => {
+      clearTimeout(pollTimer)
+      if (!stopped) {
+        pollTimer = setTimeout(pollUpdates, POLL_INTERVAL_MS)
       }
     }
 
-    const scheduleReconnect = () => {
-      if (stoppedRef.current) return
-      setStatus('reconnecting')
-      retryTimerRef.current = setTimeout(connectStream, backoffRef.current)
-      backoffRef.current = Math.min(backoffRef.current * 2, MAX_BACKOFF_MS)
+    async function pollUpdates() {
+      if (stopped) return
+      if (document.hidden) {
+        schedulePoll()
+        return
+      }
+      if (inFlight || !lastEventIdRef.current) {
+        schedulePoll()
+        return
+      }
+
+      inFlight = true
+      try {
+        const json = await requestJson(
+          `/api/communities/${communityId}/feed/updates${feedParams({ since: lastEventIdRef.current })}`,
+          'Could not refresh the activity feed.'
+        )
+        if (stopped) return
+        mergeUpdates(json.activities || [])
+        rememberCursor(json.feedCursor)
+        setStatus('live')
+      } catch (err) {
+        if (err.name !== 'AbortError') setStatus('reconnecting')
+      } finally {
+        inFlight = false
+        schedulePoll()
+      }
     }
 
     const loadInitial = async () => {
+      inFlight = true
       try {
-        const params = challengeId ? `?challenge=${challengeId}` : ''
-        const res = await fetch(`/api/communities/${communityId}/feed${params}`, { headers: authHeader })
-        const json = await res.json()
-        if (!res.ok) throw new Error(json.error || 'Could not load the activity feed.')
+        setStatus('connecting')
+        const json = await requestJson(
+          `/api/communities/${communityId}/feed${feedParams()}`,
+          'Could not load the activity feed.'
+        )
+        if (stopped) return
         setActivities(json.activities || [])
         setHasMore(json.hasMore)
         rememberCursor(json.feedCursor || json.activities?.[0]?.feedEventId || json.activities?.[0]?._id)
-        connectStream()
+        setStatus('live')
+        schedulePoll()
       } catch (err) {
-        setError(err.message)
+        if (err.name !== 'AbortError') {
+          setError(err.message)
+          setStatus('reconnecting')
+        }
       } finally {
-        setLoading(false)
+        inFlight = false
+        if (!stopped) setLoading(false)
       }
     }
 
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        clearTimeout(pollTimer)
+        pollUpdates()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
     loadInitial()
 
     return () => {
-      stoppedRef.current = true
-      clearTimeout(retryTimerRef.current)
-      sourceRef.current?.close()
+      stopped = true
+      clearTimeout(pollTimer)
+      activeController?.abort()
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [communityId, challengeId, token, enabled])
 

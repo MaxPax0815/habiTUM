@@ -63,7 +63,7 @@ Communities have **no** shared context — `useCommunities()` (`src/hooks/useCom
 
 There is no data-fetching library (no React Query/SWR). Every page/hook manages its own `fetch` + `useState(loading/error)` + `useEffect`. New features should follow this same manual pattern for consistency, not introduce a fetching library unless asked.
 
-One real-time exception: the community activity feed (`src/feed/useCommunityFeed.js`) uses **Server-Sent Events**. Because `EventSource` cannot send an `Authorization` header, it first POSTs to `/api/feed/ticket` (normal Bearer fetch) and opens the stream with the returned 30-second single-use ticket as a query param. Reconnects fetch a fresh ticket and pass `?lastEventId=` so the server replays missed events. If another feature ever needs live updates, reuse this ticket+SSE pattern rather than adding socket.io.
+One near-real-time exception: the community activity feed (`src/feed/useCommunityFeed.js`) uses lightweight polling, not Server-Sent Events. It loads the first page from `GET /api/communities/:id/feed`, then every 5 seconds asks `GET /api/communities/:id/feed/updates?since=<feedCursor>` for only changed activity rows. Polling is paused while the browser tab is hidden and resumes on visibility. If another feature needs low-cost freshness on the free MongoDB tier, prefer this cursor polling pattern over persistent streams.
 
 ## Talking to the backend
 
@@ -120,11 +120,11 @@ Frontend/src/
 │   ├── useBillings.js               — startCheckout, scheduleCancellation, refreshCurrentUser (note: filename plural "Billings", hook name singular `useBilling`)
 │   ├── UpgradeButton.jsx             — starts Stripe Checkout via useBilling().startCheckout, redirects to session.url
 │   └── DowngradeButton.jsx           — currently an empty stub file (1 line) — downgrade UI actually lives inline in Profile.jsx (`handleDowngradeClick` + a confirmation Dialog). Don't assume this file is used.
-├── feed/                            — live community activity feed (SSE)
-│   ├── useCommunityFeed.js           — initial REST fetch + ticket exchange + EventSource; manual reconnect with fresh ticket + exponential backoff (the single-use ticket makes the browser's built-in retry useless); dedupes by _id; optional { challengeId } narrows to one challenge (REST filters server-side, live events client-side); holds per-community state, so consumers remount it via key instead of expecting a reset
+├── feed/                            — near-live community activity feed (cursor polling)
+│   ├── useCommunityFeed.js           — initial REST fetch + 5s `/feed/updates?since=<feedCursor>` polling; pauses while the tab is hidden; handles revoked updates by removing items; dedupes by _id; optional { challengeId } narrows both REST calls server-side; holds per-community state, so consumers remount it via key instead of expecting a reset
 │   ├── formatActivityMessage.js      — pure meta→segments formatter ("Anna just checked into *X* — 5 days in a row"; no suffix at streak ≤ 1; streak %7 === 0 renders the celebratory 🔥 variant of the SAME checkin message — separate milestone items are legacy-only); unit from meta.frequency (days/weeks)
 │   ├── FeedRailLayout.jsx            — sticky right-rail layout (stacked below on mobile); pages wrap their existing JSX and pass the feed as a prop, keeping the merge-conflict surface minimal
-│   └── ActivityFeed.jsx              — feed panel: Live/Reconnecting status chip, initials avatars, flash highlight on live arrivals, Load more (cursor pagination); props communityId + optional challengeId/title; fully self-contained so pages integrate it with ONE JSX line (CommunityDashboard full feed, ChallengePage challenge-scoped mini-feed)
+│   └── ActivityFeed.jsx              — feed panel: Auto-refresh/Retrying status chip, initials avatars, flash highlight on new polling arrivals, Load more (cursor pagination); props communityId + optional challengeId/title; fully self-contained so pages integrate it with ONE JSX line (CommunityDashboard full feed, ChallengePage challenge-scoped mini-feed)
 ├── challenges/
 │   ├── Challenges.jsx                 — exports default `ChallengeCard` (compact, grid) and named `ExtendedChallengeCard` (full-width, used on ChallengePage)
 │   ├── ChallengePage.jsx               — route target for /challenges/:challengeId; fetches the leaderboard endpoint (which also returns the challenge itself) and renders ExtendedChallengeCard + Leaderboard + a challenge-scoped ActivityFeed one-liner (members only)

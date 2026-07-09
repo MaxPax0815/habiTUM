@@ -29,7 +29,7 @@ const statusChip = (status) => {
     return (
       <Chip
         size="small"
-        label="Live"
+        label="Auto-refresh"
         icon={
           <Box sx={{
             width: 8, height: 8, borderRadius: '50%', bgcolor: colors.green,
@@ -43,7 +43,7 @@ const statusChip = (status) => {
   return (
     <Chip
       size="small"
-      label={status === 'connecting' ? 'Connecting…' : 'Reconnecting…'}
+      label={status === 'connecting' ? 'Loading…' : 'Retrying…'}
       sx={{ bgcolor: colors.softOrange, color: colors.orange, fontWeight: 700 }}
     />
   )
@@ -62,8 +62,7 @@ const ActivityItem = ({ activity }) => {
         px: 2,
         py: 1.5,
         borderRadius: 2,
-        // Items that arrived over the live stream flash briefly so new
-        // activity is visible from across the room.
+        // Items that arrived during polling flash briefly so new activity is visible.
         ...(activity.isLive && { animation: 'habitumFeedFlash 2.5s ease-out' }),
       }}
     >
@@ -99,13 +98,13 @@ const ActivityItem = ({ activity }) => {
   )
 }
 
-// The community's live activity feed: challenge-habit checkins only, pushed
-// over SSE. Fully self-contained (data fetching, spacing, loading/error/empty
+// The community's activity feed: challenge-habit checkins only, refreshed by
+// lightweight polling. Fully self-contained (data fetching, spacing, loading/error/empty
 // states) so consumers integrate it with a single JSX line — see
 // CommunityDashboard, where it renders as a full-width section below the
 // challenges. Keep it that way: the dashboard layout is under active rework
 // and a one-line integration keeps merge conflicts trivial.
-const ActivityFeed = ({ communityId, challengeId = null, title = 'Live activity', enabled = true }) => {
+const ActivityFeed = ({ communityId, challengeId = null, title = 'Activity', enabled = true }) => {
   const { activities, hasMore, loading, error, status, loadMore } = useCommunityFeed(communityId, { challengeId, enabled })
 
   return (
@@ -114,7 +113,7 @@ const ActivityFeed = ({ communityId, challengeId = null, title = 'Live activity'
     // viewport-bound scroll area instead.
     <PageSection title={title} actions={statusChip(status)} sx={{ mt: { xs: 4, lg: 0 }, mb: 0 }}>
       {feedAnimations}
-      {/* aria-live: screen readers announce items arriving over the stream */}
+      {/* aria-live: screen readers announce items arriving during polling */}
       <Paper
         variant="outlined"
         aria-live="polite"
@@ -137,8 +136,8 @@ const ActivityFeed = ({ communityId, challengeId = null, title = 'Live activity'
             </span>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
               {challengeId
-                ? 'No activity yet. When someone checks into this challenge, it shows up here live.'
-                : 'No activity yet. When someone checks into one of this community’s challenges, it shows up here live.'}
+                ? 'No activity yet. When someone checks into this challenge, it shows up here automatically.'
+                : 'No activity yet. When someone checks into one of this community’s challenges, it shows up here automatically.'}
             </Typography>
           </Box>
         ) : (
