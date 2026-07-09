@@ -63,6 +63,8 @@ Communities have **no** shared context — `useCommunities()` (`src/hooks/useCom
 
 There is no data-fetching library (no React Query/SWR). Every page/hook manages its own `fetch` + `useState(loading/error)` + `useEffect`. New features should follow this same manual pattern for consistency, not introduce a fetching library unless asked.
 
+One near-real-time exception: the community activity feed (`src/feed/useCommunityFeed.js`) uses lightweight polling, not Server-Sent Events. It loads the first page from `GET /api/communities/:id/feed`, then every 5 seconds asks `GET /api/communities/:id/feed/updates?since=<feedCursor>` for only changed activity rows. Polling is paused while the browser tab is hidden and resumes on visibility. If another feature needs low-cost freshness on the free MongoDB tier, prefer this cursor polling pattern over persistent streams.
+
 ## Talking to the backend
 
 Every authenticated request manually attaches the JWT:
@@ -118,9 +120,14 @@ Frontend/src/
 │   ├── useBillings.js               — startCheckout, scheduleCancellation, refreshCurrentUser (note: filename plural "Billings", hook name singular `useBilling`)
 │   ├── UpgradeButton.jsx             — starts Stripe Checkout via useBilling().startCheckout, redirects to session.url
 │   └── DowngradeButton.jsx           — currently an empty stub file (1 line) — downgrade UI actually lives inline in Profile.jsx (`handleDowngradeClick` + a confirmation Dialog). Don't assume this file is used.
+├── feed/                            — near-live community activity feed (cursor polling)
+│   ├── useCommunityFeed.js           — initial REST fetch + 5s `/feed/updates?since=<feedCursor>` polling; pauses while the tab is hidden; handles revoked updates by removing items; dedupes by _id; optional { challengeId } narrows both REST calls server-side; holds per-community state, so consumers remount it via key instead of expecting a reset
+│   ├── formatActivityMessage.js      — pure meta→segments formatter ("Anna just checked into *X* — 5 days in a row"; no suffix at streak ≤ 1; streak %7 === 0 renders the celebratory 🔥 variant of the SAME checkin message — separate milestone items are legacy-only); unit from meta.frequency (days/weeks)
+│   ├── FeedRailLayout.jsx            — sticky right-rail layout (stacked below on mobile); pages wrap their existing JSX and pass the feed as a prop, keeping the merge-conflict surface minimal
+│   └── ActivityFeed.jsx              — feed panel: Auto-refresh/Retrying status chip, initials avatars, flash highlight on new polling arrivals, Load more (cursor pagination); props communityId + optional challengeId/title; fully self-contained so pages integrate it with ONE JSX line (CommunityDashboard full feed, ChallengePage challenge-scoped mini-feed)
 ├── challenges/
 │   ├── Challenges.jsx                 — exports default `ChallengeCard` (compact, grid) and named `ExtendedChallengeCard` (full-width, used on ChallengePage)
-│   ├── ChallengePage.jsx               — route target for /challenges/:challengeId; fetches the leaderboard endpoint (which also returns the challenge itself) and renders ExtendedChallengeCard + Leaderboard
+│   ├── ChallengePage.jsx               — route target for /challenges/:challengeId; fetches the leaderboard endpoint (which also returns the challenge itself) and renders ExtendedChallengeCard + Leaderboard + a challenge-scoped ActivityFeed one-liner (members only)
 │   ├── ChallengeForm.jsx                — create-challenge form (POST /api/challenges); not yet linked from any page's UI — no "New Challenge" button exists in Communities/CommunityDashboard yet, so this form is currently dead code reachable only by direct usage
 │   └── Leaderboard.jsx                  — ranked participant table; can take `initialData` (avoids a second fetch when ChallengePage already has it) or fetch standalone by `challengeId`
 └── pages/
@@ -134,7 +141,7 @@ Frontend/src/
         ├── Home.jsx                      — "/today": greeting header, 3 stat cards, build/break habit lists, "+ Add habit" → AppDialog(HabitForm)
         ├── Communities.jsx                — "/communities": search + "your communities" + gated "create" CTA + "discover" list with Join buttons
         ├── NewCommunity.jsx                — "/communities/new": name/description/visibility form
-        ├── CommunityDashboard.jsx          — "/communities/:id": header (join/leave/delete depending on role) + that community's challenges grid
+        ├── CommunityDashboard.jsx          — "/communities/:id": header (join/leave/delete depending on role), About, challenges grid, with the live ActivityFeed as a sticky right rail via FeedRailLayout (members only; the page only wraps its JSX and passes the feed prop — keep it that way to avoid merge conflicts with layout work)
         ├── ManagerDashboard.jsx             — "/manager": placeholder cards ("Coming soon") — not yet a real feature
         ├── Profile.jsx                      — "/profile": account status, Standard/Premium PlanCards, BillingInformationCard, downgrade confirmation dialog
         └── Progress/

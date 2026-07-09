@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { useAuthContext } from "../../auth/useAuthContext"
 import { useHabitsContext } from "../../hooks/useHabitsContext"
 
@@ -74,6 +75,8 @@ const Home = () => {
   const { habits, dispatch } = useHabitsContext()
   const { user } = useAuthContext() // get the current user from the auth context hook
   const [showForm, setShowForm] = useState(false)   // controls the create-habit popup
+  const [activeChallenges, setActiveChallenges] = useState([]) // joined + running challenges for the sidebar panel
+  const navigate = useNavigate()
 
 
   useEffect(() => {
@@ -89,7 +92,26 @@ const Home = () => {
         dispatch({type: 'SET_HABITS', payload: json})
       }
     }
-    if (user) fetchHabits() // only fetch habits if user is logged in (i.e. we have a valid token)
+
+    // fills the "Active challenges" sidebar: challenges this user joined that
+    // are currently running (the backend filters to status 'active')
+    const fetchActiveChallenges = async () => {
+      const response = await fetch('/api/challenges/joined', {
+        headers: {
+          'Authorization': `Bearer ${user.token}`
+        }
+      })
+      const json = await response.json()
+
+      if (response.ok) {
+        setActiveChallenges(json)
+      }
+    }
+
+    if (user) {
+      fetchHabits() // only fetch if user is logged in (i.e. we have a valid token)
+      fetchActiveChallenges()
+    }
 
   }, [dispatch, user]) // re-run this effect whenever the user changes (e.g. log in or log out).
   // user addes as a dependency to ensure that if the user logs in or out, the habits will be fetched or cleared accordingly.
@@ -196,21 +218,66 @@ const Home = () => {
           </Button>
         </Box>
 
-        {/* RIGHT: Active Challenges placeholder (real feature comes later) */}
+        {/* RIGHT: the user's active challenges — one card per joined challenge
+            that is currently running; clicking opens the challenge page */}
         <Box>
           <Typography component="h2" sx={sectionTitleSx}>Active challenges</Typography>
-          <Paper variant="outlined" sx={{ p: 3, textAlign: "center" }}>
-            <span className="material-symbols-outlined" style={{ fontSize: 32, color: colors.muted }}>
-              emoji_events
-            </span>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              No active challenges yet.{" "}
-              <Box component="a" href="#" sx={{ color: colors.primary, textDecoration: "none" }}>
-                Join a community
-              </Box>{" "}
-              to get started.
-            </Typography>
-          </Paper>
+
+          {activeChallenges.length === 0 ? (
+            <Paper variant="outlined" sx={{ p: 3, textAlign: "center" }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 32, color: colors.muted }}>
+                emoji_events
+              </span>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                No active challenges yet.{" "}
+                <Box
+                  component="a"
+                  onClick={() => navigate("/communities")}
+                  sx={{ color: colors.primary, textDecoration: "none", cursor: "pointer" }}
+                >
+                  Join a community
+                </Box>{" "}
+                to get started.
+              </Typography>
+            </Paper>
+          ) : (
+            activeChallenges.map(challenge => {
+              // whole days until the challenge ends (never negative — the
+              // backend only returns challenges that are still active)
+              const daysLeft = Math.max(0, Math.ceil((new Date(challenge.ends) - now) / 86400000))
+
+              return (
+                <Paper
+                  key={challenge._id}
+                  onClick={() => navigate(`/challenges/${challenge._id}`)}
+                  sx={{
+                    p: 2, mb: 1.5, cursor: "pointer",
+                    display: "flex", alignItems: "center", gap: 1.5,
+                    transition: "all 0.15s",
+                    "&:hover": { borderColor: colors.primary, bgcolor: colors.softBlue },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 36, height: 36, borderRadius: 2, flexShrink: 0,
+                      display: "grid", placeItems: "center",
+                      bgcolor: colors.softOrange, color: colors.orange,
+                    }}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 20 }}>emoji_events</span>
+                  </Box>
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700, lineHeight: 1.3 }} noWrap>
+                      {challenge.title}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>
+                      {challenge.community?.name || "Community"} · {daysLeft} day{daysLeft === 1 ? "" : "s"} left
+                    </Typography>
+                  </Box>
+                </Paper>
+              )
+            })
+          )}
         </Box>
       </Box>
 

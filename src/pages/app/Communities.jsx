@@ -4,32 +4,58 @@ import { Box, Button, InputBase, Paper, Typography } from '@mui/material'
 import { useAuthContext } from '../../auth/useAuthContext'
 import { useCommunities } from '../../hooks/useCommunites'
 import { colors, radii } from '../../styles/tokens'
+import AppDialog from '../../components/AppDialog'
 import PageHeader from '../../components/layout/PageHeader'
 import PageSection from '../../components/layout/PageSection'
+import CommunityForm from './CommunityForm'
 
 // Deterministic avatar colour from the community name so each one looks distinct
 // without storing a colour (logo/brand colour are deferred to a later version).
 const avatarColors = [colors.primary, '#A21CAF', '#B91C1C', colors.secondary, colors.orange]
 const colorFor = (name) => avatarColors[(name?.charCodeAt(0) || 0) % avatarColors.length]
 
-// Small reusable circle avatar showing the first letter of the community name.
-const CommunityAvatar = ({ name, size = 44 }) => (
+// Small reusable logo slot showing the community logo or the first letter.
+const CommunityAvatar = ({ logoUrl, name, size = 44 }) => (
   <Box
     sx={{
       width: size, height: size, borderRadius: 2, flexShrink: 0,
       display: 'grid', placeItems: 'center',
-      bgcolor: colorFor(name), color: '#fff', fontWeight: 800,
+      border: `1px solid ${colors.border}`,
+      bgcolor: colors.surface,
+      overflow: 'hidden',
     }}
   >
-    {(name?.[0] || '?').toUpperCase()}
+    {logoUrl ? (
+      <Box
+        component="img"
+        src={logoUrl}
+        alt={`${name} logo`}
+        sx={{ width: '72%', height: '72%', objectFit: 'contain', display: 'block' }}
+      />
+    ) : (
+      <Box
+        sx={{
+          width: '100%',
+          height: '100%',
+          display: 'grid',
+          placeItems: 'center',
+          bgcolor: colorFor(name),
+          color: '#fff',
+          fontWeight: 800,
+        }}
+      >
+        {(name?.[0] || '?').toUpperCase()}
+      </Box>
+    )}
   </Box>
 )
 
 const Communities = () => {
   const { user } = useAuthContext()
-  const { communities, fetchCommunities, joinCommunity } = useCommunities()
+  const { communities, fetchCommunities } = useCommunities()
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false) // create-community popup
 
   const canCreate = user.accountType === 'manager' || user.subscription === 'premium'
 
@@ -84,7 +110,7 @@ const Communities = () => {
                   cursor: 'pointer', '&:hover': { borderColor: colors.primary, bgcolor: colors.softBlue },
                 }}
               >
-                <CommunityAvatar name={c.name} />
+                <CommunityAvatar logoUrl={c.logoUrl} name={c.name} />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography sx={{ fontWeight: 700 }}>{c.name}</Typography>
                   <Typography variant="body2" color="text.secondary" noWrap>{c.description}</Typography>
@@ -131,7 +157,7 @@ const Communities = () => {
         </Box>
 
         {canCreate ? (
-          <Button variant="outlined" onClick={() => navigate('/communities/new')}>
+          <Button variant="outlined" onClick={() => setIsCreateDialogOpen(true)}>
             + Create Community
           </Button>
         ) : (
@@ -165,7 +191,7 @@ const Communities = () => {
               borderTop: i === 0 ? 'none' : `1px solid ${colors.border}`,
             }}
           >
-            <CommunityAvatar name={c.name} />
+            <CommunityAvatar logoUrl={c.logoUrl} name={c.name} />
             <Box sx={{ flex: 1, minWidth: 0 }}>
               <Typography sx={{ fontWeight: 700 }}>{c.name}</Typography>
               <Typography variant="body2" color="text.secondary" noWrap>{c.description}</Typography>
@@ -174,18 +200,25 @@ const Communities = () => {
               {c.memberCount} members
             </Typography>
             <Button
-              variant="contained"
-              onClick={async () => {
-                const ok = await joinCommunity(c._id)
-                if (ok) navigate(`/communities/${c._id}`)
-              }}
+              variant="outlined"
+              startIcon={<span className="material-symbols-outlined">visibility</span>}
+              onClick={() => navigate(`/communities/${c._id}`)}
             >
-              Join
+              View
             </Button>
           </Box>
         ))}
         </Paper>
       </PageSection>
+
+      {/* Create-community popup — same dialog/blur behaviour as the habit and
+          challenge forms. On success, open the new community's page. */}
+      <AppDialog open={isCreateDialogOpen} onClose={() => setIsCreateDialogOpen(false)}>
+        <CommunityForm
+          onCreated={(community) => navigate(`/communities/${community._id}`)}
+          onClose={() => setIsCreateDialogOpen(false)}
+        />
+      </AppDialog>
     </Box>
   )
 }

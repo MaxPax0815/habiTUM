@@ -18,7 +18,11 @@ import { sectionTitleSx } from '../styles/recipes'
 // allowed categories — must match the enum in the backend habitModel.js
 const CATEGORIES = ['Nutrition', 'Fitness', 'Learning', 'Wellness', 'Productivity', 'Other']
 
-const HabitForm = ({ onClose }) => {
+// Without props the form creates a personal habit (POST /api/habits) and pushes
+// it into the HabitsContext. With a challengeId it creates a challenge habit
+// (POST /api/challenges/:id/habits) instead and reports it via onHabitCreated —
+// challenge habits belong to the challenge, not to the user's personal list.
+const HabitForm = ({ onClose, challengeId, onHabitCreated }) => {
   const { dispatch } = useHabitsContext()
   // get the current user from the auth context, so we can include their token in the API request to create a new habit
   const { user } = useAuthContext()
@@ -48,7 +52,8 @@ const HabitForm = ({ onClose }) => {
 
     const habit = {title, frequency, motivation, habitType, category}
 
-    const response = await fetch('/api/habits', {
+    const endpoint = challengeId ? `/api/challenges/${challengeId}/habits` : '/api/habits'
+    const response = await fetch(endpoint, {
       method: 'POST',
       body: JSON.stringify(habit),
       headers: {
@@ -69,7 +74,11 @@ const HabitForm = ({ onClose }) => {
       setFrequency('')
       setMotivation('')
       setCategory('')
-      dispatch({type: 'CREATE_HABIT', payload: json})
+      if (challengeId) {
+        onHabitCreated?.(json) // challenge habit — let the challenge page update its own list
+      } else {
+        dispatch({type: 'CREATE_HABIT', payload: json}) // personal habit — goes into the global habits context
+      }
       onClose?.() // call the onClose callback to close the form after successful habit creation
     }
 

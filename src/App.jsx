@@ -8,10 +8,11 @@ import PublicLayout from './layouts/PublicLayout.jsx'
 
 // App pages
 import Communities from './pages/app/Communities'
-import NewCommunity from './pages/app/NewCommunity'
 import CommunityDashboard from './pages/app/CommunityDashboard'
+import CommunityUpdatesPage from './pages/app/CommunityUpdatesPage'
 import Home from './pages/app/Home'
 import ManagerDashboard from './pages/app/ManagerDashboard'
+import ManagerCommunity from './pages/app/ManagerCommunity'
 import Profile from './pages/app/Profile'
 import Progress from './pages/app/Progress'
 import ChallengePage from './challenges/ChallengePage.jsx'
@@ -111,7 +112,7 @@ function App() {
             <Route path="/challenges/:challengeId" element={<ChallengePage />} />
             <Route path="/progress" element={<Progress />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/communities/new" element={<NewCommunity />} />
+            <Route path="/communities/:id/updates" element={<CommunityUpdatesPage />} />
             <Route path="/communities/:id" element={<CommunityDashboard />} />
 
             {/* Manager dashboard — only active managers. Pending managers are sent
@@ -121,6 +122,15 @@ function App() {
               element={
                 user?.accountType === 'manager' && user?.subscription === 'manager'
                   ? <ManagerDashboard />
+                  : <Navigate to={managerAwareHome(user)} replace />
+              }
+            />
+            {/* Community detail opened from the manager dashboard; same active-manager guard. */}
+            <Route
+              path="/manager/communities/:id"
+              element={
+                user?.accountType === 'manager' && user?.subscription === 'manager'
+                  ? <ManagerCommunity />
                   : <Navigate to={managerAwareHome(user)} replace />
               }
             />

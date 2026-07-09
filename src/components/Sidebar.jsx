@@ -224,6 +224,9 @@ const Sidebar = ({ user }) => {
                 alignItems: "center",
                 gap: 0.5,
                 color: "rgba(255,255,255,0.35)",
+                // subscription values come lowercase from the backend ("free",
+                // "premium") — always display them with a capital first letter
+                textTransform: "capitalize",
               }}
             >
               {/* managers show a role badge instead of their subscription tier, since free/premium doesn't apply to them */}

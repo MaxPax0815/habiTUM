@@ -465,37 +465,46 @@ export const ExtendedChallengeCard = ({
             justifyContent: "space-evenly",
             gap: { xs: 3, md: 6 },
             flexWrap: "wrap",
+            // sit a little lower below the divider rather than hugging it
+            pt: 2,
+            pb: 1,
           }}
         >
-          <Stack direction="row" spacing={1.5} alignItems="center">
-            <GroupsOutlinedIcon sx={{ fontSize: 28, color: colors.muted }} />
-            <Typography sx={{ color: colors.textPrimary, fontSize: 20, fontWeight: 900 }}>
-              {participants.toLocaleString()}
-            </Typography>
-            <Typography sx={{ color: colors.muted, fontSize: 18, fontWeight: 700 }}>
-              {participants === 1 ? "participant" : "participants"}
-            </Typography>
+          <Stack direction="row" spacing={1.25} alignItems="center">
+            <GroupsOutlinedIcon sx={{ fontSize: 24, color: colors.muted }} />
+            <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75 }}>
+              <Typography sx={{ color: colors.textPrimary, fontSize: 20, fontWeight: 900, lineHeight: 1 }}>
+                {participants.toLocaleString()}
+              </Typography>
+              <Typography sx={{ color: colors.muted, fontSize: 18, fontWeight: 700, lineHeight: 1 }}>
+                {participants === 1 ? "participant" : "participants"}
+              </Typography>
+            </Box>
           </Stack>
 
-          <Stack direction="row" spacing={1.5} alignItems="center">
-            <AccessTimeOutlinedIcon sx={{ fontSize: 28, color: colors.muted }} />
-            <Typography sx={{ color: colors.textPrimary, fontSize: 20, fontWeight: 900 }}>
-              {daysLeft === null ? "--" : daysLeft}
-            </Typography>
-            <Typography sx={{ color: colors.muted, fontSize: 18, fontWeight: 700 }}>
-              days left
-            </Typography>
+          <Stack direction="row" spacing={1.25} alignItems="center">
+            <AccessTimeOutlinedIcon sx={{ fontSize: 24, color: colors.muted }} />
+            <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75 }}>
+              <Typography sx={{ color: colors.textPrimary, fontSize: 20, fontWeight: 900, lineHeight: 1 }}>
+                {daysLeft === null ? "--" : daysLeft}
+              </Typography>
+              <Typography sx={{ color: colors.muted, fontSize: 18, fontWeight: 700, lineHeight: 1 }}>
+                days left
+              </Typography>
+            </Box>
           </Stack>
 
           {hasCurrentUserRank && (
-            <Stack direction="row" spacing={1.5} alignItems="center">
-              <EmojiEventsOutlinedIcon sx={{ fontSize: 26, color: colors.primary }} />
-              <Typography sx={{ color: colors.primary, fontSize: 20, fontWeight: 900 }}>
-                #{rank}
-              </Typography>
-              <Typography sx={{ color: colors.muted, fontSize: 18, fontWeight: 700 }}>
-                your rank
-              </Typography>
+            <Stack direction="row" spacing={1.25} alignItems="center">
+              <EmojiEventsOutlinedIcon sx={{ fontSize: 24, color: colors.primary }} />
+              <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75 }}>
+                <Typography sx={{ color: colors.primary, fontSize: 20, fontWeight: 900, lineHeight: 1 }}>
+                  #{rank}
+                </Typography>
+                <Typography sx={{ color: colors.muted, fontSize: 18, fontWeight: 700, lineHeight: 1 }}>
+                  your rank
+                </Typography>
+              </Box>
             </Stack>
           )}
         </Box>
