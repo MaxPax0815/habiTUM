@@ -13,6 +13,7 @@ import CommunityDashboard from './pages/app/CommunityDashboard'
 import CommunityUpdatesPage from './pages/app/CommunityUpdatesPage'
 import Home from './pages/app/Home'
 import ManagerDashboard from './pages/app/ManagerDashboard'
+import ManagerCommunity from './pages/app/ManagerCommunity'
 import Profile from './pages/app/Profile'
 import Progress from './pages/app/Progress'
 import ChallengePage from './challenges/ChallengePage.jsx'
@@ -58,10 +59,14 @@ function App() {
             <Route path="/communities/:id/updates" element={<CommunityUpdatesPage />} />
             <Route path="/communities/:id" element={<CommunityDashboard />} /> 
 
-            <Route 
-              path="/manager" 
+            <Route
+              path="/manager"
               element={user?.accountType === 'manager' ? <ManagerDashboard /> : <Navigate to="/today" replace />}
             /> {/* manager-only page; accessible by URL but only linked in sidebar for managers */}
+            <Route
+              path="/manager/communities/:id"
+              element={user?.accountType === 'manager' ? <ManagerCommunity /> : <Navigate to="/today" replace />}
+            /> {/* community detail opened from the manager dashboard; same manager-only guard */}
           </Route>
 
           {/* Fallback Route */}
