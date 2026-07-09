@@ -18,6 +18,8 @@ import CommunityPostDialog from '../../components/CommunityPostDialog'
 import PageContainer from '../../components/layout/PageContainer'
 import PageHeader from '../../components/layout/PageHeader'
 import PageSection from '../../components/layout/PageSection'
+import ActivityFeed from '../../feed/ActivityFeed'
+import FeedRailLayout from '../../feed/FeedRailLayout'
 
 const avatarColors = [colors.primary, '#A21CAF', '#B91C1C', colors.secondary, colors.orange]
 const colorFor = (name) => avatarColors[(name?.charCodeAt(0) || 0) % avatarColors.length]
@@ -259,7 +261,9 @@ const CommunityDashboard = () => {
   const hasMorePosts = posts.length > 2
 
   return (
-
+    // FeedRailLayout: feed as sticky right rail on desktop, stacked below on
+    // mobile; all layout logic lives in the feed module, not in this page.
+    <FeedRailLayout feed={isMember && <ActivityFeed key={id} communityId={id} />}>
     <Box sx={{ textAlign: 'left' }}>
       <BackButton text="Back to Communities" to="/communities" sx={{ mb: 0 }} />
       <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 }, mb: 4 }}>
@@ -395,14 +399,15 @@ const CommunityDashboard = () => {
         )}
       </PageSection>
 
-      <CommunityPostDialog
-        open={isPostDialogOpen}
-        onClose={handleClosePostDialog}
-        onSubmit={handleCreatePost}
-        submitting={postSubmitting}
-        challenges={challenges}
-      />
+<CommunityPostDialog
+          open={isPostDialogOpen}
+          onClose={handleClosePostDialog}
+          onSubmit={handleCreatePost}
+          submitting={postSubmitting}
+          challenges={challenges}
+        />
     </Box>
+    </FeedRailLayout>
   )
 }
 

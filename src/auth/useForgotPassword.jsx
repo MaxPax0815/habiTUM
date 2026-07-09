@@ -21,12 +21,11 @@ export const useForgotPassword = () => {
                 return null
             }
 
-            if (!json.resetToken) {
-                setError('The server did not return a reset token.')
-                return null
-            }
-
-            return json.resetToken
+            // Anti-enumeration contract with the backend: a 200 WITHOUT a
+            // resetToken means "request accepted" (whether the account exists
+            // is deliberately not revealed) — that is not an error. The page
+            // decides: navigate on resetToken, neutral confirmation otherwise.
+            return json
         } catch {
             setError('Could not reach the server. Please try again.')
             return null
