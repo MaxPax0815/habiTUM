@@ -10,6 +10,7 @@ import PublicLayout from './layouts/PublicLayout.jsx'
 import Communities from './pages/app/Communities'
 import NewCommunity from './pages/app/NewCommunity'
 import CommunityDashboard from './pages/app/CommunityDashboard'
+import CommunityUpdatesPage from './pages/app/CommunityUpdatesPage'
 import Home from './pages/app/Home'
 import ManagerDashboard from './pages/app/ManagerDashboard'
 import Profile from './pages/app/Profile'
@@ -54,6 +55,7 @@ function App() {
             <Route path="/progress" element={<Progress />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/communities/new" element={<NewCommunity />} />
+            <Route path="/communities/:id/updates" element={<CommunityUpdatesPage />} />
             <Route path="/communities/:id" element={<CommunityDashboard />} /> 
 
             <Route 
