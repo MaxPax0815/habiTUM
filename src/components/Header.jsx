@@ -1,10 +1,12 @@
 import { Link as RouterLink, useLocation } from "react-router-dom";
-import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
+import { Alert, Box, Button, IconButton, Snackbar, Stack, Typography } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 import { colors } from '../styles/tokens'
 import { outlinedPillButtonSx, pillButtonSx } from '../styles/recipes'
+import { useAuthContext } from '../auth/useAuthContext'
+import { useCancelManagerSignup } from '../auth/useCancelManagerSignup'
 
 // Source of truth for the landing page's in-page navigation.
 // Each `href` is an anchor (#features, #habits, #challenges) that scrolls to the
@@ -13,6 +15,7 @@ const sectionLinks = [
     { label: "Habits", href: "#habits" },
     { label: "Features", href: "#features" },
     { label: "Challenges", href: "#challenges" },
+    { label: "Plans", href: "#plans" },
 ];
 
 // Shared style object that strips the default anchor styling (underline, borders,
@@ -177,11 +180,19 @@ const SectionNav = () => {
 // Props: `title`, `subtitle` — heading text for sub-pages (ignored on landing).
 const Header = () => {
     const location = useLocation()
+    const { user } = useAuthContext()
+    const { cancelManagerSignup, isCancelling, error: cancelError } = useCancelManagerSignup()
 
     // Route flags drive all the conditional rendering below.
-    const isSignupPage = location.pathname === '/signup'
+    const isSignupPage = location.pathname === '/signup' || location.pathname === '/signup/manager'
     const isLoginPage = location.pathname === '/login'
     const isLandingPage = location.pathname === '/'
+    const isConfigurePlanPage = location.pathname === '/configure-manager-plan'
+
+    // A pending manager is logged in but hasn't paid yet. The header must not
+    // offer the normal auth CTAs (they'd only bounce off the route guards) —
+    // instead it offers exactly two actions: continue setup or cancel the signup.
+    const isPendingManager = user?.accountType === 'manager' && user?.subscription === 'manager_pending'
 
     return (  
         <Box
@@ -210,19 +221,64 @@ const Header = () => {
                     alignItems: "center",
                 }}
             >
-                {/* Left */}
+                {/* Left — no back arrow for pending managers: they should not be
+                    steered back to the landing page mid-signup (the logo still
+                    points to "/", which itself renders the pending-manager state) */}
                 <Box sx={{ justifySelf: "start" }}>
-                    <LogoLink showBackArrow={!isLandingPage} />
+                    <LogoLink showBackArrow={!isLandingPage && !isPendingManager} />
                 </Box>
 
-                {/* Center */}
+                {/* Center — section anchors only exist on the normal landing page */}
                 <Box sx={{ justifySelf: "center" }}>
-                    {isLandingPage && <SectionNav />}
+                    {isLandingPage && !isPendingManager && <SectionNav />}
                 </Box>
 
                 {/* Right */}
                 <Stack direction="row" spacing={2} sx={{ justifySelf: "end"}}>
-                    {isLandingPage && (
+                    {isPendingManager && (
+                        <>
+                            <Button
+                                onClick={cancelManagerSignup}
+                                disabled={isCancelling}
+                                variant="outlined"
+                                size="small"
+                                sx={{
+                                    ...outlinedPillButtonSx,
+                                    color: 'error.main',
+                                    borderColor: 'error.main',
+                                    "&:hover": {
+                                        border: '1px solid',
+                                        borderColor: 'error.main',
+                                        backgroundColor: '#FDECEA', // light red fill on hover
+                                    },
+                                }}
+                            >
+                                {isCancelling ? 'Cancelling…' : 'Cancel manager signup'}
+                            </Button>
+
+                            {/* Hidden on the configure page itself — the page's own
+                                CTA is the way forward there */}
+                            {!isConfigurePlanPage && (
+                                <Button
+                                    component={RouterLink}
+                                    to="/configure-manager-plan"
+                                    variant="contained"
+                                    size="small"
+                                    endIcon={<ArrowForwardIcon />}
+                                    sx={{
+                                        ...pillButtonSx,
+                                        backgroundColor: colors.primary,
+                                        color: colors.surface,
+                                        "&:hover": { backgroundColor: colors.primaryDark },
+                                    }}
+                                >
+                                    Continue setup
+                                </Button>
+                            )}
+                        </>
+                    )}
+
+                    {!isPendingManager && isLandingPage && (
                         <>
                             <Button
                                 component={RouterLink}
@@ -258,7 +314,7 @@ const Header = () => {
                         </>
                     )}
 
-                    {isSignupPage && (
+                    {!isPendingManager && isSignupPage && (
                         <Button
                             component={RouterLink}
                             to="/login"
@@ -270,7 +326,7 @@ const Header = () => {
                         </Button>
                     )}
 
-                    {isLoginPage && (
+                    {!isPendingManager && isLoginPage && (
                         <Button
                             component={RouterLink}
                             to="/signup"
@@ -283,6 +339,14 @@ const Header = () => {
                     )}
                 </Stack>
             </Box>
+
+            {/* Surface backend errors from the cancel flow (e.g. server down) */}
+            <Snackbar
+                open={Boolean(cancelError)}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert severity="error" variant="filled">{cancelError}</Alert>
+            </Snackbar>
         </Box>
   )
 };

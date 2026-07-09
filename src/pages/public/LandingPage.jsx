@@ -1,9 +1,11 @@
 import { Link as RouterLink } from "react-router-dom";
 import {
+  Alert,
   Box,
   Button,
   Chip,
   Container,
+  Divider,
   Grid,
   Stack,
   Typography,
@@ -15,10 +17,15 @@ import WhatshotIcon from "@mui/icons-material/Whatshot";
 import GroupsIcon from "@mui/icons-material/Groups";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import MilitaryTechIcon from "@mui/icons-material/MilitaryTech";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+import WorkspacePremiumOutlinedIcon from "@mui/icons-material/WorkspacePremiumOutlined";
+import BusinessCenterOutlinedIcon from "@mui/icons-material/BusinessCenterOutlined";
 
 import mockupDashboard from '../../assets/mockup_dashboard.png';
 import AppCard from "../../components/AppCard";
 import { colors, radii, shadows } from '../../styles/tokens'
+import { useAuthContext } from '../../auth/useAuthContext'
+import { useCancelManagerSignup } from '../../auth/useCancelManagerSignup'
 
 // ------------------------------------------------------
 // Small helper components
@@ -124,6 +131,62 @@ function DashboardMockup() {
 // ------------------------------------------------------
 
 export default function LandingPage() {
+  const { user } = useAuthContext()
+  const { cancelManagerSignup, isCancelling, error: cancelError } = useCancelManagerSignup()
+
+  // A logged-in pending manager must not see the normal marketing CTAs
+  // (Login / Signup / Go Premium / Create manager account) — every one of them
+  // would just bounce off the route guards back to /configure-manager-plan.
+  // Show an explicit "finish or cancel your signup" state instead.
+  const isPendingManager = user?.accountType === 'manager' && user?.subscription === 'manager_pending'
+
+  if (isPendingManager) {
+    return (
+      <Container maxWidth="sm" sx={{ py: { xs: 8, md: 12 }, textAlign: 'center' }}>
+        <BusinessCenterOutlinedIcon sx={{ fontSize: 64, color: colors.primary, mb: 2 }} />
+
+        <Typography variant="h4" sx={{ fontWeight: 900, mb: 1.5 }}>
+          Complete your manager signup
+        </Typography>
+
+        <Typography sx={{ color: colors.textSecondary, mb: 4, lineHeight: 1.6 }}>
+          Your manager account has been created, but your subscription is not
+          active yet. Please continue the setup or cancel the manager signup.
+        </Typography>
+
+        {cancelError && (
+          <Alert severity="error" sx={{ mb: 3, textAlign: 'left' }}>{cancelError}</Alert>
+        )}
+
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
+          <Button
+            component={RouterLink}
+            to="/configure-manager-plan"
+            variant="contained"
+            size="large"
+            endIcon={<ArrowForwardIcon />}
+          >
+            Continue manager setup
+          </Button>
+
+          <Button
+            variant="outlined"
+            color="error"
+            size="large"
+            onClick={cancelManagerSignup}
+            disabled={isCancelling}
+          >
+            {isCancelling ? 'Cancelling…' : 'Cancel manager signup'}
+          </Button>
+        </Stack>
+
+        <Typography variant="caption" sx={{ color: colors.muted, display: 'block', mt: 3 }}>
+          Cancelling deletes your pending account — you can sign up again anytime.
+        </Typography>
+      </Container>
+    )
+  }
+
   return (
     <Box sx={{ bgcolor: "background.default", minHeight: "100vh" }}>
         {/* Hero Section */}
@@ -335,6 +398,219 @@ export default function LandingPage() {
                   Join student communities, take on shared challenges, and keep each other
                   accountable — together you go further.
                 </Typography>
+              </AppCard>
+            </Grid>
+          </Grid>
+        </Container>
+
+        {/* Plans / Pricing Section */}
+        <Container id="plans" maxWidth="lg" sx={{ pb: { xs: 7, md: 10 } }}>
+          <Box sx={{ mb: 1, textAlign: "center" }}>
+            <Typography
+              variant="overline"
+              sx={{ color: colors.muted, fontWeight: 900, letterSpacing: "0.18em" }}
+            >
+              PRICING
+            </Typography>
+            <Typography
+              variant="h2"
+              sx={{ fontSize: { xs: 30, md: 38 }, letterSpacing: "-0.035em" }}
+            >
+              Choose your plan
+            </Typography>
+            <Typography
+              sx={{ color: "text.secondary", mt: 1, maxWidth: 480, mx: "auto" }}
+            >
+              Start for free. Upgrade when you're ready to go further.
+            </Typography>
+          </Box>
+
+          <Grid container spacing={3} sx={{ mt: 3 }} alignItems="stretch">
+            {/* ── Free ── */}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <AppCard sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
+                    <IconBadge bg={colors.softNeutral} color={colors.textSecondary} sx={{ mb: 0 }}>
+                      <TrackChangesIcon fontSize="small" />
+                    </IconBadge>
+                    <Typography variant="h6" sx={{ fontWeight: 800 }}>Free</Typography>
+                    <Typography
+                      sx={{
+                        ml: "auto",
+                        px: 1.4,
+                        py: 0.4,
+                        borderRadius: "999px",
+                        fontSize: "0.875rem",
+                        fontWeight: 800,
+                        color: colors.textSecondary,
+                        bgcolor: colors.softNeutral,
+                      }}
+                    >
+                      0 €
+                    </Typography>
+                  </Box>
+
+                  <Typography sx={{ color: "text.secondary", mb: 2 }}>
+                    Everything you need to build lasting habits — no credit card required.
+                  </Typography>
+
+                  <Divider sx={{ mb: 2 }} />
+
+                  <Stack spacing={1}>
+                    {["Track unlimited personal habits", "Daily & weekly habit frequency", "Streak tracking & stats", "Join communities & challenges"].map((f) => (
+                      <Box key={f} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                        <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: colors.green, mt: "3px", flexShrink: 0 }} />
+                        <Typography sx={{ color: "text.secondary", lineHeight: 1.5 }}>{f}</Typography>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+
+                <Box sx={{ mt: "auto", pt: 3 }}>
+                  <Button
+                    component={RouterLink}
+                    to="/signup"
+                    variant="outlined"
+                    fullWidth
+                    size="large"
+                    endIcon={<ArrowForwardIcon />}
+                  >
+                    Start for free
+                  </Button>
+                </Box>
+              </AppCard>
+            </Grid>
+
+            {/* ── Premium ── */}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <AppCard
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  border: `2px solid ${colors.primary}`,
+                  bgcolor: colors.softBlue,
+                }}
+              >
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
+                    <IconBadge bg={colors.primary} color="#fff" sx={{ mb: 0 }}>
+                      <WorkspacePremiumOutlinedIcon fontSize="small" />
+                    </IconBadge>
+                    <Typography variant="h6" sx={{ fontWeight: 800 }}>Premium</Typography>
+                    <Chip
+                      label="Popular"
+                      size="small"
+                      sx={{ ml: "auto", bgcolor: colors.primary, color: "#fff", fontWeight: 800, fontSize: 11 }}
+                    />
+                  </Box>
+
+                  <Box sx={{ mb: 2 }}>
+                    <Typography
+                      sx={{ px: 0, py: 0.4, fontSize: "0.875rem", fontWeight: 800, color: colors.primary }}
+                    >
+                      3.99 € / month
+                    </Typography>
+                  </Box>
+
+                  <Typography sx={{ color: "text.secondary", mb: 2 }}>
+                    Unlock advanced analytics and deepen your habit insights.
+                  </Typography>
+
+                  <Divider sx={{ mb: 2 }} />
+
+                  <Stack spacing={1}>
+                    {[
+                      "Everything in Free",
+                      "Progress analytics dashboard",
+                      "Habit Pulse score & coach insights",
+                      "Streak recovery stats & heatmaps",
+                      "Weekly & monthly trend charts",
+                    ].map((f) => (
+                      <Box key={f} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                        <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: colors.primary, mt: "3px", flexShrink: 0 }} />
+                        <Typography sx={{ color: "text.secondary", lineHeight: 1.5 }}>{f}</Typography>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+
+                <Box sx={{ mt: "auto", pt: 3 }}>
+                  <Button
+                    component={RouterLink}
+                    to="/signup?plan=premium"
+                    variant="contained"
+                    fullWidth
+                    size="large"
+                    endIcon={<ArrowForwardIcon />}
+                  >
+                    Go Premium
+                  </Button>
+                </Box>
+              </AppCard>
+            </Grid>
+
+            {/* ── Manager ── */}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <AppCard sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
+                    <IconBadge bg={colors.softOrange} color={colors.orange} sx={{ mb: 0 }}>
+                      <BusinessCenterOutlinedIcon fontSize="small" />
+                    </IconBadge>
+                    <Typography variant="h6" sx={{ fontWeight: 800 }}>Manager</Typography>
+                    <Typography
+                      sx={{
+                        ml: "auto",
+                        px: 1.4,
+                        py: 0.4,
+                        borderRadius: "999px",
+                        fontSize: "0.875rem",
+                        fontWeight: 800,
+                        color: colors.orange,
+                        bgcolor: colors.softOrange,
+                      }}
+                    >
+                      from 20 €
+                    </Typography>
+                  </Box>
+
+                  <Typography sx={{ color: "text.secondary", mb: 2 }}>
+                    Host branded communities and run challenges for your institution.
+                  </Typography>
+
+                  <Divider sx={{ mb: 2 }} />
+
+                  <Stack spacing={1}>
+                    {[
+                      "Everything in Premium",
+                      "Create branded public communities",
+                      "Launch challenges & leaderboards",
+                      "20 € base + 5 € per community / month",
+                      "2 € per challenge slot / month",
+                    ].map((f) => (
+                      <Box key={f} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                        <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: colors.orange, mt: "3px", flexShrink: 0 }} />
+                        <Typography sx={{ color: "text.secondary", lineHeight: 1.5 }}>{f}</Typography>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+
+                <Box sx={{ mt: "auto", pt: 3 }}>
+                  <Button
+                    component={RouterLink}
+                    to="/signup/manager"
+                    variant="outlined"
+                    fullWidth
+                    size="large"
+                    endIcon={<ArrowForwardIcon />}
+                    sx={{ borderColor: colors.orange, color: colors.orange, "&:hover": { borderColor: colors.orange, bgcolor: colors.softOrange } }}
+                  >
+                    Create manager account
+                  </Button>
+                </Box>
               </AppCard>
             </Grid>
           </Grid>

@@ -8,28 +8,31 @@ export const useSignup = () => {
   const [isLoading, setIsLoading] = useState(null) // state to track loading status during signup
   const { dispatch } = useAuthContext()
 
-  // async function to handle user signup; takes email and password as parameters
-  const signup = async ( firstName, lastName, username, email, password) => {
+  // plan defaults to 'free'; pass 'premium' or 'manager' to trigger the Stripe checkout flow.
+  // Returns the full response JSON on success (including checkoutUrl if a Stripe session was created),
+  // or null on failure. Previously returned true — now returns the object so callers can check checkoutUrl.
+  const signup = async (firstName, lastName, username, email, password, plan = 'free') => {
     setIsLoading(true)
     setError(null)
 
     const response = await fetch('/api/user/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ firstName, lastName, username, email, password })
+      body: JSON.stringify({ firstName, lastName, username, email, password, plan })
     })
     const json = await response.json()
 
     if (!response.ok) {
       setIsLoading(false) // stop loading state if response is not ok
       setError(json.error) // set error state to the error message from the response
+      return null
     }
 
     if (response.ok) {
       localStorage.setItem('user', JSON.stringify(json))
       dispatch({ type: 'LOGIN', payload: json })
       setIsLoading(false)
-      return true
+      return json // return full data so callers can read checkoutUrl
     }
   }
 

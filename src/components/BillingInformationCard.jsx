@@ -57,6 +57,8 @@ const billingValueSx = {
 
 const BillingInformationCard = ({ user, paymentMethod }) => {
   const isPremium = user?.subscription === 'premium'
+  const isManager = user?.subscription === 'manager'
+  const hasActiveBilling = isPremium || isManager
 
   // Later this should come from Stripe via /api/billing/info.
   // For now, we use paymentMethod if passed in, otherwise a test fallback.
@@ -69,7 +71,15 @@ const BillingInformationCard = ({ user, paymentMethod }) => {
   const formattedStatusLabel =
     statusLabel.charAt(0).toUpperCase() + statusLabel.slice(1)
 
-  if (!isPremium) {
+  // For managers: 50 € base + 5 € per additional community (beyond the 1 included)
+  const managerAdditional = Math.max(0, (user?.maxCommunities || 1) - 1)
+  const monthlyAmountDisplay = isPremium
+    ? '€3.99'
+    : isManager
+      ? `€${50 + managerAdditional * 5}.00`
+      : null
+
+  if (!hasActiveBilling) {
     return (
       <Box sx={{ mt: 4 }}>
         <Typography component="h2" sx={sectionTitleSx}>
@@ -210,7 +220,7 @@ const BillingInformationCard = ({ user, paymentMethod }) => {
               </Typography>
 
               <Typography variant="body1" sx={billingValueSx}>
-                €3.99
+                {monthlyAmountDisplay}
               </Typography>
             </Box>
 

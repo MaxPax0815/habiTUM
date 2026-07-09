@@ -6,7 +6,7 @@ import AppLayout from './layouts/AppLayout'
 import AuthLayout from './layouts/AuthLayout.jsx'
 import PublicLayout from './layouts/PublicLayout.jsx'
 
-// App pages 
+// App pages
 import Communities from './pages/app/Communities'
 import NewCommunity from './pages/app/NewCommunity'
 import CommunityDashboard from './pages/app/CommunityDashboard'
@@ -20,8 +20,33 @@ import ChallengePage from './challenges/ChallengePage.jsx'
 import LandingPage from './pages/public/LandingPage'
 import Login from './pages/public/Login.jsx'
 import Signup from './pages/public/Signup.jsx'
+import ManagerSignup from './pages/public/ManagerSignup.jsx'
+import ConfigureManagerPlan from './pages/public/ConfigureManagerPlan.jsx'
 import ForgotPassword from './pages/public/ForgotPassword.jsx'
 import ResetPassword from './pages/public/ResetPassword.jsx'
+import CheckoutSuccess from './pages/public/CheckoutSuccess.jsx'
+import CheckoutCancel from './pages/public/CheckoutCancel.jsx'
+
+// Login/entry redirect per account state:
+//   active manager   → manager dashboard
+//   pending manager  → plan configuration (must pay first)
+//   lapsed manager   → /today (subscription ended: app access as free user, manager features locked)
+//   everyone else    → /today
+const managerAwareHome = (user) => {
+  if (user?.accountType === 'manager') {
+    if (user.subscription === 'manager') return '/manager'
+    if (user.subscription === 'manager_pending') return '/configure-manager-plan'
+  }
+  return '/today'
+}
+
+// Pending managers have never completed payment — locked out of ALL app pages.
+const isPendingManager = (user) =>
+  user?.accountType === 'manager' && user?.subscription === 'manager_pending'
+
+// Any manager without an active subscription (pending or lapsed) may (re)configure their plan.
+const canConfigureManagerPlan = (user) =>
+  user?.accountType === 'manager' && user?.subscription !== 'manager'
 
 function App() {
   const { user } = useAuthContext()
@@ -33,39 +58,78 @@ function App() {
           <Route element={<PublicLayout />}>
             <Route path="/" element={<LandingPage />} />
 
+            {/* Checkout result pages — user is logged in (just signed up) but not in AppLayout */}
+            <Route path="/checkout/success" element={<CheckoutSuccess />} />
+            <Route path="/checkout/cancel" element={<CheckoutCancel />} />
+
             <Route element={<AuthLayout />}>
               <Route
                 path="/login"
-                element={!user ? <Login /> : <Navigate to={user.accountType === 'manager' ? '/manager' : '/today'} replace /> }
+                element={!user ? <Login /> : <Navigate to={managerAwareHome(user)} replace />}
               />
               <Route
                 path="/signup"
                 element={!user ? <Signup /> : <Navigate to="/today" replace />} />
+
+              {/* Manager onboarding — two standalone auth-layout steps.
+                  Step 1: create the pending account. Step 2: choose plan → Stripe checkout. */}
+              <Route
+                path="/signup/manager"
+                element={!user ? <ManagerSignup /> : <Navigate to={managerAwareHome(user)} replace />}
+              />
+              <Route
+                path="/configure-manager-plan"
+                element={
+                  !user
+                    ? <Navigate to="/" replace />
+                    : canConfigureManagerPlan(user)
+                      ? <ConfigureManagerPlan />
+                      : <Navigate to={managerAwareHome(user)} replace />
+                }
+              />
+
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password/:token" element={<ResetPassword />} />
             </Route>
           </Route>
 
-          {/* Proctected app pages */}
-          <Route element={user ? <AppLayout user={user} /> : <Navigate to="/login" replace />}>
+          {/* Protected app pages.
+              Pending managers (accountType manager, subscription not active) are
+              locked out of ALL app pages until they complete Stripe payment —
+              accountType alone must never grant access. */}
+          <Route
+            element={
+              !user
+                ? <Navigate to="/" replace />
+                : isPendingManager(user)
+                  ? <Navigate to="/configure-manager-plan" replace />
+                  : <AppLayout user={user} />
+            }
+          >
             <Route path="/today" element={<Home />} />
             <Route path="/communities" element={<Communities />} />
             <Route path="/challenges/:challengeId" element={<ChallengePage />} />
             <Route path="/progress" element={<Progress />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/communities/new" element={<NewCommunity />} />
-            <Route path="/communities/:id" element={<CommunityDashboard />} /> 
+            <Route path="/communities/:id" element={<CommunityDashboard />} />
 
-            <Route 
-              path="/manager" 
-              element={user?.accountType === 'manager' ? <ManagerDashboard /> : <Navigate to="/today" replace />}
-            /> {/* manager-only page; accessible by URL but only linked in sidebar for managers */}
+            {/* Manager dashboard — only active managers. Pending managers are sent
+                to /configure-manager-plan to complete payment first. */}
+            <Route
+              path="/manager"
+              element={
+                user?.accountType === 'manager' && user?.subscription === 'manager'
+                  ? <ManagerDashboard />
+                  : <Navigate to={managerAwareHome(user)} replace />
+              }
+            />
           </Route>
 
           {/* Fallback Route */}
           <Route
             path="*"
-            element={<Navigate to={user ? '/today' : '/'} replace />}
+            element={<Navigate to={user ? managerAwareHome(user) : '/'} replace />}
           />
         </ Routes>
       </ BrowserRouter>
