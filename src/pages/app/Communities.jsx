@@ -52,7 +52,7 @@ const CommunityAvatar = ({ logoUrl, name, size = 44 }) => (
 
 const Communities = () => {
   const { user } = useAuthContext()
-  const { communities, fetchCommunities, joinCommunity } = useCommunities()
+  const { communities, fetchCommunities } = useCommunities()
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false) // create-community popup
@@ -200,13 +200,11 @@ const Communities = () => {
               {c.memberCount} members
             </Typography>
             <Button
-              variant="contained"
-              onClick={async () => {
-                const ok = await joinCommunity(c._id)
-                if (ok) navigate(`/communities/${c._id}`)
-              }}
+              variant="outlined"
+              startIcon={<span className="material-symbols-outlined">visibility</span>}
+              onClick={() => navigate(`/communities/${c._id}`)}
             >
-              Join
+              View
             </Button>
           </Box>
         ))}

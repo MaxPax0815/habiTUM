@@ -5,7 +5,6 @@ import { useParams } from "react-router-dom";
 import { useAuthContext } from "../auth/useAuthContext";
 import { ExtendedChallengeCard } from "./Challenges";
 import Leaderboard from "./Leaderboard";
-import PageHeader from "../components/layout/PageHeader";
 import { sectionTitleSx } from "../styles/recipes";
 import AppDialog from "../components/AppDialog";
 import HabitDetails from "../components/HabitDetails";
@@ -313,11 +312,8 @@ const ChallengePage = () => {
           sx={{ mb: 0 }}
         />
 
-        <PageHeader
-          title={challenge.title || "Challenge"}
-          description={challenge.description || "No description yet."}
-        />
-
+        {/* Title + description live inside the card (showHeading), above the
+            participants/days-left/rank row — see ExtendedChallengeCard. */}
         <ExtendedChallengeCard
           challenge={challenge}
           currentUserRank={data.currentUserRank}
@@ -325,7 +321,7 @@ const ChallengePage = () => {
           isCommunityMember={isCommunityMember}
           onJoin={handleJoinChallenge}
           onLeaveChallenge={handleLeaveChallenge}
-          showHeading={false}
+          showHeading
         />
       </Box>
 
