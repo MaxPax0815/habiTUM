@@ -82,6 +82,7 @@ const CommunityDashboard = () => {
   const [challengesError, setChallengesError] = useState(null)
   const [postsError, setPostsError] = useState(null)
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false)
+  const [postDialogKey, setPostDialogKey] = useState(0)
   const [postSubmitting, setPostSubmitting] = useState(false)
   const [error, setError] = useState(null)
 
@@ -188,30 +189,49 @@ const CommunityDashboard = () => {
     setPostSubmitting(true)
     setPostsError(null)
 
-    const authHeader = {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    }
-    const res = await fetch(`/api/communities/${id}/posts`, {
-      method: 'POST',
-      headers: authHeader,
-      body: JSON.stringify({
-        ...postForm,
-        challenge: postForm.challenge || null,
-        eventDate: postForm.eventDate || null,
-      }),
-    })
-    const json = await res.json()
+    console.debug('Creating community post', { communityId: id, postForm })
 
-    setPostSubmitting(false)
+    try {
+      const authHeader = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+      const res = await fetch(`/api/communities/${id}/posts`, {
+        method: 'POST',
+        headers: authHeader,
+        body: JSON.stringify({
+          ...postForm,
+          challenge: postForm.challenge || null,
+          eventDate: postForm.eventDate || null,
+        }),
+      })
 
-    if (res.ok) {
-      setPosts((currentPosts) => [json, ...currentPosts].sort((a, b) =>
-        Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)) || new Date(b.createdAt) - new Date(a.createdAt)
-      ).slice(0, 3))
-      handleClosePostDialog()
-    } else {
-      setPostsError(json.error || 'Could not create post.')
+      const body = await res.text()
+      let json = null
+      if (body) {
+        try {
+          json = JSON.parse(body)
+        } catch {
+          console.error('Invalid JSON from create post response', body)
+          throw new Error('Server returned an invalid response.')
+        }
+      }
+
+      console.debug('Create post response', { status: res.status, body: json })
+
+      if (res.ok) {
+        setPosts((currentPosts) => [json, ...currentPosts].sort((a, b) =>
+          Number(Boolean(b.pinned)) - Number(Boolean(a.pinned)) || new Date(b.createdAt) - new Date(a.createdAt)
+        ).slice(0, 3))
+        handleClosePostDialog()
+      } else {
+        setPostsError(json?.error || 'Could not create post.')
+      }
+    } catch (error) {
+      console.error('Failed to create community post', error)
+      setPostsError(error.message || 'Could not create post.')
+    } finally {
+      setPostSubmitting(false)
     }
   }
 
@@ -322,7 +342,10 @@ const CommunityDashboard = () => {
             {canManageCommunity && (
               <Button
                 variant="outlined"
-                onClick={() => setIsPostDialogOpen(true)}
+                onClick={() => {
+                  setPostDialogKey((current) => current + 1)
+                  setIsPostDialogOpen(true)
+                }}
                 startIcon={<span className="material-symbols-outlined">add</span>}
               >
                 New Post
@@ -400,6 +423,7 @@ const CommunityDashboard = () => {
       </PageSection>
 
 <CommunityPostDialog
+          key={postDialogKey}
           open={isPostDialogOpen}
           onClose={handleClosePostDialog}
           onSubmit={handleCreatePost}

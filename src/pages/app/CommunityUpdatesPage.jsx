@@ -24,6 +24,7 @@ const CommunityUpdatesPage = () => {
   const [postsError, setPostsError] = useState(null)
   const [error, setError] = useState(null)
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false)
+  const [postDialogKey, setPostDialogKey] = useState(0)
   const [postSubmitting, setPostSubmitting] = useState(false)
 
   const token = user.token
@@ -74,24 +75,43 @@ const CommunityUpdatesPage = () => {
     setPostSubmitting(true)
     setPostsError(null)
 
-    const authHeader = {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    }
-    const res = await fetch(`/api/communities/${id}/posts`, {
-      method: 'POST',
-      headers: authHeader,
-      body: JSON.stringify(postForm),
-    })
-    const json = await res.json()
+    console.debug('Creating community post', { communityId: id, postForm })
 
-    setPostSubmitting(false)
+    try {
+      const authHeader = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+      const res = await fetch(`/api/communities/${id}/posts`, {
+        method: 'POST',
+        headers: authHeader,
+        body: JSON.stringify(postForm),
+      })
 
-    if (res.ok) {
-      setPosts((currentPosts) => [json, ...currentPosts].sort(sortCommunityPosts))
-      setIsPostDialogOpen(false)
-    } else {
-      setPostsError(json.error || 'Could not create post.')
+      const body = await res.text()
+      let json = null
+      if (body) {
+        try {
+          json = JSON.parse(body)
+        } catch {
+          console.error('Invalid JSON from create post response', body)
+          throw new Error('Server returned an invalid response.')
+        }
+      }
+
+      console.debug('Create post response', { status: res.status, body: json })
+
+      if (res.ok) {
+        setPosts((currentPosts) => [json, ...currentPosts].sort(sortCommunityPosts))
+        setIsPostDialogOpen(false)
+      } else {
+        setPostsError(json?.error || 'Could not create post.')
+      }
+    } catch (error) {
+      console.error('Failed to create community post', error)
+      setPostsError(error.message || 'Could not create post.')
+    } finally {
+      setPostSubmitting(false)
     }
   }
 
@@ -148,7 +168,10 @@ const CommunityUpdatesPage = () => {
         actions={canManageCommunity && (
           <Button
             variant="outlined"
-            onClick={() => setIsPostDialogOpen(true)}
+            onClick={() => {
+              setPostDialogKey((current) => current + 1)
+              setIsPostDialogOpen(true)
+            }}
             startIcon={<span className="material-symbols-outlined">add</span>}
           >
             New Post
@@ -192,6 +215,7 @@ const CommunityUpdatesPage = () => {
       </PageSection>
 
       <CommunityPostDialog
+        key={postDialogKey}
         open={isPostDialogOpen}
         onClose={() => setIsPostDialogOpen(false)}
         onSubmit={handleCreatePost}

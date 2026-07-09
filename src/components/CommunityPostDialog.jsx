@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
-  Box,
   Button,
   Checkbox,
   Dialog,
@@ -24,10 +23,6 @@ const emptyPostForm = {
 const CommunityPostDialog = ({ challenges = [], onClose, onSubmit, open, submitting }) => {
   const [postForm, setPostForm] = useState(emptyPostForm)
 
-  useEffect(() => {
-    if (!open) setPostForm(emptyPostForm)
-  }, [open])
-
   const handlePostFormChange = (field) => (event) => {
     const value = field === 'pinned' ? event.target.checked : event.target.value
     setPostForm((currentForm) => ({ ...currentForm, [field]: value }))
@@ -35,14 +30,19 @@ const CommunityPostDialog = ({ challenges = [], onClose, onSubmit, open, submitt
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    await onSubmit({
-      title: postForm.title.trim(),
-      body: postForm.body.trim() || undefined,
-      imageUrl: postForm.imageUrl.trim() || undefined,
-      challenge: postForm.challenge || null,
-      eventDate: postForm.eventDate || null,
-      pinned: postForm.pinned,
-    })
+
+    try {
+      await onSubmit({
+        title: postForm.title.trim(),
+        body: postForm.body.trim() || undefined,
+        imageUrl: postForm.imageUrl.trim() || undefined,
+        challenge: postForm.challenge || null,
+        eventDate: postForm.eventDate || null,
+        pinned: postForm.pinned,
+      })
+    } catch (error) {
+      console.error('Community post submission failed:', error)
+    }
   }
 
   return (
@@ -52,56 +52,56 @@ const CommunityPostDialog = ({ challenges = [], onClose, onSubmit, open, submitt
       fullWidth
       maxWidth="sm"
     >
-      <Box component="form" onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <DialogTitle>New community post</DialogTitle>
         <DialogContent sx={{ display: 'grid', gap: 2, pt: 1 }}>
-        <TextField
-          label="Title"
-          value={postForm.title}
-          onChange={handlePostFormChange('title')}
-          required
-          fullWidth
-        />
-        <TextField
-          label="Body"
-          value={postForm.body}
-          onChange={handlePostFormChange('body')}
-          multiline
-          minRows={4}
-          fullWidth
-        />
-        <TextField
-          label="Image URL"
-          value={postForm.imageUrl}
-          onChange={handlePostFormChange('imageUrl')}
-          fullWidth
-        />
-        <TextField
-          label="Related challenge"
-          value={postForm.challenge}
-          onChange={handlePostFormChange('challenge')}
-          select
-          fullWidth
-        >
-          <MenuItem value="">None</MenuItem>
-          {challenges.map((challenge) => (
-            <MenuItem key={challenge._id} value={challenge._id}>
-              {challenge.title}
-            </MenuItem>
-          ))}
-        </TextField>
-        <TextField
-          label="Gathering date"
-          value={postForm.eventDate}
-          onChange={handlePostFormChange('eventDate')}
-          type="datetime-local"
-          fullWidth
-          InputLabelProps={{ shrink: true }}
-        />
-        <FormControlLabel
-          control={<Checkbox checked={postForm.pinned} onChange={handlePostFormChange('pinned')} />}
-          label="Pin this post"
-        />
+          <TextField
+            label="Title"
+            value={postForm.title}
+            onChange={handlePostFormChange('title')}
+            required
+            fullWidth
+          />
+          <TextField
+            label="Body"
+            value={postForm.body}
+            onChange={handlePostFormChange('body')}
+            multiline
+            minRows={4}
+            fullWidth
+          />
+          <TextField
+            label="Image URL"
+            value={postForm.imageUrl}
+            onChange={handlePostFormChange('imageUrl')}
+            fullWidth
+          />
+          <TextField
+            label="Related challenge"
+            value={postForm.challenge}
+            onChange={handlePostFormChange('challenge')}
+            select
+            fullWidth
+          >
+            <MenuItem value="">None</MenuItem>
+            {challenges.map((challenge) => (
+              <MenuItem key={challenge._id} value={challenge._id}>
+                {challenge.title}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            label="Gathering date"
+            value={postForm.eventDate}
+            onChange={handlePostFormChange('eventDate')}
+            type="datetime-local"
+            fullWidth
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+          <FormControlLabel
+            control={<Checkbox checked={postForm.pinned} onChange={handlePostFormChange('pinned')} />}
+            label="Pin this post"
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={onClose}>Cancel</Button>
@@ -109,7 +109,7 @@ const CommunityPostDialog = ({ challenges = [], onClose, onSubmit, open, submitt
             Post
           </Button>
         </DialogActions>
-      </Box>
+      </form>
     </Dialog>
   )
 }
