@@ -65,7 +65,11 @@ const Communities = () => {
   const matches = (c) => c.name.toLowerCase().includes(term)
 
   const joined = communities.filter((c) => c.membershipStatus === 'accepted' && matches(c))
-  const discover = communities.filter((c) => c.membershipStatus !== 'accepted' && matches(c))
+  // Discover never shows private communities — they are invite-only and only
+  // appear under "Your communities" once you're a member (this holds for
+  // managers too, who can otherwise create private communities). The backend
+  // also withholds private communities from non-members as the real guard.
+  const discover = communities.filter((c) => c.membershipStatus !== 'accepted' && !c.isPrivate && matches(c))
 
   return (
     <Box sx={{ textAlign: 'left' }}>
