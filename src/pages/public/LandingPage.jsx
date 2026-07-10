@@ -1,9 +1,11 @@
+import { useEffect, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import {
   Alert,
   Box,
   Button,
   Chip,
+  CircularProgress,
   Container,
   Divider,
   Grid,
@@ -17,6 +19,10 @@ import WhatshotIcon from "@mui/icons-material/Whatshot";
 import GroupsIcon from "@mui/icons-material/Groups";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import MilitaryTechIcon from "@mui/icons-material/MilitaryTech";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+
+import ChallengePreview from "../../challenges/ChallengePreview";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import WorkspacePremiumOutlinedIcon from "@mui/icons-material/WorkspacePremiumOutlined";
 import BusinessCenterOutlinedIcon from "@mui/icons-material/BusinessCenterOutlined";
@@ -123,6 +129,225 @@ function DashboardMockup() {
         }}
       />
     </Box>
+  );
+}
+
+// ------------------------------------------------------
+// Challenges section — the three most trending challenges (live from the public
+// API) on the left, a marketing card explaining challenges on the right.
+// ------------------------------------------------------
+
+const DIFFICULTY_STYLES = {
+  easy: { label: "Easy", bg: colors.softGreen, color: colors.green },
+  medium: { label: "Medium", bg: colors.softBlue, color: colors.primary },
+  hard: { label: "Hard", bg: colors.softOrange, color: colors.orange },
+};
+
+// Right-side card that markets the idea behind challenges.
+function ChallengesInfoCard() {
+  const highlights = [
+    { title: "Live leaderboards", text: "See exactly where you rank as everyone's streaks grow." },
+    { title: "Real-time trackers", text: "Watch progress update as your community checks in." },
+    { title: "Friendly competition", text: "A little rivalry that makes habits actually stick." },
+  ];
+
+  return (
+    <AppCard
+      sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+      contentSx={{ flex: 1, display: "flex", flexDirection: "column" }}
+    >
+      <IconBadge bg={colors.softOrange} color={colors.orange}>
+        <EmojiEventsIcon fontSize="small" />
+      </IconBadge>
+
+      <Typography
+        variant="overline"
+        sx={{ color: colors.muted, fontWeight: 900, letterSpacing: "0.18em" }}
+      >
+        Why challenges?
+      </Typography>
+
+      <Typography variant="h5" sx={{ fontWeight: 800, mt: 0.5, mb: 1.5, lineHeight: 1.2 }}>
+        Push each other to the next level
+      </Typography>
+
+      <Typography sx={{ color: "text.secondary", lineHeight: 1.7, mb: 3 }}>
+        Challenges turn solo habits into a team effort — motivate and push each
+        other inside your community.
+      </Typography>
+
+      <Stack spacing={2} sx={{ flex: 1 }}>
+        {highlights.map((item) => (
+          <Box key={item.title} sx={{ display: "flex", alignItems: "flex-start", gap: 1.25 }}>
+            <CheckCircleOutlinedIcon
+              sx={{ fontSize: 20, color: colors.orange, mt: "2px", flexShrink: 0 }}
+            />
+            <Box>
+              <Typography sx={{ fontWeight: 800, color: "text.primary", lineHeight: 1.3 }}>
+                {item.title}
+              </Typography>
+              <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.5 }}>
+                {item.text}
+              </Typography>
+            </Box>
+          </Box>
+        ))}
+      </Stack>
+
+      <Box sx={{ mt: "auto", pt: 3 }}>
+        <Divider sx={{ mb: 2 }} />
+        <Typography sx={{ color: "text.secondary", lineHeight: 1.6 }}>
+          Hit{" "}
+          <Box component="span" sx={{ fontWeight: 800, color: colors.orange }}>
+            View
+          </Box>{" "}
+          on any challenge to explore its leaderboard yourself.
+        </Typography>
+      </Box>
+    </AppCard>
+  );
+}
+
+function TrendingChallengeCard({ challenge, onView }) {
+  const difficulty = DIFFICULTY_STYLES[challenge.difficulty] || DIFFICULTY_STYLES.medium;
+
+  return (
+    <AppCard>
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{ alignItems: "flex-start", justifyContent: "space-between", mb: 0.5 }}
+      >
+        <Typography sx={{ fontWeight: 800, color: "text.primary", lineHeight: 1.3 }}>
+          {challenge.title}
+        </Typography>
+        <Chip
+          label={difficulty.label}
+          size="small"
+          sx={{
+            bgcolor: difficulty.bg,
+            color: difficulty.color,
+            fontWeight: 800,
+            flexShrink: 0,
+          }}
+        />
+      </Stack>
+
+      {challenge.community?.name && (
+        <Typography variant="body2" sx={{ color: colors.muted, fontWeight: 700, mb: 1 }}>
+          {challenge.community.name}
+        </Typography>
+      )}
+
+      {challenge.description && (
+        <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.6, mb: 1.5 }}>
+          {challenge.description}
+        </Typography>
+      )}
+
+      <Stack
+        direction="row"
+        spacing={2}
+        sx={{ alignItems: "center", justifyContent: "space-between", mt: 0.5 }}
+      >
+        <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+          <GroupsIcon sx={{ fontSize: 18, color: colors.primary }} />
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>
+              {challenge.participantCount}
+            </Box>{" "}
+            {challenge.participantCount === 1 ? "participant" : "participants"}
+          </Typography>
+        </Stack>
+
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<VisibilityOutlinedIcon />}
+          onClick={() => onView(challenge)}
+          sx={{ fontWeight: 800, flexShrink: 0 }}
+        >
+          View
+        </Button>
+      </Stack>
+    </AppCard>
+  );
+}
+
+function TrendingChallenges() {
+  const [challenges, setChallenges] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [previewId, setPreviewId] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+
+    const fetchTrending = async () => {
+      try {
+        // Public endpoint — no auth header. Registered before requireAuth so
+        // logged-out visitors can load it.
+        const response = await fetch("/api/challenges/trending");
+        if (!response.ok) throw new Error("Could not load trending challenges.");
+        const data = await response.json();
+        if (active) setChallenges(Array.isArray(data) ? data : []);
+      } catch (err) {
+        if (active) setError(err.message);
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    fetchTrending();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return <Alert severity="error">{error}</Alert>;
+  }
+
+  if (challenges.length === 0) {
+    return (
+      <AppCard sx={{ textAlign: "center", py: 5 }}>
+        <Typography sx={{ fontSize: 34, mb: 1 }}>🏆</Typography>
+        <Typography sx={{ fontWeight: 800, mb: 0.5 }}>
+          No trending challenges yet
+        </Typography>
+        <Typography sx={{ color: "text.secondary" }}>
+          Join a community and be the first to start one.
+        </Typography>
+      </AppCard>
+    );
+  }
+
+  return (
+    <>
+      <Stack spacing={2} sx={{ height: "100%" }}>
+        {challenges.slice(0, 3).map((challenge) => (
+          <TrendingChallengeCard
+            key={challenge._id}
+            challenge={challenge}
+            onView={(selected) => setPreviewId(selected._id)}
+          />
+        ))}
+      </Stack>
+
+      <ChallengePreview
+        challengeId={previewId}
+        open={Boolean(previewId)}
+        onClose={() => setPreviewId(null)}
+      />
+    </>
   );
 }
 
@@ -403,221 +628,8 @@ export default function LandingPage() {
           </Grid>
         </Container>
 
-        {/* Plans / Pricing Section */}
-        <Container id="plans" maxWidth="lg" sx={{ pb: { xs: 7, md: 10 } }}>
-          <Box sx={{ mb: 1, textAlign: "center" }}>
-            <Typography
-              variant="overline"
-              sx={{ color: colors.muted, fontWeight: 900, letterSpacing: "0.18em" }}
-            >
-              PRICING
-            </Typography>
-            <Typography
-              variant="h2"
-              sx={{ fontSize: { xs: 30, md: 38 }, letterSpacing: "-0.035em" }}
-            >
-              Choose your plan
-            </Typography>
-            <Typography
-              sx={{ color: "text.secondary", mt: 1, maxWidth: 480, mx: "auto" }}
-            >
-              Start for free. Upgrade when you're ready to go further.
-            </Typography>
-          </Box>
-
-          <Grid container spacing={3} sx={{ mt: 3 }} alignItems="stretch">
-            {/* ── Free ── */}
-            <Grid size={{ xs: 12, md: 4 }}>
-              <AppCard sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-                <Box sx={{ flex: 1 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
-                    <IconBadge bg={colors.softNeutral} color={colors.textSecondary} sx={{ mb: 0 }}>
-                      <TrackChangesIcon fontSize="small" />
-                    </IconBadge>
-                    <Typography variant="h6" sx={{ fontWeight: 800 }}>Free</Typography>
-                    <Typography
-                      sx={{
-                        ml: "auto",
-                        px: 1.4,
-                        py: 0.4,
-                        borderRadius: "999px",
-                        fontSize: "0.875rem",
-                        fontWeight: 800,
-                        color: colors.textSecondary,
-                        bgcolor: colors.softNeutral,
-                      }}
-                    >
-                      0 €
-                    </Typography>
-                  </Box>
-
-                  <Typography sx={{ color: "text.secondary", mb: 2 }}>
-                    Everything you need to build lasting habits — no credit card required.
-                  </Typography>
-
-                  <Divider sx={{ mb: 2 }} />
-
-                  <Stack spacing={1}>
-                    {["Track unlimited personal habits", "Daily & weekly habit frequency", "Streak tracking & stats", "Join communities & challenges"].map((f) => (
-                      <Box key={f} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                        <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: colors.green, mt: "3px", flexShrink: 0 }} />
-                        <Typography sx={{ color: "text.secondary", lineHeight: 1.5 }}>{f}</Typography>
-                      </Box>
-                    ))}
-                  </Stack>
-                </Box>
-
-                <Box sx={{ mt: "auto", pt: 3 }}>
-                  <Button
-                    component={RouterLink}
-                    to="/signup"
-                    variant="outlined"
-                    fullWidth
-                    size="large"
-                    endIcon={<ArrowForwardIcon />}
-                  >
-                    Start for free
-                  </Button>
-                </Box>
-              </AppCard>
-            </Grid>
-
-            {/* ── Premium ── */}
-            <Grid size={{ xs: 12, md: 4 }}>
-              <AppCard
-                sx={{
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  border: `2px solid ${colors.primary}`,
-                  bgcolor: colors.softBlue,
-                }}
-              >
-                <Box sx={{ flex: 1 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
-                    <IconBadge bg={colors.primary} color="#fff" sx={{ mb: 0 }}>
-                      <WorkspacePremiumOutlinedIcon fontSize="small" />
-                    </IconBadge>
-                    <Typography variant="h6" sx={{ fontWeight: 800 }}>Premium</Typography>
-                    <Chip
-                      label="Popular"
-                      size="small"
-                      sx={{ ml: "auto", bgcolor: colors.primary, color: "#fff", fontWeight: 800, fontSize: 11 }}
-                    />
-                  </Box>
-
-                  <Box sx={{ mb: 2 }}>
-                    <Typography
-                      sx={{ px: 0, py: 0.4, fontSize: "0.875rem", fontWeight: 800, color: colors.primary }}
-                    >
-                      3.99 € / month
-                    </Typography>
-                  </Box>
-
-                  <Typography sx={{ color: "text.secondary", mb: 2 }}>
-                    Unlock advanced analytics and deepen your habit insights.
-                  </Typography>
-
-                  <Divider sx={{ mb: 2 }} />
-
-                  <Stack spacing={1}>
-                    {[
-                      "Everything in Free",
-                      "Progress analytics dashboard",
-                      "Habit Pulse score & coach insights",
-                      "Streak recovery stats & heatmaps",
-                      "Weekly & monthly trend charts",
-                    ].map((f) => (
-                      <Box key={f} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                        <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: colors.primary, mt: "3px", flexShrink: 0 }} />
-                        <Typography sx={{ color: "text.secondary", lineHeight: 1.5 }}>{f}</Typography>
-                      </Box>
-                    ))}
-                  </Stack>
-                </Box>
-
-                <Box sx={{ mt: "auto", pt: 3 }}>
-                  <Button
-                    component={RouterLink}
-                    to="/signup?plan=premium"
-                    variant="contained"
-                    fullWidth
-                    size="large"
-                    endIcon={<ArrowForwardIcon />}
-                  >
-                    Go Premium
-                  </Button>
-                </Box>
-              </AppCard>
-            </Grid>
-
-            {/* ── Manager ── */}
-            <Grid size={{ xs: 12, md: 4 }}>
-              <AppCard sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-                <Box sx={{ flex: 1 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
-                    <IconBadge bg={colors.softOrange} color={colors.orange} sx={{ mb: 0 }}>
-                      <BusinessCenterOutlinedIcon fontSize="small" />
-                    </IconBadge>
-                    <Typography variant="h6" sx={{ fontWeight: 800 }}>Manager</Typography>
-                    <Typography
-                      sx={{
-                        ml: "auto",
-                        px: 1.4,
-                        py: 0.4,
-                        borderRadius: "999px",
-                        fontSize: "0.875rem",
-                        fontWeight: 800,
-                        color: colors.orange,
-                        bgcolor: colors.softOrange,
-                      }}
-                    >
-                      from 20 €
-                    </Typography>
-                  </Box>
-
-                  <Typography sx={{ color: "text.secondary", mb: 2 }}>
-                    Host branded communities and run challenges for your institution.
-                  </Typography>
-
-                  <Divider sx={{ mb: 2 }} />
-
-                  <Stack spacing={1}>
-                    {[
-                      "Everything in Premium",
-                      "Create branded public communities",
-                      "Launch challenges & leaderboards",
-                      "20 € base + 5 € per community / month",
-                      "2 € per challenge slot / month",
-                    ].map((f) => (
-                      <Box key={f} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                        <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: colors.orange, mt: "3px", flexShrink: 0 }} />
-                        <Typography sx={{ color: "text.secondary", lineHeight: 1.5 }}>{f}</Typography>
-                      </Box>
-                    ))}
-                  </Stack>
-                </Box>
-
-                <Box sx={{ mt: "auto", pt: 3 }}>
-                  <Button
-                    component={RouterLink}
-                    to="/signup/manager"
-                    variant="outlined"
-                    fullWidth
-                    size="large"
-                    endIcon={<ArrowForwardIcon />}
-                    sx={{ borderColor: colors.orange, color: colors.orange, "&:hover": { borderColor: colors.orange, bgcolor: colors.softOrange } }}
-                  >
-                    Create manager account
-                  </Button>
-                </Box>
-              </AppCard>
-            </Grid>
-          </Grid>
-        </Container>
-
-        {/* Community Section */}
-        <Container id="challenges" maxWidth="lg" sx={{ pb: { xs: 7, md: 10 } }}>
+        {/* Communities Section */}
+        <Container id="communities" maxWidth="lg" sx={{ pb: { xs: 7, md: 10 } }}>
           <Box
             sx={{
               bgcolor: colors.primaryDark,
@@ -694,7 +706,7 @@ export default function LandingPage() {
                   </AppCard>
 
                   <AppCard sx={{ textAlign: "center" }}>
-                    <Typography sx={{ fontSize: 34, mb: 1 }}>🏆</Typography>
+                    <Typography sx={{ fontSize: 34, mb: 1 }}>🤝</Typography>
 
                     <Typography
                       variant="overline"
@@ -704,18 +716,284 @@ export default function LandingPage() {
                         letterSpacing: "0.18em",
                       }}
                     >
-                      Challenges
+                      Stay accountable
                     </Typography>
 
                     <Typography sx={{ color: "text.secondary", lineHeight: 1.7 }}>
-                      30-day sprints, reading goals, detox weeks — take on challenges and earn
-                      your place on the leaderboard.
+                      Share progress, cheer each other on, and keep your streaks alive with a
+                      group that has your back — public groups or invite-only circles.
                     </Typography>
                   </AppCard>
                 </Stack>
               </Grid>
             </Grid>
           </Box>
+        </Container>
+
+        {/* Challenges Section — trending challenges (live) + info card */}
+        <Container id="challenges" maxWidth="lg" sx={{ pb: { xs: 7, md: 10 } }}>
+          <Box sx={{ mb: 4, textAlign: "center" }}>
+            <Typography
+              variant="overline"
+              sx={{ color: colors.muted, fontWeight: 900, letterSpacing: "0.18em" }}
+            >
+              Compete & stay motivated
+            </Typography>
+            <Typography
+              variant="h2"
+              sx={{ fontSize: { xs: 30, md: 38 }, letterSpacing: "-0.035em" }}
+            >
+              Trending challenges
+            </Typography>
+            <Typography sx={{ color: "text.secondary", mt: 1, maxWidth: 520, mx: "auto" }}>
+              Jump into what the community is doing right now and climb the leaderboard.
+            </Typography>
+          </Box>
+
+          <Grid container spacing={4} sx={{ alignItems: "stretch" }}>
+            {/* Left — trending challenges, live from the backend */}
+            <Grid size={{ xs: 12, md: 7 }} sx={{ order: { xs: 2, md: 1 } }}>
+              <TrendingChallenges />
+            </Grid>
+
+            {/* Right — marketing card explaining challenges */}
+            <Grid size={{ xs: 12, md: 5 }} sx={{ display: "flex", order: { xs: 1, md: 2 } }}>
+              <ChallengesInfoCard />
+            </Grid>
+          </Grid>
+        </Container>
+
+        {/* Plans / Pricing Section */}
+        <Container id="plans" maxWidth="lg" sx={{ pb: { xs: 7, md: 10 } }}>
+          <Box sx={{ mb: 1, textAlign: "center" }}>
+            <Typography
+              variant="overline"
+              sx={{ color: colors.muted, fontWeight: 900, letterSpacing: "0.18em" }}
+            >
+              PRICING
+            </Typography>
+            <Typography
+              variant="h2"
+              sx={{ fontSize: { xs: 30, md: 38 }, letterSpacing: "-0.035em" }}
+            >
+              Choose your plan
+            </Typography>
+            <Typography
+              sx={{ color: "text.secondary", mt: 1, maxWidth: 480, mx: "auto" }}
+            >
+              Start for free. Upgrade when you're ready to go further.
+            </Typography>
+          </Box>
+
+          <Grid container spacing={3} sx={{ mt: 3 }} alignItems="stretch">
+            {/* ── Free ── */}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <AppCard
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+                contentSx={{ flex: 1, display: "flex", flexDirection: "column" }}
+              >
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
+                    <IconBadge bg={colors.softNeutral} color={colors.textSecondary} sx={{ mb: 0 }}>
+                      <TrackChangesIcon fontSize="small" />
+                    </IconBadge>
+                    <Typography variant="h6" sx={{ fontWeight: 800 }}>Free</Typography>
+                    <Typography
+                      sx={{
+                        ml: "auto",
+                        px: 1.4,
+                        py: 0.4,
+                        borderRadius: "999px",
+                        fontSize: "0.875rem",
+                        fontWeight: 800,
+                        color: colors.textSecondary,
+                        bgcolor: colors.softNeutral,
+                      }}
+                    >
+                      0 €
+                    </Typography>
+                  </Box>
+
+                  <Typography sx={{ color: "text.secondary", mb: 2, minHeight: 48 }}>
+                    Everything you need to build lasting habits — no credit card required.
+                  </Typography>
+
+                  <Divider sx={{ mb: 2 }} />
+
+                  <Stack spacing={1}>
+                    {["Track unlimited personal habits", "Daily & weekly habit frequency", "Join communities & challenges"].map((f) => (
+                      <Box key={f} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                        <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: colors.green, mt: "3px", flexShrink: 0 }} />
+                        <Typography sx={{ color: "text.secondary", lineHeight: 1.5 }}>{f}</Typography>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+
+                <Box sx={{ mt: "auto", pt: 3 }}>
+                  <Button
+                    component={RouterLink}
+                    to="/signup"
+                    variant="outlined"
+                    fullWidth
+                    size="large"
+                    endIcon={<ArrowForwardIcon />}
+                    sx={{ height: 52, whiteSpace: "nowrap" }}
+                  >
+                    Start for free
+                  </Button>
+                </Box>
+              </AppCard>
+            </Grid>
+
+            {/* ── Premium ── */}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <AppCard
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  border: `1px solid ${colors.primary}`,
+                  boxShadow: `inset 0 0 0 1px ${colors.primary}`,
+                  bgcolor: colors.softBlue,
+                }}
+                contentSx={{ flex: 1, display: "flex", flexDirection: "column" }}
+              >
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
+                    <IconBadge bg={colors.primary} color="#fff" sx={{ mb: 0 }}>
+                      <WorkspacePremiumOutlinedIcon fontSize="small" />
+                    </IconBadge>
+                    <Typography variant="h6" sx={{ fontWeight: 800 }}>Premium</Typography>
+                    <Typography
+                      sx={{
+                        ml: "auto",
+                        px: 1.4,
+                        py: 0.4,
+                        borderRadius: "999px",
+                        fontSize: "0.875rem",
+                        fontWeight: 800,
+                        color: "#fff",
+                        bgcolor: colors.primary,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      3.99 € / month
+                    </Typography>
+                  </Box>
+
+                  <Typography sx={{ color: "text.secondary", mb: 2, minHeight: 48 }}>
+                    Unlock advanced analytics and deepen your habit insights.
+                  </Typography>
+
+                  <Divider sx={{ mb: 2 }} />
+
+                  <Stack spacing={1}>
+                    {[
+                      "Everything in Free",
+                      "Progress analytics dashboard",
+                      "Streak recovery stats & heatmaps",
+                      "Create your own private Communities & Challenges",
+                    ].map((f) => (
+                      <Box key={f} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                        <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: colors.primary, mt: "3px", flexShrink: 0 }} />
+                        <Typography sx={{ color: "text.secondary", lineHeight: 1.5 }}>{f}</Typography>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+
+                <Box sx={{ mt: "auto", pt: 3 }}>
+                  <Button
+                    component={RouterLink}
+                    to="/signup?plan=premium"
+                    variant="contained"
+                    fullWidth
+                    size="large"
+                    endIcon={<ArrowForwardIcon />}
+                    sx={{ height: 52, whiteSpace: "nowrap" }}
+                  >
+                    Go Premium
+                  </Button>
+                </Box>
+              </AppCard>
+            </Grid>
+
+            {/* ── Manager ── */}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <AppCard
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+                contentSx={{ flex: 1, display: "flex", flexDirection: "column" }}
+              >
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
+                    <IconBadge bg={colors.softOrange} color={colors.orange} sx={{ mb: 0 }}>
+                      <BusinessCenterOutlinedIcon fontSize="small" />
+                    </IconBadge>
+                    <Typography variant="h6" sx={{ fontWeight: 800 }}>Manager</Typography>
+                    <Typography
+                      sx={{
+                        ml: "auto",
+                        px: 1.4,
+                        py: 0.4,
+                        borderRadius: "999px",
+                        fontSize: "0.875rem",
+                        fontWeight: 800,
+                        color: colors.orange,
+                        bgcolor: colors.softOrange,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      from 50 €
+                    </Typography>
+                  </Box>
+
+                  <Typography sx={{ color: "text.secondary", mb: 2, minHeight: 48 }}>
+                    Host branded communities and run challenges for your institution.
+                  </Typography>
+
+                  <Divider sx={{ mb: 2 }} />
+
+                  <Stack spacing={1}>
+                    {[
+                      "Everything in Premium",
+                      "Create branded public communities",
+                      "Launch challenges & leaderboards",
+                      "50 € base with 1 community already included",
+                      "Add up to 15 additional communities for 5€ each",
+                    ].map((f) => (
+                      <Box key={f} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                        <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: colors.orange, mt: "3px", flexShrink: 0 }} />
+                        <Typography sx={{ color: "text.secondary", lineHeight: 1.5 }}>{f}</Typography>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+
+                <Box sx={{ mt: "auto", pt: 3 }}>
+                  <Button
+                    component={RouterLink}
+                    to="/signup/manager"
+                    variant="outlined"
+                    fullWidth
+                    size="large"
+                    endIcon={<ArrowForwardIcon />}
+                    sx={{ height: 52, whiteSpace: "nowrap", borderColor: colors.orange, color: colors.orange, "&:hover": { borderColor: colors.orange, bgcolor: colors.softOrange } }}
+                  >
+                    Create manager account
+                  </Button>
+                </Box>
+              </AppCard>
+            </Grid>
+          </Grid>
         </Container>
 
         {/* Stats Section */}

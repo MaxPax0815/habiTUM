@@ -1,7 +1,22 @@
+import { useState } from "react";
 import { Link as RouterLink, useLocation } from "react-router-dom";
-import { Alert, Box, Button, IconButton, Snackbar, Stack, Typography } from "@mui/material";
+import {
+    Alert,
+    Box,
+    Button,
+    Drawer,
+    IconButton,
+    List,
+    ListItemButton,
+    ListItemText,
+    Snackbar,
+    Stack,
+    Typography,
+} from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import CloseIcon from "@mui/icons-material/Close";
+import MenuIcon from "@mui/icons-material/Menu";
 
 import { colors } from '../styles/tokens'
 import { outlinedPillButtonSx, pillButtonSx } from '../styles/recipes'
@@ -14,6 +29,7 @@ import { useCancelManagerSignup } from '../auth/useCancelManagerSignup'
 const sectionLinks = [
     { label: "Habits", href: "#habits" },
     { label: "Features", href: "#features" },
+    { label: "Communities", href: "#communities" },
     { label: "Challenges", href: "#challenges" },
     { label: "Plans", href: "#plans" },
 ];
@@ -171,6 +187,107 @@ const SectionNav = () => {
   );
 };
 
+// Mobile-only section navigation for the landing page. It reuses `sectionLinks`
+// so the burger menu and desktop nav always point to the same page sections.
+const LandingSectionMenu = () => {
+    const [isOpen, setIsOpen] = useState(false)
+
+    const closeMenu = () => setIsOpen(false)
+
+    return (
+        <>
+            <IconButton
+                aria-label="Open section navigation"
+                aria-controls="landing-section-menu"
+                aria-expanded={isOpen ? "true" : undefined}
+                onClick={() => setIsOpen(true)}
+                sx={{
+                    ...linkResetSx,
+                    display: { xs: "inline-flex", md: "none" },
+                    color: colors.textPrimary,
+                    p: 1,
+                    mr: 0.5,
+
+                    "&:hover": {
+                        backgroundColor: colors.softBlue,
+                    },
+                }}
+            >
+                <MenuIcon />
+            </IconButton>
+
+            <Drawer
+                id="landing-section-menu"
+                anchor="left"
+                open={isOpen}
+                onClose={closeMenu}
+                PaperProps={{
+                    sx: {
+                        width: 280,
+                        borderRadius: 0,
+                        borderRight: `1px solid ${colors.border}`,
+                    },
+                }}
+            >
+                <Box sx={{ p: 2 }}>
+                    <Stack
+                        direction="row"
+                        sx={{
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            mb: 1,
+                        }}
+                    >
+                        <Typography sx={{ fontWeight: 900, color: colors.textPrimary }}>
+                            Habi
+                            <Box component="span" sx={{ color: colors.primary }}>
+                                TUM
+                            </Box>
+                        </Typography>
+
+                        <IconButton
+                            aria-label="Close section navigation"
+                            onClick={closeMenu}
+                            sx={{ color: colors.textSecondary }}
+                        >
+                            <CloseIcon />
+                        </IconButton>
+                    </Stack>
+
+                    <List component="nav" aria-label="Landing page sections" sx={{ py: 0 }}>
+                        {sectionLinks.map((link) => (
+                            <ListItemButton
+                                key={link.href}
+                                component="a"
+                                href={link.href}
+                                onClick={closeMenu}
+                                sx={{
+                                    borderRadius: 2,
+                                    px: 1.5,
+                                    py: 1.25,
+                                    color: colors.textSecondary,
+
+                                    "&:hover": {
+                                        color: colors.textPrimary,
+                                        backgroundColor: colors.softBlue,
+                                    },
+                                }}
+                            >
+                                <ListItemText
+                                    primary={link.label}
+                                    primaryTypographyProps={{
+                                        fontWeight: 800,
+                                    }}
+                                />
+                            </ListItemButton>
+                        ))}
+                    </List>
+                </Box>
+            </Drawer>
+        </>
+    )
+}
+
 // Top-level header shown across the app. It's context-aware: it reads the current
 // route and adapts which pieces it renders.
 //   - Composes the helpers above: always <LogoLink />, plus <SectionNav /> and the
@@ -217,24 +334,33 @@ const Header = () => {
                     px: 2,
                     py: 1,
                     display: "grid",
-                    gridTemplateColumns: "1fr auto 1fr",
+                    gridTemplateColumns: { xs: "auto 1fr auto", md: "1fr auto 1fr" },
                     alignItems: "center",
                 }}
             >
                 {/* Left — no back arrow for pending managers: they should not be
                     steered back to the landing page mid-signup (the logo still
                     points to "/", which itself renders the pending-manager state) */}
-                <Box sx={{ justifySelf: "start" }}>
+                <Box sx={{ justifySelf: "start", display: "flex", alignItems: "center", minWidth: 0 }}>
+                    {isLandingPage && !isPendingManager && <LandingSectionMenu />}
                     <LogoLink showBackArrow={!isLandingPage && !isPendingManager} />
                 </Box>
 
                 {/* Center — section anchors only exist on the normal landing page */}
-                <Box sx={{ justifySelf: "center" }}>
+                <Box sx={{ justifySelf: "center", display: { xs: "none", md: "block" } }}>
                     {isLandingPage && !isPendingManager && <SectionNav />}
                 </Box>
 
                 {/* Right */}
-                <Stack direction="row" spacing={2} sx={{ justifySelf: "end"}}>
+                <Stack
+                    direction="row"
+                    spacing={{ xs: 1, sm: 2 }}
+                    sx={{
+                        justifySelf: "end",
+                        alignItems: "center",
+                        minWidth: 0,
+                    }}
+                >
                     {isPendingManager && (
                         <>
                             <Button
@@ -288,6 +414,7 @@ const Header = () => {
                                 sx={{
                                     ...outlinedPillButtonSx,
                                     color: colors.textPrimary,
+                                    display: { xs: "none", sm: "inline-flex" },
                                 }}
                             >
                                 Login

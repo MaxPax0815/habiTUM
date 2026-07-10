@@ -256,6 +256,7 @@ export const ExtendedChallengeCard = ({
   onManageChallenge,
   onLeaveChallenge,
   showHeading = true,
+  readOnly = false,
 }) => {
   const [actionAnchorEl, setActionAnchorEl] = useState(null);
   const daysLeft = getDaysLeft(challenge?.ends);
@@ -295,7 +296,7 @@ export const ExtendedChallengeCard = ({
       sx={{
         width: "100%",
         minHeight: 260,
-        border: isJoined ? `2px solid ${colors.primary}` : undefined,
+        border: isJoined && !readOnly ? `2px solid ${colors.primary}` : undefined,
       }}
       contentSx={{
         p: { xs: 3, md: 4 },
@@ -442,7 +443,7 @@ export const ExtendedChallengeCard = ({
           </>
         )}
 
-        {!isJoined && (
+        {!isJoined && !readOnly && (
           <ChallengeJoinButton
             isJoined={false}
             disabled={!canJoinChallenge}
