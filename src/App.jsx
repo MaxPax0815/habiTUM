@@ -27,6 +27,7 @@ import ForgotPassword from './pages/public/ForgotPassword.jsx'
 import ResetPassword from './pages/public/ResetPassword.jsx'
 import CheckoutSuccess from './pages/public/CheckoutSuccess.jsx'
 import CheckoutCancel from './pages/public/CheckoutCancel.jsx'
+import { ImpressumPage, PrivacyPage, TermsPage } from './pages/public/LegalPage.jsx'
 
 // Login/entry redirect per account state:
 //   active manager   → manager dashboard
@@ -58,6 +59,9 @@ function App() {
           {/* Public pages */}
           <Route element={<PublicLayout />}>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/impressum" element={<ImpressumPage />} />
+            <Route path="/datenschutz" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
 
             {/* Checkout result pages — user is logged in (just signed up) but not in AppLayout */}
             <Route path="/checkout/success" element={<CheckoutSuccess />} />
