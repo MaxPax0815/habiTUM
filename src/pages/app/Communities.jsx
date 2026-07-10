@@ -132,21 +132,6 @@ const Communities = () => {
             p: 2.5, opacity: canCreate ? 1 : 0.85,
           }}
         >
-        {/* lock badge sits on top of the card for free users */}
-        {!canCreate && (
-          <Box
-            sx={{
-              position: 'absolute', top: -12, left: 20,
-              display: 'flex', alignItems: 'center', gap: 0.5,
-              px: 1, py: 0.25, borderRadius: radii.pill,
-              bgcolor: colors.primaryDark, color: '#fff',
-            }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>lock</span>
-            <Typography variant="caption" sx={{ fontWeight: 700 }}>Premium</Typography>
-          </Box>
-        )}
-
         <Box>
           <Typography sx={{ fontWeight: 700 }}>Start something new</Typography>
           <Typography variant="body2" color="text.secondary">
