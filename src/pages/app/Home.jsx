@@ -10,7 +10,8 @@ import isToday from "date-fns/isToday"
 import getDay from "date-fns/getDay"
 
 // MUI
-import { Box, Button, Paper, Typography } from "@mui/material"
+import { Box, Button, Menu, MenuItem, Paper, Typography } from "@mui/material"
+import FilterListOutlinedIcon from "@mui/icons-material/FilterListOutlined"
 import { colors } from '../../styles/tokens'
 import { sectionTitleSx } from '../../styles/recipes'
 
@@ -70,12 +71,44 @@ const StatCard = ({ icon, iconColor, label, value }) => (
   </Paper>
 )
 
+const CATEGORIES = ['Nutrition', 'Fitness', 'Learning', 'Wellness', 'Productivity', 'Other']
+
+const EmptyHabitsCard = ({ onCreateHabit }) => (
+  <Paper
+    variant="outlined"
+    sx={{
+      minHeight: 172,
+      p: 3,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      textAlign: "center",
+    }}
+  >
+    <Typography sx={{ fontSize: 34, lineHeight: 1, mb: 1.5 }}>
+      🌱
+    </Typography>
+    <Typography variant="h6" sx={{ fontWeight: 900, mb: 1 }}>
+      No habits yet
+    </Typography>
+    <Typography sx={{ color: "text.secondary", mb: 2.5, maxWidth: 380 }}>
+      Start building or breaking your first habit.
+    </Typography>
+    <Button variant="contained" size="large" onClick={onCreateHabit}>
+      Add your first habit
+    </Button>
+  </Paper>
+)
+
 // Main components
 const Home = () => {
   const { habits, dispatch } = useHabitsContext()
   const { user } = useAuthContext() // get the current user from the auth context hook
   const [showForm, setShowForm] = useState(false)   // controls the create-habit popup
   const [activeChallenges, setActiveChallenges] = useState([]) // joined + running challenges for the sidebar panel
+  const [categoryFilter, setCategoryFilter] = useState('all')
+  const [filterAnchorEl, setFilterAnchorEl] = useState(null)
   const navigate = useNavigate()
 
 
@@ -128,10 +161,28 @@ const Home = () => {
   const remaining = total - done
   const bestStreak = list.reduce((m, h) => Math.max(m, h.streak || 0), 0)
   const weekDays = daysActiveThisWeek(list)
+  const visibleHabits = categoryFilter === 'all'
+    ? list
+    : list.filter(h => h.category === categoryFilter)
 
   // split habits into the two sections — build habits render on top, break habits below
-  const buildHabits = list.filter(h => h.habitType === "build")
-  const breakHabits = list.filter(h => h.habitType === "break")
+  const buildHabits = visibleHabits.filter(h => h.habitType === "build")
+  const breakHabits = visibleHabits.filter(h => h.habitType === "break")
+  const hasVisibleHabits = visibleHabits.length > 0
+  const isFilterOpen = Boolean(filterAnchorEl)
+
+  const handleFilterClick = (event) => {
+    setFilterAnchorEl(event.currentTarget)
+  }
+
+  const handleFilterClose = () => {
+    setFilterAnchorEl(null)
+  }
+
+  const handleSelectCategory = (category) => {
+    setCategoryFilter(category)
+    handleFilterClose()
+  }
 
   // Html structure: we show the stats in the header, then the list of habits, and the form to add new habits.
   
@@ -184,47 +235,126 @@ const Home = () => {
       >
         {/* LEFT: build habits, then break habits, then add button — spans the two left columns */}
         <Box sx={{ gridColumn: { md: "span 2" } }}>
-          <Typography component="h2" sx={sectionTitleSx}>
-            Build habits
-          </Typography>
-          {buildHabits.map(habit => (
-            <HabitDetails habit={habit} key={habit._id} />
-          ))}
-
-          {/* break habits -> heading + list only render when at least one exists */}
-          {breakHabits.length > 0 && (
-            <>
-              <Box sx={{ mt: 3 }}>
-                <Typography component="h2" sx={sectionTitleSx}>Break habits</Typography>
-              </Box>
-              {breakHabits.map(habit => (
-                <HabitDetails habit={habit} key={habit._id} />
-              ))}
-            </>
-          )}
-
-          {/* grey "add" button under both lists -> opens the popup */}
-          <Button
-            fullWidth
-            onClick={() => setShowForm(true)}
+          <Box
             sx={{
-              mt: 1.5, mb: 4, py: 1.5,
-              color: "text.secondary",
-              bgcolor: colors.softNeutral,
-              "&:hover": { bgcolor: colors.progressTrack },
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 2,
+              mb: 2,
             }}
           >
-            + Add another habit
-          </Button>
+            <Typography component="h2" sx={{ ...sectionTitleSx, mb: 0 }}>
+              Build habits
+            </Typography>
+
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<FilterListOutlinedIcon />}
+              onClick={handleFilterClick}
+              disabled={total === 0}
+              sx={{ flexShrink: 0, fontWeight: 800 }}
+            >
+              {categoryFilter === 'all' ? 'Filter' : categoryFilter}
+            </Button>
+            <Menu
+              anchorEl={filterAnchorEl}
+              open={isFilterOpen}
+              onClose={handleFilterClose}
+            >
+              <MenuItem selected={categoryFilter === 'all'} onClick={() => handleSelectCategory('all')}>
+                All categories
+              </MenuItem>
+              {CATEGORIES.map((category) => (
+                <MenuItem
+                  key={category}
+                  selected={categoryFilter === category}
+                  onClick={() => handleSelectCategory(category)}
+                >
+                  {category}
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
+
+          {total === 0 ? (
+            <EmptyHabitsCard onCreateHabit={() => setShowForm(true)} />
+          ) : (
+            <>
+              {!hasVisibleHabits && (
+                <Paper variant="outlined" sx={{ p: 3, textAlign: "center", mb: 1.5 }}>
+                  <Typography sx={{ fontWeight: 800, mb: 0.5 }}>
+                    No habits in this category
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    Choose another category or add a new habit.
+                  </Typography>
+                </Paper>
+              )}
+
+              {buildHabits.map(habit => (
+                <HabitDetails habit={habit} key={habit._id} />
+              ))}
+
+              {/* break habits -> heading + list only render when at least one exists */}
+              {breakHabits.length > 0 && (
+                <>
+                  <Box sx={{ mt: 3 }}>
+                    <Typography component="h2" sx={sectionTitleSx}>Break habits</Typography>
+                  </Box>
+                  {breakHabits.map(habit => (
+                    <HabitDetails habit={habit} key={habit._id} />
+                  ))}
+                </>
+              )}
+
+              {/* grey "add" button under both lists -> opens the popup */}
+              <Button
+                fullWidth
+                onClick={() => setShowForm(true)}
+                sx={{
+                  mt: 1.5, mb: 4, py: 1.5,
+                  color: "text.secondary",
+                  bgcolor: colors.softNeutral,
+                  "&:hover": { bgcolor: colors.progressTrack },
+                }}
+              >
+                + Add another habit
+              </Button>
+            </>
+          )}
         </Box>
 
         {/* RIGHT: the user's active challenges — one card per joined challenge
             that is currently running; clicking opens the challenge page */}
         <Box>
-          <Typography component="h2" sx={sectionTitleSx}>Active challenges</Typography>
+          <Box
+            sx={{
+              minHeight: 40,
+              display: "flex",
+              alignItems: "center",
+              mb: 2,
+            }}
+          >
+            <Typography component="h2" sx={{ ...sectionTitleSx, mb: 0 }}>
+              Active challenges
+            </Typography>
+          </Box>
 
           {activeChallenges.length === 0 ? (
-            <Paper variant="outlined" sx={{ p: 3, textAlign: "center" }}>
+            <Paper
+              variant="outlined"
+              sx={{
+                minHeight: 172,
+                p: 3,
+                textAlign: "center",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <span className="material-symbols-outlined" style={{ fontSize: 32, color: colors.muted }}>
                 emoji_events
               </span>

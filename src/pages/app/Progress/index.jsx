@@ -65,9 +65,28 @@ const SectionTitle = ({ children }) => (
  * Used on metrics that aren't self-evident from their label alone.
  */
 const InfoTooltip = ({ text }) => (
-  <Tooltip title={text} placement="top" arrow>
+  <Tooltip 
+    title={text} 
+    placement="top" 
+    arrow
+    slotProps={{
+      tooltip: {
+        sx: {
+          fontSize: 16,
+          px: 2,
+          py: 1.25,
+          maxWidth: 320,
+        },
+      },
+      arrow: {
+        sx: {
+          fontSize: 20,
+        },
+      },
+    }}
+    >
     <IconButton size="small" disableRipple sx={{ p: 0, ml: 0.5, color: "text.disabled", cursor: "help" }}>
-      <InfoOutlinedIcon sx={{ fontSize: 14 }} />
+      <InfoOutlinedIcon sx={{ fontSize: 18 }} />
     </IconButton>
   </Tooltip>
 )

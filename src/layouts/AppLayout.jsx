@@ -4,6 +4,7 @@ import { useTheme } from '@mui/material/styles'
 
 import MobileNav from '../components/MobileNav'
 import Sidebar from '../components/Sidebar'
+import SupportHelpButton from '../components/SupportHelpButton'
 import PageContainer from '../components/layout/PageContainer'
 import { colors } from '../styles/tokens'
 import { useAuthContext } from '../auth/useAuthContext'
@@ -44,6 +45,7 @@ const AppLayout = () => {
       </Box>
 
       {isMobile && <MobileNav />}
+      <SupportHelpButton isMobile={isMobile} />
     </Box>
   )
 }
