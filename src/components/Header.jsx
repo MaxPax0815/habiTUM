@@ -56,8 +56,19 @@ const linkResetSx = {
 // When `showBackArrow` is true (i.e. we're NOT on the landing page), an extra
 // back-arrow IconButton is shown so users can return home from sub-pages.
 // Used by <Header /> via `showBackArrow={!isLandingPage}`.
-const LogoLink = ({ showBackArrow = false}) => {
+const LogoLink = ({ showBackArrow = false, scrollToHabits = false}) => {
+    const handleLogoClick = (event) => {
+        if (!scrollToHabits) return 
 
+        event.preventDefault()
+
+        const habitsSection = document.getElementById("habits")
+        if (habitsSection) {
+            habitsSection.scrollIntoView({ behavior: "smooth", block: "start" })
+        }
+
+        window.history.replaceState(null, "", "/#habits") // Update URL without reloading the page
+    }
 
     return (
         <Stack 
@@ -97,6 +108,7 @@ const LogoLink = ({ showBackArrow = false}) => {
             <Box
                 component={RouterLink}
                 to="/"
+                onClick={handleLogoClick}
                 sx={{
                 ...linkResetSx,  
                 display: "flex",
@@ -343,7 +355,10 @@ const Header = () => {
                     points to "/", which itself renders the pending-manager state) */}
                 <Box sx={{ justifySelf: "start", display: "flex", alignItems: "center", minWidth: 0 }}>
                     {isLandingPage && !isPendingManager && <LandingSectionMenu />}
-                    <LogoLink showBackArrow={!isLandingPage && !isPendingManager} />
+                    <LogoLink 
+                        showBackArrow={!isLandingPage && !isPendingManager} 
+                        scrollToHabits={isLandingPage && !isPendingManager}
+                    />
                 </Box>
 
                 {/* Center — section anchors only exist on the normal landing page */}

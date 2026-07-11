@@ -355,6 +355,10 @@ function TrendingChallenges() {
 // Main page
 // ------------------------------------------------------
 
+const sectionAnchorSx = {
+  scrollMarginTop: "85px",
+};
+
 export default function LandingPage() {
   const { user } = useAuthContext()
   const { cancelManagerSignup, isCancelling, error: cancelError } = useCancelManagerSignup()
@@ -415,7 +419,7 @@ export default function LandingPage() {
   return (
     <Box sx={{ bgcolor: "background.default", minHeight: "100vh" }}>
         {/* Hero Section */}
-        <Container id="habits" maxWidth="lg" sx={{ pt: { xs: 4, md: 6 }, pb: { xs: 7, md: 10 } }}>
+        <Container id="habits" maxWidth="lg" sx={{ ...sectionAnchorSx, pt: { xs: 4, md: 6 }, pb: { xs: 7, md: 10 } }}>
           <Grid
             container
             spacing={{ xs: 5, md: 7 }}
@@ -534,7 +538,7 @@ export default function LandingPage() {
         </Container>
 
         {/* Why HabiTUM */}
-        <Container id="features" maxWidth="lg" sx={{ pb: { xs: 7, md: 10 } }}>
+        <Container id="features" maxWidth="lg" sx={{ ...sectionAnchorSx, pb: { xs: 7, md: 10 } }}>
           <Box sx={{ mb: 1, textAlign: "center" }}>
             <Typography
               variant="overline"
@@ -629,7 +633,7 @@ export default function LandingPage() {
         </Container>
 
         {/* Communities Section */}
-        <Container id="communities" maxWidth="lg" sx={{ pb: { xs: 7, md: 10 } }}>
+        <Container id="communities" maxWidth="lg" sx={{ ...sectionAnchorSx, pb: { xs: 7, md: 10 } }}>
           <Box
             sx={{
               bgcolor: colors.primaryDark,
@@ -731,7 +735,7 @@ export default function LandingPage() {
         </Container>
 
         {/* Challenges Section — trending challenges (live) + info card */}
-        <Container id="challenges" maxWidth="lg" sx={{ pb: { xs: 7, md: 10 } }}>
+        <Container id="challenges" maxWidth="lg" sx={{ ...sectionAnchorSx, pb: { xs: 7, md: 10 } }}>
           <Box sx={{ mb: 4, textAlign: "center" }}>
             <Typography
               variant="overline"
@@ -764,7 +768,7 @@ export default function LandingPage() {
         </Container>
 
         {/* Plans / Pricing Section */}
-        <Container id="plans" maxWidth="lg" sx={{ pb: { xs: 7, md: 10 } }}>
+        <Container id="plans" maxWidth="lg" sx={{ ...sectionAnchorSx, pb: { xs: 7, md: 10 } }}>
           <Box sx={{ mb: 1, textAlign: "center" }}>
             <Typography
               variant="overline"
