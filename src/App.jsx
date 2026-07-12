@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useSearchParams } from 'react-router-dom'
 import { useAuthContext } from './auth/useAuthContext'
 
 // Layouts
@@ -25,6 +25,7 @@ import ManagerSignup from './pages/public/ManagerSignup.jsx'
 import ConfigureManagerPlan from './pages/public/ConfigureManagerPlan.jsx'
 import ForgotPassword from './pages/public/ForgotPassword.jsx'
 import ResetPassword from './pages/public/ResetPassword.jsx'
+import InvitePage from './pages/public/InvitePage.jsx'
 import CheckoutSuccess from './pages/public/CheckoutSuccess.jsx'
 import CheckoutCancel from './pages/public/CheckoutCancel.jsx'
 import { ImpressumPage, PrivacyPage, TermsPage } from './pages/public/LegalPage.jsx'
@@ -46,6 +47,17 @@ const isPendingManager = (user) =>
 const canConfigureManagerPlan = (user) =>
   user?.accountType === 'manager' && user?.subscription !== 'manager'
 
+// The /login route, with support for ?redirect=<path> — invite links send
+// logged-out users here and expect them to land back on the invite afterwards.
+const LoginRoute = ({ user }) => {
+  const [searchParams] = useSearchParams()
+
+  if (!user) return <Login />
+
+  const redirectTo = searchParams.get('redirect')
+  return <Navigate to={redirectTo || managerAwareHome(user)} replace />
+}
+
 function App() {
   const { user } = useAuthContext()
 
@@ -63,11 +75,12 @@ function App() {
             <Route path="/checkout/success" element={<CheckoutSuccess />} />
             <Route path="/checkout/cancel" element={<CheckoutCancel />} />
 
+            {/* Community invite link. Redeems the code when logged in; sends
+                logged-out visitors to /login?redirect=… and back here after. */}
+            <Route path="/invite/:code" element={<InvitePage />} />
+
             <Route element={<AuthLayout />}>
-              <Route
-                path="/login"
-                element={!user ? <Login /> : <Navigate to={managerAwareHome(user)} replace />}
-              />
+              <Route path="/login" element={<LoginRoute user={user} />} />
               <Route
                 path="/signup"
                 element={!user ? <Signup /> : <Navigate to="/today" replace />} />

@@ -92,6 +92,8 @@ const CommunityDashboard = () => {
   const [isChallengeDialogOpen, setIsChallengeDialogOpen] = useState(false) // creator-only "New Challenge" popup
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false) // creator/admin invite-link popup
   const [inviteCopied, setInviteCopied] = useState(false)
+  const [inviteLink, setInviteLink] = useState('')
+  const [inviteError, setInviteError] = useState(null)
   const [error, setError] = useState(null)
 
   const token = user.token
@@ -288,10 +290,30 @@ const CommunityDashboard = () => {
   const previewPosts = posts.slice(0, 2)
   const hasMorePosts = posts.length > 2
 
-  // Dummy invite link for now — we'll decide what it points to (real invite
-  // tokens, join flow) later. It's deterministic per community so re-opening
-  // the dialog always shows the same link.
-  const inviteLink = `${window.location.origin}/communities/${id}/join?invite=${id}`
+  // Fetch the community's real invite code (generated server-side on first use)
+  // and build the link the invitee will open. Only logged-in users can redeem
+  // it; /invite/:code sends anyone else to log in first.
+  const handleOpenInviteDialog = async () => {
+    setIsInviteDialogOpen(true)
+    setInviteCopied(false)
+    setInviteError(null)
+    setInviteLink('')
+
+    try {
+      const res = await fetch(`/api/communities/${id}/invite`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+      const json = await res.json()
+      if (res.ok) {
+        const baseUrl = import.meta.env.VITE_APP_URL || window.location.origin
+        setInviteLink(`${baseUrl}/invite/${json.inviteCode}`)
+      } else {
+        setInviteError(json.error || 'Could not create an invite link.')
+      }
+    } catch {
+      setInviteError('Could not reach the server.')
+    }
+  }
 
   const handleCopyInvite = async () => {
     try {
@@ -327,7 +349,7 @@ const CommunityDashboard = () => {
           actions={isCreator ? (
             <Stack direction="row" spacing={1.5}>
               <Button
-                variant="outlined" onClick={() => setIsInviteDialogOpen(true)}
+                variant="outlined" onClick={handleOpenInviteDialog}
                 startIcon={<span className="material-symbols-outlined">link</span>}
               >
                 Invite
@@ -494,30 +516,38 @@ const CommunityDashboard = () => {
           Invite to {community.name}
         </Typography>
         <Typography sx={{ mt: 0.5, mb: 3, color: colors.muted, fontWeight: 700 }}>
-          Share this link so people can join{community.isPrivate ? ' this private community.' : '.'}
+          Anyone with this link can log in and join{community.isPrivate ? ' this private community.' : '.'}
         </Typography>
 
-        <Box
-          sx={{
-            display: 'flex', alignItems: 'center', gap: 1,
-            border: `1px solid ${colors.border}`, borderRadius: 2, pl: 2, pr: 0.5, py: 0.5,
-          }}
-        >
-          <InputBase
-            value={inviteLink}
-            readOnly
-            fullWidth
-            sx={{ fontSize: 14, color: colors.textSecondary }}
-            onFocus={(e) => e.target.select()}
-          />
-          <Tooltip title={inviteCopied ? 'Copied!' : 'Copy link'} placement="top" arrow>
-            <IconButton onClick={handleCopyInvite} sx={{ color: inviteCopied ? colors.green : colors.primary }}>
-              <span className="material-symbols-outlined">
-                {inviteCopied ? 'check' : 'content_copy'}
-              </span>
-            </IconButton>
-          </Tooltip>
-        </Box>
+        {inviteError ? (
+          <Alert severity="error">{inviteError}</Alert>
+        ) : !inviteLink ? (
+          <Box sx={{ display: 'grid', placeItems: 'center', py: 3 }}>
+            <CircularProgress size={24} />
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              display: 'flex', alignItems: 'center', gap: 1,
+              border: `1px solid ${colors.border}`, borderRadius: 2, pl: 2, pr: 0.5, py: 0.5,
+            }}
+          >
+            <InputBase
+              value={inviteLink}
+              readOnly
+              fullWidth
+              sx={{ fontSize: 14, color: colors.textSecondary }}
+              onFocus={(e) => e.target.select()}
+            />
+            <Tooltip title={inviteCopied ? 'Copied!' : 'Copy link'} placement="top" arrow>
+              <IconButton onClick={handleCopyInvite} sx={{ color: inviteCopied ? colors.green : colors.primary }}>
+                <span className="material-symbols-outlined">
+                  {inviteCopied ? 'check' : 'content_copy'}
+                </span>
+              </IconButton>
+            </Tooltip>
+          </Box>
+        )}
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
           <Button variant="contained" onClick={handleCloseInviteDialog}>Done</Button>
