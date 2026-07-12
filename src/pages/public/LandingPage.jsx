@@ -393,9 +393,9 @@ export default function LandingPage() {
             to="/configure-manager-plan"
             variant="contained"
             size="large"
-            endIcon={<ArrowForwardIcon />}
+            startIcon={<ArrowForwardIcon />}
           >
-            Continue manager setup
+            Continue Manager Setup
           </Button>
 
           <Button
@@ -405,7 +405,7 @@ export default function LandingPage() {
             onClick={cancelManagerSignup}
             disabled={isCancelling}
           >
-            {isCancelling ? 'Cancelling…' : 'Cancel manager signup'}
+            {isCancelling ? 'Cancelling…' : 'Cancel Manager Signup'}
           </Button>
         </Stack>
 
@@ -489,9 +489,9 @@ export default function LandingPage() {
                   to="/signup"
                   variant="contained"
                   size="large"
-                  endIcon={<ArrowForwardIcon />}
+                  startIcon={<ArrowForwardIcon />}
                 >
-                  Get started — it’s free
+                  Get Started — It’s Free
                 </Button>
 
                 <Button
@@ -500,7 +500,7 @@ export default function LandingPage() {
                   variant="outlined"
                   size="large"
                 >
-                  Login
+                  Log In
                 </Button>
               </Stack>
 
@@ -845,10 +845,10 @@ export default function LandingPage() {
                     variant="outlined"
                     fullWidth
                     size="large"
-                    endIcon={<ArrowForwardIcon />}
+                    startIcon={<ArrowForwardIcon />}
                     sx={{ height: 52, whiteSpace: "nowrap" }}
                   >
-                    Start for free
+                    Start For Free
                   </Button>
                 </Box>
               </AppCard>
@@ -918,7 +918,7 @@ export default function LandingPage() {
                     variant="contained"
                     fullWidth
                     size="large"
-                    endIcon={<ArrowForwardIcon />}
+                    startIcon={<ArrowForwardIcon />}
                     sx={{ height: 52, whiteSpace: "nowrap" }}
                   >
                     Go Premium
@@ -989,10 +989,10 @@ export default function LandingPage() {
                     variant="outlined"
                     fullWidth
                     size="large"
-                    endIcon={<ArrowForwardIcon />}
+                    startIcon={<ArrowForwardIcon />}
                     sx={{ height: 52, whiteSpace: "nowrap", borderColor: colors.orange, color: colors.orange, "&:hover": { borderColor: colors.orange, bgcolor: colors.softOrange } }}
                   >
-                    Create manager account
+                    Create Manager Account
                   </Button>
                 </Box>
               </AppCard>
@@ -1095,9 +1095,9 @@ export default function LandingPage() {
                   to="/signup"
                   variant="contained"
                   size="large"
-                  endIcon={<ArrowForwardIcon />}
+                  startIcon={<ArrowForwardIcon />}
                 >
-                  Get started — it’s free
+                  Get Started — It’s Free
                 </Button>
 
                 <Button
@@ -1106,7 +1106,7 @@ export default function LandingPage() {
                   variant="outlined"
                   size="large"
                 >
-                  Login
+                  Log In
                 </Button>
               </Stack>
           </Box>

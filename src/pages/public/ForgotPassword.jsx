@@ -125,7 +125,7 @@ const ForgotPassword = () => {
                         size="large"
                         fullWidth
                         disabled={isLoading}
-                        endIcon={<ArrowForwardIcon />}
+                        startIcon={<ArrowForwardIcon />}
                         sx={{ mt: 0.5 }}
                     >
                         {isLoading ? 'Checking…' : 'Continue'}
@@ -146,7 +146,7 @@ const ForgotPassword = () => {
                                 '&:hover': { textDecoration: 'underline' },
                             }}
                         >
-                            ← Back to login
+                            ← Back To Login
                         </Typography>
                     </Typography>
                 </Box>

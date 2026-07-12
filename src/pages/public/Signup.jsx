@@ -343,12 +343,12 @@ const Signup = () => {
                         size="large"
                         fullWidth
                         disabled={isLoading || passwordMismatch}
-                        endIcon={<ArrowForwardIcon />}
+                        startIcon={<ArrowForwardIcon />}
                         sx={{ mt: 0.5 }}
                     >
                         {isLoading
-                            ? (isPremiumSignup ? 'Setting up…' : 'Creating account…')
-                            : (isPremiumSignup ? 'Continue to payment' : 'Create account')}
+                            ? (isPremiumSignup ? 'Setting Up…' : 'Creating Account…')
+                            : (isPremiumSignup ? 'Continue To Payment' : 'Create Account')}
                     </Button>
 
                     {/* Bottom link */}
@@ -368,7 +368,7 @@ const Signup = () => {
                                 '&:hover': { textDecoration: 'underline' },
                             }}
                         >
-                            Log in
+                            Log In
                         </Typography>
                     </Typography>
                 </Box>

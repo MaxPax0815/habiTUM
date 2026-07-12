@@ -242,10 +242,10 @@ export default function ManagerSignup() {
                     size="large"
                     fullWidth
                     disabled={isLoading || passwordMismatch}
-                    endIcon={<ArrowForwardIcon />}
+                    startIcon={<ArrowForwardIcon />}
                     sx={{ mt: 0.5 }}
                 >
-                    {isLoading ? 'Creating account…' : 'Continue — choose your plan'}
+                    {isLoading ? 'Creating Account…' : 'Continue — Choose Your Plan'}
                 </Button>
 
                 <Typography variant="body2" sx={{ textAlign: 'center', color: colors.textSecondary }}>
@@ -254,7 +254,7 @@ export default function ManagerSignup() {
                         component={RouterLink} to="/login" variant="body2"
                         sx={{ color: colors.primary, fontWeight: 700, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
                     >
-                        Log in
+                        Log In
                     </Typography>
                 </Typography>
             </Box>

@@ -7,7 +7,7 @@ import { colors, radii } from '../styles/tokens'
 // Reusable button that only starts the Stripe Checkout flow. Premium status is
 // never set here — it is granted server-side via the Stripe webhook after payment.
 const UpgradeButton = ({
-  label = 'Upgrade to Premium',
+  label = 'Upgrade To Premium',
   fullWidth = false,
   size = 'medium',
   showIcon = false,
@@ -24,6 +24,7 @@ const UpgradeButton = ({
         size={size}
         onClick={startCheckout}
         disabled={isLoading}
+        startIcon={showIcon ? <WorkspacePremiumOutlinedIcon /> : undefined}
         sx={{
           borderRadius: radii.pill,
           fontWeight: 800,
@@ -37,7 +38,6 @@ const UpgradeButton = ({
           ...sx
         }}
       >
-        {showIcon && <WorkspacePremiumOutlinedIcon sx={{ mr: 1 }} />}
         {isLoading ? 'Redirecting...' : label}
       </Button>
 

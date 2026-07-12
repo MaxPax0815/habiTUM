@@ -148,8 +148,8 @@ const ResetPassword = () => {
                                 textDecoration: 'none',
                                 '&:hover': { textDecoration: 'underline' },
                             }}
-                        >
-                            Go to login →
+                            >
+                            Go To Login →
                         </Typography>
                     </Box>
                 ) : (
@@ -196,10 +196,10 @@ const ResetPassword = () => {
                             size="large"
                             fullWidth
                             disabled={isLoading}
-                            endIcon={<ArrowForwardIcon />}
+                            startIcon={<ArrowForwardIcon />}
                             sx={{ mt: 0.5 }}
                         >
-                            {isLoading ? 'Saving…' : 'Set new password'}
+                            {isLoading ? 'Saving…' : 'Set New Password'}
                         </Button>
 
                         <Typography
@@ -217,7 +217,7 @@ const ResetPassword = () => {
                                     '&:hover': { textDecoration: 'underline' },
                                 }}
                             >
-                                ← Back to login
+                                ← Back To Login
                             </Typography>
                         </Typography>
                     </Box>

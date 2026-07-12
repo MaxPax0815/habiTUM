@@ -345,7 +345,7 @@ const ChallengePage = () => {
         >
           <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
             <BackButton
-              text={`Back to ${challenge.community?.name || "Community"}`}
+              text={`Back To ${challenge.community?.name || "Community"}`}
               to={`/communities/${challenge.community?._id || challenge.community}`}
               sx={{ mb: 0 }}
             />
@@ -377,8 +377,13 @@ const ChallengePage = () => {
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ alignItems: { xs: "stretch", sm: "center" } }}>
               {showFeedButton}
               {isCommunityCreator && (
-                <Button variant="outlined" size="small" onClick={() => setShowHabitForm(true)}>
-                  + Add habit
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => setShowHabitForm(true)}
+                  startIcon={<span className="material-symbols-outlined">add</span>}
+                >
+                  Add Habit
                 </Button>
               )}
             </Stack>

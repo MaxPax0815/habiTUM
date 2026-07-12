@@ -196,12 +196,12 @@ const Login = () => {
                         size="large"
                         fullWidth
                         disabled={isLoading}
-                        endIcon={<ArrowForwardIcon />}
+                        startIcon={<ArrowForwardIcon />}
                         sx={{
                             mt: 0.5,
                         }}
                     >
-                        {isLoading ? 'Logging in…' : 'Log in'}
+                        {isLoading ? 'Logging In…' : 'Log In'}
                     </Button>
 
                     {/* Bottom link */}
@@ -221,7 +221,7 @@ const Login = () => {
                                 '&:hover': { textDecoration: 'underline' },
                             }}
                         >
-                            Sign up
+                            Sign Up
                         </Typography>
                     </Typography>
                 </Box>

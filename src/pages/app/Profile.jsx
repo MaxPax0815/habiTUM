@@ -407,7 +407,7 @@ const Profile = () => {
                   />
                 ) : (
                   <UpgradeButton
-                    label="Upgrade to Premium"
+                    label="Upgrade To Premium"
                     fullWidth
                     showError={false}
                   />

@@ -21,6 +21,7 @@ import {
 } from 'recharts'
 
 import BackButton from '../../components/BackButton'
+import AppCard from '../../components/AppCard'
 import PageHeader from '../../components/layout/PageHeader'
 import AppDialog from '../../components/AppDialog'
 import ChallengeForm from '../../challenges/ChallengeForm'
@@ -284,7 +285,7 @@ const ManagerCommunity = () => {
 
   if (loading) return (
     <Box>
-      <BackButton text="Back to Manager Dashboard" to="/manager" sx={{ mb: 0 }} />
+      <BackButton text="Back To Manager Dashboard" to="/manager" sx={{ mb: 0 }} />
       <Box sx={{ display: 'grid', placeItems: 'center', minHeight: 240 }}>
         <CircularProgress size={28} />
       </Box>
@@ -293,7 +294,7 @@ const ManagerCommunity = () => {
 
   if (error || !stats) return (
     <Box>
-      <BackButton text="Back to Manager Dashboard" to="/manager" sx={{ mb: 0 }} />
+      <BackButton text="Back To Manager Dashboard" to="/manager" sx={{ mb: 0 }} />
       <Paper sx={{ p: 4, textAlign: 'center', mt: 2 }}>
         <Typography color="text.secondary">
           Couldn't load this community{error ? ` — ${error}` : ''}. Please try again.
@@ -312,17 +313,20 @@ const ManagerCommunity = () => {
 
   return (
     <Box>
-      <BackButton text="Back to Manager Dashboard" to="/manager" sx={{ mb: 0 }} />
-      <PageHeader
-        eyebrow="Community"
-        title={community.name}
-        description={community.description}
-        actions={(
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setFormOpen(true)}>
-            New Challenge
-          </Button>
-        )}
-      />
+      <BackButton text="Back To Manager Dashboard" to="/manager" sx={{ mb: 0 }} />
+      <AppCard sx={{ mb: 4 }}>
+        <PageHeader
+          eyebrow="Community"
+          title={community.name}
+          description={community.description}
+          actions={(
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => setFormOpen(true)}>
+              New Challenge
+            </Button>
+          )}
+          sx={{ mb: 0 }}
+        />
+      </AppCard>
 
       {/* Summary tile row — mirrors the mockup's "SUMMARY · <community>" */}
       <Box sx={{ mb: 4 }}>

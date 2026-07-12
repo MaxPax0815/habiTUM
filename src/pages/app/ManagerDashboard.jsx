@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import AddIcon from '@mui/icons-material/Add'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import {
@@ -345,8 +346,12 @@ const ManagerDashboard = () => {
           Create your first community and set up challenges to see engagement
           analytics for your members here.
         </Typography>
-        <Button variant="contained" onClick={() => setIsCreateDialogOpen(true)}>
-          Create a community
+        <Button
+          variant="contained"
+          onClick={() => setIsCreateDialogOpen(true)}
+          startIcon={<AddIcon />}
+        >
+          Create A Community
         </Button>
       </Paper>
 

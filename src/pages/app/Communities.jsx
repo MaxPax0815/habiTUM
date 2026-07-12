@@ -146,8 +146,12 @@ const Communities = () => {
         </Box>
 
         {canCreate ? (
-          <Button variant="outlined" onClick={() => setIsCreateDialogOpen(true)}>
-            + Create Community
+          <Button
+            variant="outlined"
+            onClick={() => setIsCreateDialogOpen(true)}
+            startIcon={<span className="material-symbols-outlined">add</span>}
+          >
+            Create Community
           </Button>
         ) : (
           <Button
@@ -155,7 +159,7 @@ const Communities = () => {
             disabled
             startIcon={<span className="material-symbols-outlined">lock</span>}
           >
-            Premium only
+            Premium Only
           </Button>
         )}
         </Paper>

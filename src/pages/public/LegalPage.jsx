@@ -160,7 +160,7 @@ const LegalPage = ({ page }) => {
         startIcon={<ArrowBackIcon />}
         sx={{ mb: 3, fontWeight: 800 }}
       >
-        Back to HabiTUM
+        Back To HabiTUM
       </Button>
 
       <AppCard contentSx={{ p: { xs: 3, md: 5 } }}>

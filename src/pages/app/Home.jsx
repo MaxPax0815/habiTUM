@@ -96,8 +96,13 @@ const EmptyHabitsCard = ({ onCreateHabit }) => (
     <Typography sx={{ color: "text.secondary", mb: 2.5, maxWidth: 380 }}>
       Start building or breaking your first habit.
     </Typography>
-    <Button variant="contained" size="large" onClick={onCreateHabit}>
-      Add your first habit
+    <Button
+      variant="contained"
+      size="large"
+      onClick={onCreateHabit}
+      startIcon={<span className="material-symbols-outlined">add</span>}
+    >
+      Add Your First Habit
     </Button>
   </Paper>
 )
@@ -307,6 +312,7 @@ const Home = () => {
               <Button
                 fullWidth
                 onClick={() => setShowForm(true)}
+                startIcon={<span className="material-symbols-outlined">add</span>}
                 sx={{
                   mt: 1.5, mb: 4, py: 1.5,
                   color: "text.secondary",
@@ -314,7 +320,7 @@ const Home = () => {
                   "&:hover": { bgcolor: colors.progressTrack },
                 }}
               >
-                + Add another habit
+                Add Another Habit
               </Button>
             </>
           )}

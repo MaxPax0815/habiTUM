@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Alert, Box, Button, CircularProgress, Paper, Typography } from '@mui/material'
 import { useAuthContext } from '../../auth/useAuthContext'
+import AppCard from '../../components/AppCard'
 import BackButton from '../../components/BackButton'
 import CommunityPostCard from '../../components/CommunityPostCard'
 import CommunityPostDialog from '../../components/CommunityPostDialog'
@@ -160,24 +161,27 @@ const CommunityUpdatesPage = () => {
 
   return (
     <Box sx={{ textAlign: 'left' }}>
-      <BackButton text={`Back to ${community.name}`} to={`/communities/${id}`} sx={{ mb: 0 }} />
+      <BackButton text={`Back To ${community.name}`} to={`/communities/${id}`} sx={{ mb: 0 }} />
 
-      <PageHeader
-        title="Community Updates"
-        description={community.name}
-        actions={canManageCommunity && (
-          <Button
-            variant="outlined"
-            onClick={() => {
-              setPostDialogKey((current) => current + 1)
-              setIsPostDialogOpen(true)
-            }}
-            startIcon={<span className="material-symbols-outlined">add</span>}
-          >
-            New Post
-          </Button>
-        )}
-      />
+      <AppCard sx={{ mb: 4 }}>
+        <PageHeader
+          title="Community Updates"
+          description={community.name}
+          actions={canManageCommunity && (
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setPostDialogKey((current) => current + 1)
+                setIsPostDialogOpen(true)
+              }}
+              startIcon={<span className="material-symbols-outlined">add</span>}
+            >
+              New Post
+            </Button>
+          )}
+          sx={{ mb: 0 }}
+        />
+      </AppCard>
 
       <PageSection sx={{ mb: 0 }}>
         {postsLoading ? (

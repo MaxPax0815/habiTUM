@@ -158,9 +158,9 @@ export default function ConfigureManagerPlan() {
                     fullWidth
                     onClick={handleSubmit}
                     disabled={isLoading}
-                    endIcon={<ArrowForwardIcon />}
+                    startIcon={<ArrowForwardIcon />}
                 >
-                    {isLoading ? 'Preparing checkout…' : `Continue to payment — ${totalEur} €/month`}
+                    {isLoading ? 'Preparing Checkout…' : `Continue To Payment — ${totalEur} €/Month`}
                 </Button>
 
                 <Typography variant="caption" sx={{ color: colors.muted, display: 'block', textAlign: 'center' }}>
@@ -184,7 +184,7 @@ export default function ConfigureManagerPlan() {
                         disabled={isCancelling}
                         sx={{ typography: 'finePrint', color: 'error.main', fontWeight: 700, verticalAlign: 'baseline' }}
                     >
-                        {isCancelling ? 'Cancelling…' : 'Cancel manager signup'}
+                        {isCancelling ? 'Cancelling…' : 'Cancel Manager Signup'}
                     </Link>
                     {' '}— this deletes your pending account.
                 </Typography>

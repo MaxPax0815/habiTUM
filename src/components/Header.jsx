@@ -363,9 +363,9 @@ const Header = () => {
                         <>
                             <Button
                                 onClick={cancelManagerSignup}
-                                disabled={isCancelling}
-                                variant="outlined"
-                                size="small"
+                            disabled={isCancelling}
+                            variant="outlined"
+                            size="small"
                                 sx={{
                                     ...outlinedPillButtonSx,
                                     color: 'error.main',
@@ -375,9 +375,9 @@ const Header = () => {
                                         borderColor: 'error.main',
                                         backgroundColor: '#FDECEA', // light red fill on hover
                                     },
-                                }}
-                            >
-                                {isCancelling ? 'Cancelling…' : 'Cancel manager signup'}
+                            }}
+                        >
+                                {isCancelling ? 'Cancelling…' : 'Cancel Manager Signup'}
                             </Button>
 
                             {/* Hidden on the configure page itself — the page's own
@@ -388,7 +388,7 @@ const Header = () => {
                                     to="/configure-manager-plan"
                                     variant="contained"
                                     size="small"
-                                    endIcon={<ArrowForwardIcon />}
+                                    startIcon={<ArrowForwardIcon />}
                                     sx={{
                                         ...pillButtonSx,
                                         backgroundColor: colors.primary,
@@ -396,7 +396,7 @@ const Header = () => {
                                         "&:hover": { backgroundColor: colors.primaryDark },
                                     }}
                                 >
-                                    Continue setup
+                                    Continue Setup
                                 </Button>
                             )}
                         </>
@@ -413,17 +413,17 @@ const Header = () => {
                                     ...outlinedPillButtonSx,
                                     color: colors.textPrimary,
                                     display: { xs: "none", sm: "inline-flex" },
-                                }}
-                            >
-                                Login
-                            </Button>
+                            }}
+                        >
+                            Log In
+                        </Button>
 
                             <Button
                                 component={RouterLink}
                                 to="/signup"
                                 variant="contained"
                                 size="small"
-                                endIcon={<ArrowForwardIcon />}
+                                startIcon={<ArrowForwardIcon />}
                                 sx={{
                                     ...pillButtonSx,
                                     backgroundColor: colors.primary,
@@ -447,7 +447,7 @@ const Header = () => {
                             size="small"
                             sx={outlinedPillButtonSx}
                         >
-                            Login
+                            Log In
                         </Button>
                     )}
 
@@ -459,7 +459,7 @@ const Header = () => {
                             size="small"
                             sx={outlinedPillButtonSx}
                         >
-                            Sign up
+                            Sign Up
                         </Button>
                     )}
                 </Stack>

@@ -136,7 +136,7 @@ const BillingInformationCard = ({ user, paymentMethod }) => {
               </Typography>
 
               <UpgradeButton
-                label="Upgrade to Premium"
+                label="Upgrade To Premium"
                 showIcon
                 size="large"
                 showError={false}

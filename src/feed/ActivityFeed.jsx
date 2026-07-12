@@ -155,7 +155,7 @@ const ActivityFeed = ({ communityId, challengeId = null, title = 'Community feed
             ))}
             {hasMore && (
               <Box sx={{ display: 'grid', placeItems: 'center', py: 1 }}>
-                <Button size="small" onClick={loadMore}>Load more</Button>
+                <Button size="small" onClick={loadMore}>Load More</Button>
               </Box>
             )}
           </>
