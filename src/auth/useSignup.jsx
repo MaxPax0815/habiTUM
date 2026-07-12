@@ -3,8 +3,8 @@ import { useAuthContext } from './useAuthContext'
 
 // Signup hook: creates free/premium/manager accounts and stores the returned user/JWT.
 export const useSignup = () => {
-  const [error, setError] = useState(null) // state to track any error messages during signup
-  const [isLoading, setIsLoading] = useState(null) // state to track loading status during signup
+  const [error, setError] = useState(null)
+  const [isLoading, setIsLoading] = useState(null)
   const { dispatch } = useAuthContext()
 
   // plan defaults to free; success returns full JSON so callers can use checkoutUrl.

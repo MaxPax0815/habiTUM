@@ -4,14 +4,8 @@ import WorkspacePremiumOutlinedIcon from '@mui/icons-material/WorkspacePremiumOu
 import { useBilling } from './useBillings'
 import { colors, radii } from '../styles/tokens'
 
-/**
- * Reusable Upgrade Button.
- *
- * Semantic purpose:
- * This component starts the Stripe Checkout flow.
- * It does NOT set the user to premium directly.
- * Premium status is changed by Stripe Webhook -> Backend -> MongoDB.
- */
+// Reusable button that only starts the Stripe Checkout flow. Premium status is
+// never set here — it is granted server-side via the Stripe webhook after payment.
 const UpgradeButton = ({
   label = 'Upgrade to Premium',
   fullWidth = false,

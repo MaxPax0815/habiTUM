@@ -1,42 +1,43 @@
-import { createContext, useEffect, useReducer } from 'react'; // useReducer centralizes auth state updates
+import { createContext, useEffect, useReducer } from 'react';
 import { registerUnauthorizedHandler } from './authFetch'
 
-// Shared auth box; components read it through useAuthContext().
+// Global auth state: holds the current user snapshot, persists it to
+// localStorage, and reacts to 401s by logging out. Read via useAuthContext().
 export const AuthContext = createContext()
 
-// Reducer maps LOGIN/LOGOUT/UPDATE_USER actions to the next { user } state.
 export const authReducer = (state, action) => {
     switch (action.type) {
-        case 'LOGIN': // store full login/signup response as user snapshot
+        case 'LOGIN':
             return { user: action.payload }
-        case 'LOGOUT': // clear session
+        case 'LOGOUT':
             return { user: null }
-        case 'UPDATE_USER': // shallow-merge fresh billing/profile fields into current user
+        // Merge fresh billing/profile fields (e.g. after a checkout) onto the user.
+        case 'UPDATE_USER':
             return {
                 user: {
                     ...state.user,
                     ...action.payload
                 }
             }
-        default: //default case returns current state unchanged
+        default:
             return state
     }
 }
 
-// Provider restores persisted auth once and exposes { user, dispatch } to children.
-export const AuthContextProvider = ({ children }) => { // children are the components wrapped by this provider
+export const AuthContextProvider = ({ children }) => {
     const [state, dispatch] = useReducer(
         authReducer,
         undefined,
-        // Lazy init runs before first render, preventing a false logged-out redirect flash.
+        // Restore the persisted user before the first render so guarded routes
+        // don't briefly redirect a logged-in user to the public pages.
         () => {
             const storedUser = JSON.parse(localStorage.getItem('user'))
             return { user: storedUser || null }
         }
     )
 
+    // Mirror auth state into localStorage so a refresh keeps the user signed in.
     useEffect(() => {
-        // Keep localStorage in sync with state; [state.user] reruns only when user changes.
         if (state.user) {
             localStorage.setItem('user', JSON.stringify(state.user))
         } else {
@@ -45,16 +46,15 @@ export const AuthContextProvider = ({ children }) => { // children are the compo
     }, [state.user])
 
     useEffect(() => {
-        // authFetch calls this on any 401: LOGOUT clears user + localStorage,
-        // and App.jsx's route guards redirect to the public pages.
+        // authFetch invokes this on any 401 (expired/invalid token): log out so
+        // App.jsx's route guards send the user back to the public pages.
         registerUnauthorizedHandler(() => {
             dispatch({ type: 'LOGOUT' })
         })
     }, [dispatch])
 
     return (
-        // Spread exposes user directly; dispatch lets hooks/pages trigger reducer actions.
-        <AuthContext.Provider value={{ ...state, dispatch }}> 
+        <AuthContext.Provider value={{ ...state, dispatch }}>
             {children}
         </AuthContext.Provider>
     )

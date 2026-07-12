@@ -1,3 +1,7 @@
+// Displays the user's account and subscription information and manages plan
+// changes: standard/premium upgrades and downgrades, plus manager community-slot
+// adjustments. Upgrades run through the shared Stripe checkout flow (useBilling).
+
 import { useEffect, useRef, useState } from 'react'
 import {
   Alert,
@@ -238,6 +242,10 @@ const Profile = () => {
     try { await updateManagerCommunities(-1) } catch { /* error shown via useBilling state */ }
   }
 
+  // On load, reconcile subscription state with Stripe. If Stripe redirected back
+  // here after checkout, confirm the session (and strip the query params so a
+  // refresh can't re-trigger it); otherwise just re-fetch the current account.
+  // The ref guards against React Strict Mode's double effect run.
   useEffect(() => {
     if (checkoutSyncStarted.current) return
     checkoutSyncStarted.current = true

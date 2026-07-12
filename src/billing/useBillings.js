@@ -1,3 +1,6 @@
+// Central billing hook: every Stripe client action (premium checkout, manager
+// checkout, cancellation, slot changes) plus refreshing AuthContext afterwards.
+
 import { useState } from 'react'
 import { useAuthContext } from '../auth/useAuthContext'
 // authFetch attaches the JWT and auto-logs-out on 401 (expired session)
