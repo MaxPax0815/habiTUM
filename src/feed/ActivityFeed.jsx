@@ -10,6 +10,8 @@ const avatarColors = [colors.primary, '#A21CAF', '#B91C1C', colors.secondary, co
 // Stable avatar color from the actor name's first character.
 const colorFor = (name) => avatarColors[(name?.charCodeAt(0) || 0) % avatarColors.length]
 
+const activityTimeFor = (activity) => activity.updatedAt || activity.createdAt
+
 // Global keyframes used by the one-time flash on newly polled items.
 const feedAnimations = (
   <GlobalStyles
@@ -62,6 +64,7 @@ const feedActions = (status, onClose) => {
 const ActivityItem = ({ activity }) => {
   const segments = formatActivityMessage(activity)
   const actorName = activity.meta?.actorName || '?'
+  const activityTime = activityTimeFor(activity)
 
   return (
     <Box
@@ -100,9 +103,11 @@ const ActivityItem = ({ activity }) => {
             </Box>
           ))}
         </Typography>
-        <Typography variant="caption" color="text.secondary">
-          {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
-        </Typography>
+        {activityTime && (
+          <Typography variant="caption" color="text.secondary">
+            {formatDistanceToNow(new Date(activityTime), { addSuffix: true })}
+          </Typography>
+        )}
       </Box>
     </Box>
   )
