@@ -4,7 +4,9 @@ import {
   Alert,
   Box,
   Button,
+  Chip,
   CircularProgress,
+  Divider,
   IconButton,
   InputBase,
   Paper,
@@ -75,6 +77,38 @@ const CommunityLogo = ({ community }) => (
   </Box>
 )
 
+const formatMemberName = (member) => {
+  const user = member?.user || {}
+  const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ').trim()
+  return fullName || user.username || user.email || 'Community member'
+}
+
+const getMemberInitials = (member) => {
+  const user = member?.user || {}
+  const source = [user.firstName, user.lastName].filter(Boolean)
+
+  if (source.length > 0) {
+    return source.map((part) => part[0]).join('').slice(0, 2).toUpperCase()
+  }
+
+  return (user.username || user.email || '?').slice(0, 2).toUpperCase()
+}
+
+const roleChipStyles = {
+  creator: {
+    bgcolor: colors.softBlue,
+    color: colors.primary,
+  },
+  admin: {
+    bgcolor: colors.softGreen,
+    color: colors.green,
+  },
+  member: {
+    bgcolor: colors.softNeutral,
+    color: colors.textSecondary,
+  },
+}
+
 const CommunityDashboard = () => {
   const { id } = useParams()
   const { user } = useAuthContext()
@@ -83,22 +117,29 @@ const CommunityDashboard = () => {
   const [community, setCommunity] = useState(null)
   const [challenges, setChallenges] = useState([])
   const [posts, setPosts] = useState([])
+  const [members, setMembers] = useState([])
   const [challengesLoading, setChallengesLoading] = useState(true)
   const [postsLoading, setPostsLoading] = useState(true)
+  const [membersLoading, setMembersLoading] = useState(false)
   const [challengesError, setChallengesError] = useState(null)
   const [postsError, setPostsError] = useState(null)
+  const [membersError, setMembersError] = useState(null)
   const [isPostDialogOpen, setIsPostDialogOpen] = useState(false)
   const [postDialogKey, setPostDialogKey] = useState(0)
   const [postSubmitting, setPostSubmitting] = useState(false)
-  const [isChallengeDialogOpen, setIsChallengeDialogOpen] = useState(false) // creator-only "New Challenge" popup
-  const [editingChallenge, setEditingChallenge] = useState(null) // creator-only "Edit Challenge" popup target
+  const [isChallengeDialogOpen, setIsChallengeDialogOpen] = useState(false) // admin/creator "New Challenge" popup
+  const [editingChallenge, setEditingChallenge] = useState(null) // admin/creator "Edit Challenge" popup target
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false) // creator/admin invite-link popup
   const [inviteCopied, setInviteCopied] = useState(false)
   const [inviteLink, setInviteLink] = useState('')
   const [inviteError, setInviteError] = useState(null)
+  const [memberRoleUpdatingId, setMemberRoleUpdatingId] = useState(null)
   const [error, setError] = useState(null)
 
   const token = user.token
+  const currentCommunityRole = community?.myRole
+  const isCreator = currentCommunityRole === 'creator'
+  const canManageCommunity = isCreator || currentCommunityRole === 'admin'
 
   const fetchCommunity = useCallback(async () => {
     const authHeader = { 'Authorization': `Bearer ${token}` }
@@ -144,11 +185,43 @@ const CommunityDashboard = () => {
     setPostsLoading(false)
   }, [id, token])
 
+  const fetchCommunityMembers = useCallback(async () => {
+    setMembersLoading(true)
+    setMembersError(null)
+
+    const authHeader = { 'Authorization': `Bearer ${token}` }
+    const res = await fetch(`/api/communities/${id}/members`, { headers: authHeader })
+    const json = await res.json()
+
+    if (res.ok) {
+      setMembers(json.members || [])
+    } else {
+      setMembers([])
+      setMembersError(json.error || 'Could not load community members.')
+    }
+
+    setMembersLoading(false)
+  }, [id, token])
+
   useEffect(() => {
-    fetchCommunity()
-    fetchCommunityChallenges()
-    fetchCommunityPosts()
+    const timeoutId = window.setTimeout(() => {
+      fetchCommunity()
+      fetchCommunityChallenges()
+      fetchCommunityPosts()
+    }, 0)
+
+    return () => window.clearTimeout(timeoutId)
   }, [fetchCommunity, fetchCommunityChallenges, fetchCommunityPosts])
+
+  useEffect(() => {
+    if (!canManageCommunity) return undefined
+
+    const timeoutId = window.setTimeout(() => {
+      fetchCommunityMembers()
+    }, 0)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [canManageCommunity, fetchCommunityMembers])
 
   const handleJoin = async () => {
     const authHeader = { 'Authorization': `Bearer ${token}` }
@@ -297,12 +370,39 @@ const CommunityDashboard = () => {
     }
   }
 
+  const handleUpdateMemberRole = async (member, role) => {
+    setMembersError(null)
+    setMemberRoleUpdatingId(member._id)
+
+    try {
+      const authHeader = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+
+      const res = await fetch(`/api/communities/${id}/members/${member._id}`, {
+        method: 'PATCH',
+        headers: authHeader,
+        body: JSON.stringify({ role }),
+      })
+      const json = await res.json()
+
+      if (res.ok) {
+        fetchCommunityMembers()
+      } else {
+        setMembersError(json.error || 'Could not update member role.')
+      }
+    } catch {
+      setMembersError('Could not reach the server.')
+    } finally {
+      setMemberRoleUpdatingId(null)
+    }
+  }
+
   if (error) return <PageContainer maxWidth={760}><Typography color="error">{error}</Typography></PageContainer>
   if (!community) return <PageContainer maxWidth={760}><Typography>Loading…</Typography></PageContainer>
 
   const isMember = community.membershipStatus === 'accepted'
-  const isCreator = community.myRole === 'creator'
-  const canManageCommunity = isCreator || community.myRole === 'admin'
   const previewPosts = posts.slice(0, 2)
   const hasMorePosts = posts.length > 2
 
@@ -368,7 +468,7 @@ const CommunityDashboard = () => {
                 </span>
               )}
               leading={<CommunityLogo community={community} />}
-              actions={isCreator ? (
+              actions={canManageCommunity ? (
                 <Stack direction="row" spacing={1.5}>
                   <Button
                     variant="outlined" onClick={handleOpenInviteDialog}
@@ -376,12 +476,21 @@ const CommunityDashboard = () => {
                   >
                     Invite
                   </Button>
-                  <Button
-                    variant="outlined" color="error" onClick={handleDelete}
-                    startIcon={<span className="material-symbols-outlined">delete</span>}
-                  >
-                    Delete
-                  </Button>
+                  {isCreator ? (
+                    <Button
+                      variant="outlined" color="error" onClick={handleDelete}
+                      startIcon={<span className="material-symbols-outlined">delete</span>}
+                    >
+                      Delete
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outlined" onClick={handleLeave}
+                      startIcon={<span className="material-symbols-outlined">logout</span>}
+                    >
+                      Leave
+                    </Button>
+                  )}
                 </Stack>
               ) : isMember ? (
                 <Button
@@ -404,192 +513,308 @@ const CommunityDashboard = () => {
             </PageSection>
           )}
 
-      <PageSection
-        title="Community Updates"
-        actions={((showFeedButton && !community.description) || hasMorePosts || canManageCommunity) && (
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { xs: 'stretch', sm: 'center' } }}>
-            {!community.description && showFeedButton}
-            {canManageCommunity && (
-              <Button
-                variant="outlined"
-                onClick={() => {
-                  setPostDialogKey((current) => current + 1)
-                  setIsPostDialogOpen(true)
+          {canManageCommunity && (
+            <PageSection title="Admin team" sx={{ mb: 3 }}>
+              <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
+                {membersLoading ? (
+                  <Box sx={{ display: 'grid', placeItems: 'center', py: 5 }}>
+                    <CircularProgress size={24} />
+                  </Box>
+                ) : membersError ? (
+                  <Box sx={{ p: 2.5 }}>
+                    <Alert severity="error">{membersError}</Alert>
+                  </Box>
+                ) : members.length > 0 ? (
+                  <Stack
+                    divider={<Divider flexItem />}
+                    sx={{
+                      maxHeight: 360,
+                      overflowY: 'auto',
+                    }}
+                  >
+                    {members.map((member) => {
+                      const canChangeRole = isCreator && member.role !== 'creator'
+                      const nextRole = member.role === 'admin' ? 'member' : 'admin'
+                      const isUpdatingRole = memberRoleUpdatingId === member._id
+
+                      return (
+                        <Stack
+                          key={member._id}
+                          direction={{ xs: 'column', sm: 'row' }}
+                          spacing={2}
+                          sx={{
+                            alignItems: { xs: 'stretch', sm: 'center' },
+                            justifyContent: 'space-between',
+                            px: 2.5,
+                            py: 2,
+                          }}
+                        >
+                          <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', minWidth: 0 }}>
+                            <Box
+                              sx={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: '50%',
+                                display: 'grid',
+                                placeItems: 'center',
+                                flexShrink: 0,
+                                bgcolor: colors.softBlue,
+                                color: colors.primary,
+                                fontWeight: 900,
+                              }}
+                            >
+                              {getMemberInitials(member)}
+                            </Box>
+                            <Box sx={{ minWidth: 0 }}>
+                              <Typography sx={{ fontWeight: 900, color: colors.textPrimary }}>
+                                {formatMemberName(member)}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: colors.textSecondary,
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                {member.user?.username || member.user?.email}
+                              </Typography>
+                            </Box>
+                          </Stack>
+
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            sx={{
+                              alignItems: 'center',
+                              justifyContent: { xs: 'space-between', sm: 'flex-end' },
+                              flexShrink: 0,
+                            }}
+                          >
+                            <Chip
+                              label={member.role}
+                              size="small"
+                              sx={{
+                                typography: 'caption',
+                                fontWeight: 900,
+                                textTransform: 'capitalize',
+                                ...(roleChipStyles[member.role] || roleChipStyles.member),
+                              }}
+                            />
+                            {canChangeRole && (
+                              <Button
+                                size="small"
+                                variant={member.role === 'admin' ? 'outlined' : 'contained'}
+                                onClick={() => handleUpdateMemberRole(member, nextRole)}
+                                disabled={isUpdatingRole}
+                                sx={{ minWidth: 128, fontWeight: 800 }}
+                              >
+                                {member.role === 'admin' ? 'Remove admin' : 'Make admin'}
+                              </Button>
+                            )}
+                          </Stack>
+                        </Stack>
+                      )
+                    })}
+                  </Stack>
+                ) : (
+                  <Box sx={{ p: 3, textAlign: 'center' }}>
+                    <Typography variant="body2" sx={{ color: colors.textSecondary }}>
+                      No accepted members yet.
+                    </Typography>
+                  </Box>
+                )}
+              </Paper>
+            </PageSection>
+          )}
+
+          <PageSection
+            title="Community Updates"
+            actions={((showFeedButton && !community.description) || hasMorePosts || canManageCommunity) && (
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { xs: 'stretch', sm: 'center' } }}>
+                {!community.description && showFeedButton}
+                {canManageCommunity && (
+                  <Button
+                    variant="outlined"
+                    onClick={() => {
+                      setPostDialogKey((current) => current + 1)
+                      setIsPostDialogOpen(true)
+                    }}
+                    startIcon={<span className="material-symbols-outlined">add</span>}
+                  >
+                    New Post
+                  </Button>
+                )}
+                {hasMorePosts && (
+                  <Button
+                    component={RouterLink}
+                    to={`/communities/${id}/updates`}
+                    variant="outlined"
+                    startIcon={<span className="material-symbols-outlined">arrow_forward</span>}
+                  >
+                    View all
+                  </Button>
+                )}
+              </Stack>
+            )}
+          >
+            {postsLoading ? (
+              <Box sx={{ display: 'grid', placeItems: 'center', py: 6 }}>
+                <CircularProgress size={28} />
+              </Box>
+            ) : postsError ? (
+              <Alert severity="error">{postsError}</Alert>
+            ) : previewPosts.length > 0 ? (
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
+                  gap: 2.5,
                 }}
+              >
+                {previewPosts.map((post) => (
+                  <CommunityPostCard
+                    key={post._id}
+                    post={post}
+                    canManage={canManageCommunity}
+                    onDelete={handleDeletePost}
+                    onTogglePin={handleTogglePostPinned}
+                    bodyLineClamp={3}
+                  />
+                ))}
+              </Box>
+            ) : (
+              <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 32, color: colors.muted }}>campaign</span>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  No community updates yet.
+                </Typography>
+              </Paper>
+            )}
+          </PageSection>
+
+          <PageSection
+            title="Challenges"
+            sx={{ mb: 0 }}
+            actions={canManageCommunity && (
+              <Button
+                variant="contained"
+                onClick={() => setIsChallengeDialogOpen(true)}
                 startIcon={<span className="material-symbols-outlined">add</span>}
               >
-                New Post
+                New Challenge
               </Button>
             )}
-            {hasMorePosts && (
-              <Button
-                component={RouterLink}
-                to={`/communities/${id}/updates`}
-                variant="outlined"
-                startIcon={<span className="material-symbols-outlined">arrow_forward</span>}
+          >
+            {challengesLoading ? (
+              <Box sx={{ display: 'grid', placeItems: 'center', py: 6 }}>
+                <CircularProgress size={28} />
+              </Box>
+            ) : challengesError ? (
+              <Alert severity="error">{challengesError}</Alert>
+            ) : challenges.length > 0 ? (
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
+                  gap: 2.5,
+                }}
               >
-                View all
-              </Button>
+                {challenges.map((challenge) => (
+                  <ChallengeCard
+                    key={challenge._id}
+                    challenge={challenge}
+                    onJoin={isMember ? () => handleJoinChallenge(challenge._id) : undefined}
+                    canManage={canManageCommunity}
+                    onEdit={setEditingChallenge}
+                    onDelete={handleDeleteChallenge}
+                  />
+                ))}
+              </Box>
+            ) : (
+              <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 32, color: colors.muted }}>emoji_events</span>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  No challenges yet. Challenges for this community will appear here.
+                </Typography>
+              </Paper>
             )}
-          </Stack>
-        )}
-      >
-        {postsLoading ? (
-          <Box sx={{ display: 'grid', placeItems: 'center', py: 6 }}>
-            <CircularProgress size={28} />
-          </Box>
-        ) : postsError ? (
-          <Alert severity="error">{postsError}</Alert>
-        ) : previewPosts.length > 0 ? (
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
-              gap: 2.5,
-            }}
-          >
-            {previewPosts.map((post) => (
-              <CommunityPostCard
-                key={post._id}
-                post={post}
-                canManage={canManageCommunity}
-                onDelete={handleDeletePost}
-                onTogglePin={handleTogglePostPinned}
-                bodyLineClamp={3}
-              />
-            ))}
-          </Box>
-        ) : (
-          <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
-            <span className="material-symbols-outlined" style={{ fontSize: 32, color: colors.muted }}>campaign</span>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              No community updates yet.
-            </Typography>
-          </Paper>
-        )}
-      </PageSection>
+          </PageSection>
 
-      <PageSection
-        title="Challenges"
-        sx={{ mb: 0 }}
-        actions={isCreator && (
-          <Button
-            variant="contained"
-            onClick={() => setIsChallengeDialogOpen(true)}
-            startIcon={<span className="material-symbols-outlined">add</span>}
-          >
-            New Challenge
-          </Button>
-        )}
-      >
-        {challengesLoading ? (
-          <Box sx={{ display: 'grid', placeItems: 'center', py: 6 }}>
-            <CircularProgress size={28} />
-          </Box>
-        ) : challengesError ? (
-          <Alert severity="error">{challengesError}</Alert>
-        ) : challenges.length > 0 ? (
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
-              gap: 2.5,
-            }}
-          >
-            {challenges.map((challenge) => (
-              <ChallengeCard
-                key={challenge._id}
-                challenge={challenge}
-                onJoin={isMember ? () => handleJoinChallenge(challenge._id) : undefined}
-                canManage={isCreator}
-                onEdit={setEditingChallenge}
-                onDelete={handleDeleteChallenge}
-              />
-            ))}
-          </Box>
-        ) : (
-          <Paper variant="outlined" sx={{ p: 4, textAlign: 'center' }}>
-            <span className="material-symbols-outlined" style={{ fontSize: 32, color: colors.muted }}>emoji_events</span>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              No challenges yet. Challenges for this community will appear here.
-            </Typography>
-          </Paper>
-        )}
-      </PageSection>
-
-<CommunityPostDialog
-          key={postDialogKey}
-          open={isPostDialogOpen}
-          onClose={handleClosePostDialog}
-          onSubmit={handleCreatePost}
-          submitting={postSubmitting}
-          challenges={challenges}
-        />
-
-      {/* Creator-only: create a challenge for this community. Reuses the same
-          ChallengeForm as the manager dashboard; refetches the cards on success. */}
-      <AppDialog open={isChallengeDialogOpen} onClose={() => setIsChallengeDialogOpen(false)}>
-        <ChallengeForm
-          communityId={id}
-          onChallengeCreated={fetchCommunityChallenges}
-          onClose={() => setIsChallengeDialogOpen(false)}
-        />
-      </AppDialog>
-
-      {/* Creator-only: edit an existing challenge. Same form in edit mode. */}
-      <AppDialog open={Boolean(editingChallenge)} onClose={() => setEditingChallenge(null)}>
-        {editingChallenge && (
-          <ChallengeForm
-            challenge={editingChallenge}
-            onChallengeUpdated={fetchCommunityChallenges}
-            onClose={() => setEditingChallenge(null)}
+          <CommunityPostDialog
+            key={postDialogKey}
+            open={isPostDialogOpen}
+            onClose={handleClosePostDialog}
+            onSubmit={handleCreatePost}
+            submitting={postSubmitting}
+            challenges={challenges}
           />
-        )}
-      </AppDialog>
 
-      {/* Creator-only: share a dummy invite link with a copy-to-clipboard button. */}
-      <AppDialog open={isInviteDialogOpen} onClose={handleCloseInviteDialog}>
-        <Typography variant="h5" sx={{ color: colors.textPrimary, fontWeight: 900 }}>
-          Invite to {community.name}
-        </Typography>
-        <Typography sx={{ mt: 0.5, mb: 3, color: colors.muted, fontWeight: 700 }}>
-          Anyone with this link can log in and join{community.isPrivate ? ' this private community.' : '.'}
-        </Typography>
-
-        {inviteError ? (
-          <Alert severity="error">{inviteError}</Alert>
-        ) : !inviteLink ? (
-          <Box sx={{ display: 'grid', placeItems: 'center', py: 3 }}>
-            <CircularProgress size={24} />
-          </Box>
-        ) : (
-          <Box
-            sx={{
-              display: 'flex', alignItems: 'center', gap: 1,
-              border: `1px solid ${colors.border}`, borderRadius: 2, pl: 2, pr: 0.5, py: 0.5,
-            }}
-          >
-            <InputBase
-              value={inviteLink}
-              readOnly
-              fullWidth
-              sx={{ typography: 'body2', color: colors.textSecondary }}
-              onFocus={(e) => e.target.select()}
+          {/* Admin/creator: create a challenge for this community. Reuses the same
+              ChallengeForm as the manager dashboard; refetches the cards on success. */}
+          <AppDialog open={isChallengeDialogOpen} onClose={() => setIsChallengeDialogOpen(false)}>
+            <ChallengeForm
+              communityId={id}
+              onChallengeCreated={fetchCommunityChallenges}
+              onClose={() => setIsChallengeDialogOpen(false)}
             />
-            <Tooltip title={inviteCopied ? 'Copied!' : 'Copy link'} placement="top" arrow>
-              <IconButton onClick={handleCopyInvite} sx={{ color: inviteCopied ? colors.green : colors.primary }}>
-                <span className="material-symbols-outlined">
-                  {inviteCopied ? 'check' : 'content_copy'}
-                </span>
-              </IconButton>
-            </Tooltip>
-          </Box>
-        )}
+          </AppDialog>
 
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-          <Button variant="contained" onClick={handleCloseInviteDialog}>Done</Button>
-        </Box>
-      </AppDialog>
+          {/* Admin/creator: edit an existing challenge. Same form in edit mode. */}
+          <AppDialog open={Boolean(editingChallenge)} onClose={() => setEditingChallenge(null)}>
+            {editingChallenge && (
+              <ChallengeForm
+                challenge={editingChallenge}
+                onChallengeUpdated={fetchCommunityChallenges}
+                onClose={() => setEditingChallenge(null)}
+              />
+            )}
+          </AppDialog>
+
+          {/* Admin/creator: share an invite link with a copy-to-clipboard button. */}
+          <AppDialog open={isInviteDialogOpen} onClose={handleCloseInviteDialog}>
+            <Typography variant="h5" sx={{ color: colors.textPrimary, fontWeight: 900 }}>
+              Invite to {community.name}
+            </Typography>
+            <Typography sx={{ mt: 0.5, mb: 3, color: colors.muted, fontWeight: 700 }}>
+              Anyone with this link can log in and join{community.isPrivate ? ' this private community.' : '.'}
+            </Typography>
+
+            {inviteError ? (
+              <Alert severity="error">{inviteError}</Alert>
+            ) : !inviteLink ? (
+              <Box sx={{ display: 'grid', placeItems: 'center', py: 3 }}>
+                <CircularProgress size={24} />
+              </Box>
+            ) : (
+              <Box
+                sx={{
+                  display: 'flex', alignItems: 'center', gap: 1,
+                  border: `1px solid ${colors.border}`, borderRadius: 2, pl: 2, pr: 0.5, py: 0.5,
+                }}
+              >
+                <InputBase
+                  value={inviteLink}
+                  readOnly
+                  fullWidth
+                  sx={{ typography: 'body2', color: colors.textSecondary }}
+                  onFocus={(e) => e.target.select()}
+                />
+                <Tooltip title={inviteCopied ? 'Copied!' : 'Copy link'} placement="top" arrow>
+                  <IconButton onClick={handleCopyInvite} sx={{ color: inviteCopied ? colors.green : colors.primary }}>
+                    <span className="material-symbols-outlined">
+                      {inviteCopied ? 'check' : 'content_copy'}
+                    </span>
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            )}
+
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+              <Button variant="contained" onClick={handleCloseInviteDialog}>Done</Button>
+            </Box>
+          </AppDialog>
         </Box>
       )}
     </FeedRailLayout>

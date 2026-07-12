@@ -139,9 +139,8 @@ const ChallengePage = () => {
   // Derived from communityId so no state reset is needed when it goes away —
   // without a community, both flags are simply false.
   const isCommunityMember = Boolean(communityId) && communityMembershipStatus === "accepted";
-  // Only the community's creator gets the "Add habit" button — the backend
-  // enforces the same rule on POST /api/challenges/:id/habits.
-  const isCommunityCreator = Boolean(communityId) && communityRole === "creator";
+  // Community admins and creators can manage challenge details and habits.
+  const canManageCommunity = Boolean(communityId) && ["admin", "creator"].includes(communityRole);
 
   useEffect(() => {
     if (!communityId || !user) return undefined;
@@ -352,7 +351,7 @@ const ChallengePage = () => {
 
             {/* Title + description live inside the card (showHeading), above the
                 participants/days-left/rank row — see ExtendedChallengeCard.
-                Creator-only Edit/Delete render in the card header next to the chips. */}
+                Admin/creator Edit/Delete render in the card header next to the chips. */}
             <ExtendedChallengeCard
               challenge={challenge}
               currentUserRank={data.currentUserRank}
@@ -360,7 +359,7 @@ const ChallengePage = () => {
               isCommunityMember={isCommunityMember}
               onJoin={handleJoinChallenge}
               onLeaveChallenge={handleLeaveChallenge}
-              canManage={isCommunityCreator}
+              canManage={canManageCommunity}
               onEdit={() => setShowEditForm(true)}
               onDelete={handleDeleteChallenge}
               showHeading
@@ -368,15 +367,15 @@ const ChallengePage = () => {
           </Box>
 
       <Box>
-        {/* Section heading with the creator-only "Add habit" action on the right */}
+        {/* Section heading with the admin/creator "Add habit" action on the right */}
         <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 2 }}>
           <Typography component="h2" sx={sectionTitleSx}>
             Challenge habits
           </Typography>
-          {(showFeedButton || isCommunityCreator) && (
+          {(showFeedButton || canManageCommunity) && (
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ alignItems: { xs: "stretch", sm: "center" } }}>
               {showFeedButton}
-              {isCommunityCreator && (
+              {canManageCommunity && (
                 <Button
                   variant="outlined"
                   size="small"
