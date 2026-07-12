@@ -9,10 +9,10 @@ const PublicLayout = () => {
   const shouldShowFooter = ['/', '/impressum', '/datenschutz', '/terms'].includes(pathname)
 
   return (
-    <Box sx={{ minHeight: "100vh", backgroundColor: colors.background }}>
+    <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column", backgroundColor: colors.background }}>
       <Header />
 
-      <Box component="main">
+      <Box component="main" sx={{ flexGrow: 1 }}>
         <Outlet />
       </Box>
 
