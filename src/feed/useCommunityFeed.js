@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuthContext } from '../auth/useAuthContext'
+import { authFetch } from '../auth/authFetch'
 
 // Active feed client: initial page, then 5s cursor polling instead of legacy SSE.
 const POLL_INTERVAL_MS = 5000
@@ -28,8 +29,6 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
     let activeController = null
     let inFlight = false
 
-    const authHeader = { Authorization: `Bearer ${token}` }
-
     // Store the newest server cursor for the next /updates request.
     const rememberCursor = (cursor) => {
       if (cursor) lastEventIdRef.current = cursor
@@ -43,11 +42,12 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
       return query ? `?${query}` : ''
     }
 
-    // AbortController lets cleanup cancel in-flight fetches when the feed unmounts.
+    // AbortController lets cleanup cancel in-flight fetches; authFetch handles
+    // JWT + 401 logout (token then goes falsy and polling stops itself).
     const requestJson = async (url, fallbackMessage) => {
       const controller = new AbortController()
       activeController = controller
-      const res = await fetch(url, { headers: authHeader, signal: controller.signal })
+      const res = await authFetch(url, { token, signal: controller.signal })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || fallbackMessage)
       return json
@@ -176,9 +176,9 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
     try {
       const params = new URLSearchParams({ before: oldest._id })
       if (challengeId) params.set('challenge', challengeId)
-      const res = await fetch(
+      const res = await authFetch(
         `/api/communities/${communityId}/feed?${params}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { token }
       )
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Could not load more activity.')

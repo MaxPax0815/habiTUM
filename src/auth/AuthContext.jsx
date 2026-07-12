@@ -1,4 +1,5 @@
 import { createContext, useEffect, useReducer } from 'react'; // useReducer centralizes auth state updates
+import { registerUnauthorizedHandler } from './authFetch'
 
 // Shared auth box; components read it through useAuthContext().
 export const AuthContext = createContext()
@@ -43,7 +44,13 @@ export const AuthContextProvider = ({ children }) => { // children are the compo
         }
     }, [state.user])
 
-    console.log('AuthContext state:', state) //debugging log to see current auth state
+    useEffect(() => {
+        // authFetch calls this on any 401: LOGOUT clears user + localStorage,
+        // and App.jsx's route guards redirect to the public pages.
+        registerUnauthorizedHandler(() => {
+            dispatch({ type: 'LOGOUT' })
+        })
+    }, [dispatch])
 
     return (
         // Spread exposes user directly; dispatch lets hooks/pages trigger reducer actions.

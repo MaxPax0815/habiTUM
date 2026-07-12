@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuthContext } from "../../auth/useAuthContext"
+import { authFetch } from "../../auth/authFetch"
 import { useHabitsContext } from "../../hooks/useHabitsContext"
 
 // date-fns — some imports/helpers as in HabitDetails, plus format/getDay for the Header
@@ -114,11 +115,8 @@ const Home = () => {
 
   useEffect(() => {
     const fetchHabits = async () => {
-      const response = await fetch('/api/habits', {
-        headers: {
-          'Authorization': `Bearer ${user.token}` // include the JWT in the Authorization header
-        }
-      })
+      // authFetch attaches the JWT and auto-logs-out on 401 (expired session)
+      const response = await authFetch('/api/habits', { token: user.token })
       const json = await response.json()
 
       if (response.ok) {
@@ -129,11 +127,7 @@ const Home = () => {
     // fills the "Active challenges" sidebar: challenges this user joined that
     // are currently running (the backend filters to status 'active')
     const fetchActiveChallenges = async () => {
-      const response = await fetch('/api/challenges/joined', {
-        headers: {
-          'Authorization': `Bearer ${user.token}`
-        }
-      })
+      const response = await authFetch('/api/challenges/joined', { token: user.token })
       const json = await response.json()
 
       if (response.ok) {

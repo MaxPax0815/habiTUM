@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { useAuthContext } from "../../../auth/useAuthContext"
+import { authFetch } from "../../../auth/authFetch"
 import { useHabitsContext } from "../../../hooks/useHabitsContext"
 
 import format from "date-fns/format"
@@ -640,12 +641,13 @@ const Progress = () => {
 
   const isPremium = user?.subscription === "premium" || user?.accountType === "manager"
 
-  // Load habits from the server once if they haven't been fetched yet
+  // Load habits once if not fetched yet; authFetch handles JWT + 401 logout,
+  // and the r.ok guard keeps an { error } body out of the habit list.
   useEffect(() => {
     if (habits === null && user) {
-      fetch("/api/habits", { headers: { Authorization: `Bearer ${user.token}` } })
-        .then(r => r.json())
-        .then(json => dispatch({ type: "SET_HABITS", payload: json }))
+      authFetch("/api/habits", { token: user.token })
+        .then(r => (r.ok ? r.json() : null))
+        .then(json => { if (json) dispatch({ type: "SET_HABITS", payload: json }) })
     }
   }, [habits, user, dispatch])
 

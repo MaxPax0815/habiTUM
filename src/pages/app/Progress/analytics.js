@@ -46,7 +46,8 @@ export const getExpectedCount = (created, now, frequency) => {
 // --- Per-habit analytics ---
 
 // Mirrors backend getPeriodKey: daily:YYYY-MM-DD or weekly:YYYY-MM-DD using Monday.
-const buildPeriodKey = (date, frequency) => {
+// Exported for the drift-guard test in analytics.test.js (fixture shared with the backend).
+export const buildPeriodKey = (date, frequency) => {
   const d = new Date(date)
   d.setHours(0, 0, 0, 0)
   if (frequency === "weekly") {

@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useAuthContext } from '../auth/useAuthContext'
+// authFetch attaches the JWT and auto-logs-out on 401 (expired session)
+import { authFetch } from '../auth/authFetch'
 
 export const useBilling = () => {
   const { user, dispatch } = useAuthContext()
@@ -8,11 +10,7 @@ export const useBilling = () => {
 
   // Re-fetch /me after Stripe changes so AuthContext has current subscription/limits.
   const refreshCurrentUser = async () => {
-    const response = await fetch('/api/user/me', {
-      headers: {
-        Authorization: `Bearer ${user.token}`
-      }
-    })
+    const response = await authFetch('/api/user/me', { token: user.token })
 
     const data = await response.json()
 
@@ -33,11 +31,9 @@ export const useBilling = () => {
     setError(null)
 
     try {
-      const response = await fetch('/api/billing/create-checkout-session', {
+      const response = await authFetch('/api/billing/create-checkout-session', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${user.token}`
-        }
+        token: user.token
       })
 
       const data = await response.json()
@@ -58,12 +54,10 @@ export const useBilling = () => {
     setError(null)
 
     try {
-      const response = await fetch('/api/billing/confirm-checkout-session', {
+      const response = await authFetch('/api/billing/confirm-checkout-session', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`
-        },
+        token: user.token,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId })
       })
 
@@ -92,11 +86,9 @@ export const useBilling = () => {
     setError(null)
 
     try {
-      const response = await fetch('/api/billing/schedule-cancellation', {
+      const response = await authFetch('/api/billing/schedule-cancellation', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${user.token}`
-        }
+        token: user.token
       })
 
       const data = await response.json()
@@ -119,12 +111,10 @@ export const useBilling = () => {
     setError(null)
 
     try {
-      const response = await fetch('/api/billing/create-manager-checkout', {
+      const response = await authFetch('/api/billing/create-manager-checkout', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`
-        },
+        token: user.token,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ numCommunities: numAdditional })
       })
 
@@ -147,12 +137,10 @@ export const useBilling = () => {
     setError(null)
 
     try {
-      const response = await fetch('/api/billing/update-manager-communities', {
+      const response = await authFetch('/api/billing/update-manager-communities', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.token}`
-        },
+        token: user.token,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ delta })
       })
 
