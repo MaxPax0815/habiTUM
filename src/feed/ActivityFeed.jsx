@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Chip, CircularProgress, GlobalStyles, Paper, Typography } from '@mui/material'
+import { Alert, Box, Button, Chip, CircularProgress, GlobalStyles, IconButton, Paper, Tooltip, Typography } from '@mui/material'
 import { formatDistanceToNow } from 'date-fns'
 import { colors } from '../styles/tokens'
 import PageSection from '../components/layout/PageSection'
@@ -10,7 +10,7 @@ const avatarColors = [colors.primary, '#A21CAF', '#B91C1C', colors.secondary, co
 // Stable avatar color from the actor name's first character.
 const colorFor = (name) => avatarColors[(name?.charCodeAt(0) || 0) % avatarColors.length]
 
-// Global keyframes used by live-item flash and the status chip pulse.
+// Global keyframes used by the one-time flash on newly polled items.
 const feedAnimations = (
   <GlobalStyles
     styles={{
@@ -18,38 +18,44 @@ const feedAnimations = (
         from: { backgroundColor: colors.softBlue },
         to: { backgroundColor: 'transparent' },
       },
-      '@keyframes habitumLivePulse': {
-        '0%': { boxShadow: `0 0 0 0 ${colors.green}66` },
-        '70%': { boxShadow: `0 0 0 6px ${colors.green}00` },
-        '100%': { boxShadow: `0 0 0 0 ${colors.green}00` },
-      },
     }}
   />
 )
 
-// Poll-loop status indicator: live, connecting, or retrying.
+// Poll-loop status indicator only appears while loading or retrying.
 const statusChip = (status) => {
-  if (status === 'live') {
-    return (
-      <Chip
-        size="small"
-        label="Auto-refresh"
-        icon={
-          <Box sx={{
-            width: 8, height: 8, borderRadius: '50%', bgcolor: colors.green,
-            ml: 1, animation: 'habitumLivePulse 2s infinite',
-          }} />
-        }
-        sx={{ bgcolor: colors.softGreen, color: colors.green, fontWeight: 700 }}
-      />
-    )
-  }
+  if (status === 'live') return null
+
   return (
     <Chip
       size="small"
       label={status === 'connecting' ? 'Loading…' : 'Retrying…'}
       sx={{ bgcolor: colors.softOrange, color: colors.orange, fontWeight: 700 }}
     />
+  )
+}
+
+const feedActions = (status, onClose) => {
+  const chip = statusChip(status)
+
+  if (!chip && !onClose) return null
+
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      {chip}
+      {onClose && (
+        <Tooltip title="Hide activity">
+          <IconButton
+            aria-label="Hide activity"
+            onClick={onClose}
+            size="small"
+            sx={{ color: colors.muted }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>close</span>
+          </IconButton>
+        </Tooltip>
+      )}
+    </Box>
   )
 }
 
@@ -103,12 +109,17 @@ const ActivityItem = ({ activity }) => {
 }
 
 // Self-contained feed panel: hook state, status chip, loading/error/empty/list, and load more.
-const ActivityFeed = ({ communityId, challengeId = null, title = 'Activity', enabled = true }) => {
+const ActivityFeed = ({ communityId, challengeId = null, title = 'Community feed', enabled = true, onClose }) => {
   const { activities, hasMore, loading, error, status, loadMore } = useCommunityFeed(communityId, { challengeId, enabled })
 
   return (
     // Mobile stacks with spacing; desktop rail top-aligns and scrolls within the viewport.
-    <PageSection title={title} actions={statusChip(status)} sx={{ mt: { xs: 4, lg: 0 }, mb: 0 }}>
+    <PageSection
+      title={title}
+      titleSx={{ mb: 1, letterSpacing: 0, textTransform: 'none' }}
+      actions={feedActions(status, onClose)}
+      sx={{ mt: { xs: 4, lg: 0 }, mb: 0 }}
+    >
       {feedAnimations}
       {/* aria-live lets screen readers announce polled-in items politely. */}
       <Paper

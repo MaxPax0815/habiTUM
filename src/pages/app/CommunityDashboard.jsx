@@ -332,65 +332,72 @@ const CommunityDashboard = () => {
 
   return (
     // key={id} remounts the feed so cursor/list state resets when communities change.
-    <FeedRailLayout feed={isMember && <ActivityFeed key={id} communityId={id} />}>
-    <Box sx={{ textAlign: 'left' }}>
-      <BackButton text="Back to Communities" to="/communities" sx={{ mb: 0 }} />
-      <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 }, mb: 4 }}>
-        <PageHeader
-          title={community.name}
-          description={`${community.memberCount} members`}
-          sx={{ mb: 0 }}
-          titleAdornment={(
-            <span className="material-symbols-outlined" style={{ color: colors.muted, fontSize: 20 }}>
-              {community.isPrivate ? 'lock' : 'public'}
-            </span>
-          )}
-          leading={<CommunityLogo community={community} />}
-          actions={isCreator ? (
-            <Stack direction="row" spacing={1.5}>
-              <Button
-                variant="outlined" onClick={handleOpenInviteDialog}
-                startIcon={<span className="material-symbols-outlined">link</span>}
-              >
-                Invite
-              </Button>
-              <Button
-                variant="outlined" color="error" onClick={handleDelete}
-                startIcon={<span className="material-symbols-outlined">delete</span>}
-              >
-                Delete
-              </Button>
-            </Stack>
-          ) : isMember ? (
-            <Button
-              variant="outlined" onClick={handleLeave}
-              startIcon={<span className="material-symbols-outlined">logout</span>}
-            >
-              Leave
-            </Button>
-          ) : (
-            <Button variant="contained" onClick={handleJoin}>Join</Button>
-          )}
-        />
-      </Paper>
-
-      {community.description && (
-        <PageSection title="About" sx={{ mb: 3 }}>
-          <Paper variant="outlined" sx={{ p: 3 }}>
-            <Typography sx={{ mt: 0.5 }}>{community.description}</Typography>
+    <FeedRailLayout
+      feedKey={id}
+      feed={isMember && (({ onClose }) => (
+        <ActivityFeed key={id} communityId={id} onClose={onClose} />
+      ))}
+    >
+      {({ showFeedButton }) => (
+        <Box sx={{ textAlign: 'left' }}>
+          <BackButton text="Back to Communities" to="/communities" sx={{ mb: 0 }} />
+          <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 }, mb: 4 }}>
+            <PageHeader
+              title={community.name}
+              description={`${community.memberCount} members`}
+              sx={{ mb: 0 }}
+              titleAdornment={(
+                <span className="material-symbols-outlined" style={{ color: colors.muted, fontSize: 20 }}>
+                  {community.isPrivate ? 'lock' : 'public'}
+                </span>
+              )}
+              leading={<CommunityLogo community={community} />}
+              actions={isCreator ? (
+                <Stack direction="row" spacing={1.5}>
+                  <Button
+                    variant="outlined" onClick={handleOpenInviteDialog}
+                    startIcon={<span className="material-symbols-outlined">link</span>}
+                  >
+                    Invite
+                  </Button>
+                  <Button
+                    variant="outlined" color="error" onClick={handleDelete}
+                    startIcon={<span className="material-symbols-outlined">delete</span>}
+                  >
+                    Delete
+                  </Button>
+                </Stack>
+              ) : isMember ? (
+                <Button
+                  variant="outlined" onClick={handleLeave}
+                  startIcon={<span className="material-symbols-outlined">logout</span>}
+                >
+                  Leave
+                </Button>
+              ) : (
+                <Button variant="contained" onClick={handleJoin}>Join</Button>
+              )}
+            />
           </Paper>
-        </PageSection>
-      )}
+
+          {community.description && (
+            <PageSection title="About" actions={showFeedButton} sx={{ mb: 3 }}>
+              <Paper variant="outlined" sx={{ p: 3 }}>
+                <Typography sx={{ mt: 0.5 }}>{community.description}</Typography>
+              </Paper>
+            </PageSection>
+          )}
 
       <PageSection
         title="Community Updates"
-        actions={(hasMorePosts || canManageCommunity) && (
+        actions={((showFeedButton && !community.description) || hasMorePosts || canManageCommunity) && (
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { xs: 'stretch', sm: 'center' } }}>
+            {!community.description && showFeedButton}
             {hasMorePosts && (
               <Button
                 component={RouterLink}
                 to={`/communities/${id}/updates`}
-                variant="text"
+                variant="outlined"
                 endIcon={<span className="material-symbols-outlined">arrow_forward</span>}
               >
                 View all
@@ -553,7 +560,8 @@ const CommunityDashboard = () => {
           <Button variant="contained" onClick={handleCloseInviteDialog}>Done</Button>
         </Box>
       </AppDialog>
-    </Box>
+        </Box>
+      )}
     </FeedRailLayout>
   )
 }

@@ -10,6 +10,7 @@ const PageSection = ({
   description,
   sx = {},
   title,
+  titleSx = {},
 }) => (
   <Box component={component} sx={{ mb: 4, ...sx }}>
     {(title || description || actions) && (
@@ -24,7 +25,7 @@ const PageSection = ({
       >
         <Box sx={{ minWidth: 0 }}>
           {title && (
-            <Typography component="h2" sx={sectionTitleSx}>
+            <Typography component="h2" sx={{ ...sectionTitleSx, ...titleSx }}>
               {title}
             </Typography>
           )}

@@ -1,8 +1,51 @@
-import { Box } from '@mui/material'
+import { useState } from 'react'
+import { Box, Button, useMediaQuery } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import { colors } from '../styles/tokens'
+
+const ShowFeedButton = ({ onClick }) => (
+  <Button
+    aria-label="Show feed"
+    onClick={onClick}
+    size="small"
+    variant="outlined"
+    startIcon={<span className="material-symbols-outlined">bolt</span>}
+    sx={{
+      flexShrink: 0,
+      borderColor: colors.border,
+      color: colors.primary,
+      fontWeight: 700,
+      whiteSpace: 'nowrap',
+      '&:hover': { bgcolor: colors.softBlue, borderColor: colors.primary },
+    }}
+  >
+    Show feed
+  </Button>
+)
 
 // Sticky desktop feed rail; mobile stacks below, and falsy feed leaves children unchanged.
-const FeedRailLayout = ({ feed, children }) => {
-  if (!feed) return children
+const FeedRailLayout = ({ feed, feedKey = 'activity-feed', children }) => {
+  const theme = useTheme()
+  const canToggleFeed = useMediaQuery(theme.breakpoints.up('lg'))
+  const hasFeed = Boolean(feed)
+  const feedIdentity = hasFeed ? feedKey : null
+  const [closedFeedIdentity, setClosedFeedIdentity] = useState(null)
+  const isFeedOpen = !canToggleFeed || closedFeedIdentity !== feedIdentity
+  const handleCloseFeed = canToggleFeed ? () => setClosedFeedIdentity(feedIdentity) : undefined
+  const handleShowFeed = () => setClosedFeedIdentity(null)
+
+  const showFeedButton = canToggleFeed && hasFeed && !isFeedOpen
+    ? <ShowFeedButton onClick={handleShowFeed} />
+    : null
+  const renderedChildren = typeof children === 'function'
+    ? children({ showFeedButton })
+    : children
+
+  if (!feed) return renderedChildren
+
+  if (!isFeedOpen) return <Box sx={{ minWidth: 0 }}>{renderedChildren}</Box>
+
+  const feedPanel = typeof feed === 'function' ? feed({ onClose: handleCloseFeed }) : feed
 
   return (
     <Box
@@ -13,8 +56,8 @@ const FeedRailLayout = ({ feed, children }) => {
         alignItems: 'start',
       }}
     >
-      <Box sx={{ minWidth: 0 }}>{children}</Box>
-      <Box sx={{ position: { lg: 'sticky' }, top: { lg: 24 }, minWidth: 0 }}>{feed}</Box>
+      <Box sx={{ minWidth: 0 }}>{renderedChildren}</Box>
+      <Box sx={{ position: { lg: 'sticky' }, top: { lg: 24 }, minWidth: 0 }}>{feedPanel}</Box>
     </Box>
   )
 }

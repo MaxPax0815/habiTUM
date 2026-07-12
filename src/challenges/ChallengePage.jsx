@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Box, Button, CircularProgress, Paper, Typography } from "@mui/material";
+import { Alert, Box, Button, CircularProgress, Paper, Stack, Typography } from "@mui/material";
 import { useParams } from "react-router-dom";
 
 import { useAuthContext } from "../auth/useAuthContext";
@@ -293,36 +293,44 @@ const ChallengePage = () => {
   return (
     // key={challengeId} remounts the challenge-scoped feed so cursor/list state resets.
     <FeedRailLayout
-      feed={isCommunityMember && challenge.community?._id && (
-        <ActivityFeed key={challengeId} communityId={challenge.community._id} challengeId={challengeId} title="Challenge activity" />
-      )}
-    >
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 4,
-      }}
-    >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
-        <BackButton
-          text={`Back to ${challenge.community?.name || "Community"}`}
-          to={`/communities/${challenge.community?._id || challenge.community}`}
-          sx={{ mb: 0 }}
+      feedKey={challengeId}
+      feed={isCommunityMember && challenge.community?._id && (({ onClose }) => (
+        <ActivityFeed
+          key={challengeId}
+          communityId={challenge.community._id}
+          challengeId={challengeId}
+          title="Challenge feed"
+          onClose={onClose}
         />
+      ))}
+    >
+      {({ showFeedButton }) => (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+          }}
+        >
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0 }}>
+            <BackButton
+              text={`Back to ${challenge.community?.name || "Community"}`}
+              to={`/communities/${challenge.community?._id || challenge.community}`}
+              sx={{ mb: 0 }}
+            />
 
-        {/* Title + description live inside the card (showHeading), above the
-            participants/days-left/rank row — see ExtendedChallengeCard. */}
-        <ExtendedChallengeCard
-          challenge={challenge}
-          currentUserRank={data.currentUserRank}
-          isJoined={challenge.isJoined}
-          isCommunityMember={isCommunityMember}
-          onJoin={handleJoinChallenge}
-          onLeaveChallenge={handleLeaveChallenge}
-          showHeading
-        />
-      </Box>
+            {/* Title + description live inside the card (showHeading), above the
+                participants/days-left/rank row — see ExtendedChallengeCard. */}
+            <ExtendedChallengeCard
+              challenge={challenge}
+              currentUserRank={data.currentUserRank}
+              isJoined={challenge.isJoined}
+              isCommunityMember={isCommunityMember}
+              onJoin={handleJoinChallenge}
+              onLeaveChallenge={handleLeaveChallenge}
+              showHeading
+            />
+          </Box>
 
       <Box>
         {/* Section heading with the creator-only "Add habit" action on the right */}
@@ -330,10 +338,15 @@ const ChallengePage = () => {
           <Typography component="h2" sx={sectionTitleSx}>
             Challenge habits
           </Typography>
-          {isCommunityCreator && (
-            <Button variant="outlined" size="small" onClick={() => setShowHabitForm(true)}>
-              + Add habit
-            </Button>
+          {(showFeedButton || isCommunityCreator) && (
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ alignItems: { xs: "stretch", sm: "center" } }}>
+              {showFeedButton}
+              {isCommunityCreator && (
+                <Button variant="outlined" size="small" onClick={() => setShowHabitForm(true)}>
+                  + Add habit
+                </Button>
+              )}
+            </Stack>
           )}
         </Box>
 
@@ -398,7 +411,8 @@ const ChallengePage = () => {
           onClose={() => setShowHabitForm(false)}
         />
       </AppDialog>
-    </Box>
+        </Box>
+      )}
     </FeedRailLayout>
   );
 };
