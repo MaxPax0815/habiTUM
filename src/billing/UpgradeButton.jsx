@@ -13,7 +13,7 @@ import { colors, radii } from '../styles/tokens'
  * Premium status is changed by Stripe Webhook -> Backend -> MongoDB.
  */
 const UpgradeButton = ({
-  label = 'Upgrade to Premium',
+  label = 'Upgrade To Premium',
   fullWidth = false,
   size = 'medium',
   showIcon = false,
@@ -30,6 +30,7 @@ const UpgradeButton = ({
         size={size}
         onClick={startCheckout}
         disabled={isLoading}
+        startIcon={showIcon ? <WorkspacePremiumOutlinedIcon /> : undefined}
         sx={{
           borderRadius: radii.pill,
           fontWeight: 800,
@@ -43,7 +44,6 @@ const UpgradeButton = ({
           ...sx
         }}
       >
-        {showIcon && <WorkspacePremiumOutlinedIcon sx={{ mr: 1 }} />}
         {isLoading ? 'Redirecting...' : label}
       </Button>
 

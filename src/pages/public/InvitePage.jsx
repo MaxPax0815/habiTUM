@@ -74,7 +74,7 @@ const InvitePage = () => {
             {error}
           </Typography>
           <Button variant="contained" onClick={() => navigate('/communities')}>
-            Browse communities
+            Browse Communities
           </Button>
         </Paper>
       </Box>

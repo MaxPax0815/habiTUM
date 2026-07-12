@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Box, Button, Container, Stack, Typography } from '@mui/material'
+import { Button, Container, Stack, Typography } from '@mui/material'
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined'
 import { colors } from '../../styles/tokens'
 
@@ -25,10 +25,10 @@ export default function CheckoutCancel() {
 
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
                 <Button variant="outlined" size="large" onClick={() => navigate('/')}>
-                    Back to home
+                    Back To Home
                 </Button>
                 <Button variant="contained" size="large" onClick={() => navigate('/#plans')}>
-                    View plans
+                    View Plans
                 </Button>
             </Stack>
         </Container>

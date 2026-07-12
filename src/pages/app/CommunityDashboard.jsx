@@ -341,7 +341,7 @@ const CommunityDashboard = () => {
     >
       {({ showFeedButton }) => (
         <Box sx={{ textAlign: 'left' }}>
-          <BackButton text="Back to Communities" to="/communities" sx={{ mb: 0 }} />
+          <BackButton text="Back To Communities" to="/communities" sx={{ mb: 0 }} />
           <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 }, mb: 4 }}>
             <PageHeader
               title={community.name}
@@ -394,16 +394,6 @@ const CommunityDashboard = () => {
         actions={((showFeedButton && !community.description) || hasMorePosts || canManageCommunity) && (
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ alignItems: { xs: 'stretch', sm: 'center' } }}>
             {!community.description && showFeedButton}
-            {hasMorePosts && (
-              <Button
-                component={RouterLink}
-                to={`/communities/${id}/updates`}
-                variant="outlined"
-                endIcon={<span className="material-symbols-outlined">arrow_forward</span>}
-              >
-                View all
-              </Button>
-            )}
             {canManageCommunity && (
               <Button
                 variant="outlined"
@@ -414,6 +404,16 @@ const CommunityDashboard = () => {
                 startIcon={<span className="material-symbols-outlined">add</span>}
               >
                 New Post
+              </Button>
+            )}
+            {hasMorePosts && (
+              <Button
+                component={RouterLink}
+                to={`/communities/${id}/updates`}
+                variant="outlined"
+                startIcon={<span className="material-symbols-outlined">arrow_forward</span>}
+              >
+                View all
               </Button>
             )}
           </Stack>

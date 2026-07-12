@@ -159,12 +159,12 @@ const HabitDetails = ({
                 '&:hover': { borderColor: colors.orange, backgroundColor: colors.softOrange },
               }}
             >
-              {done ? 'Undo' : 'Mark done'}
+              {done ? 'Undo' : 'Mark Done'}
             </Button>
           )
           : (done
             ? <Button variant="outlined" disabled={actionsDisabled} onClick={handleUndo} sx={{ ...cardActionButtonSx, gridColumn: { xs: 2, sm: 4 } }}>Undo</Button>
-            : <Button variant="contained" disabled={actionsDisabled} onClick={handleMarkDone} sx={{ ...cardActionButtonSx, gridColumn: { xs: 2, sm: 4 } }}>Mark done</Button>)}
+            : <Button variant="contained" disabled={actionsDisabled} onClick={handleMarkDone} sx={{ ...cardActionButtonSx, gridColumn: { xs: 2, sm: 4 } }}>Mark Done</Button>)}
 
         {/* delete */}
         {showDelete && (

@@ -259,7 +259,7 @@ const Sidebar = ({ user }) => {
             },
           }}
         >
-          Logout
+          Log Out
         </Button>
 
       </Box>

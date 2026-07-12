@@ -180,7 +180,14 @@ return (
 
         {/* create / cancel */}
         <Stack direction="row" spacing={1}>
-          <Button type="submit" variant="contained" fullWidth>Create Habit →</Button>
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            startIcon={<span className="material-symbols-outlined">arrow_forward</span>}
+          >
+            Create Habit
+          </Button>
           <Button variant="outlined" onClick={onClose}>Cancel</Button>
         </Stack>
 

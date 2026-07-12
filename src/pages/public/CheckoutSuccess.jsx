@@ -110,7 +110,7 @@ export default function CheckoutSuccess() {
                         {errorMessage}
                     </Typography>
                     <Button variant="contained" onClick={() => navigate('/profile')}>
-                        Go to Profile
+                        Go To Profile
                     </Button>
                 </Box>
             )}

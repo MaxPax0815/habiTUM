@@ -601,7 +601,7 @@ const PaywallBanner = () => (
       momentum analytics, and personalised insights.
     </Typography>
     <UpgradeButton
-      label="Upgrade to Premium"
+      label="Upgrade To Premium"
       showIcon
       size="large"
       sx={{ px: 3 }}

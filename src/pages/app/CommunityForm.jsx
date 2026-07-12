@@ -159,7 +159,7 @@ const CommunityForm = ({ onCreated, onClose }) => {
 
       <Box sx={{ display: 'flex', gap: 1.5, mt: 1 }}>
         <Button type="submit" variant="contained" disabled={!name.trim() || submitting}
-          endIcon={<span className="material-symbols-outlined">arrow_forward</span>}>
+          startIcon={<span className="material-symbols-outlined">arrow_forward</span>}>
           Create Community
         </Button>
         <Button variant="outlined" onClick={onClose}>Cancel</Button>
