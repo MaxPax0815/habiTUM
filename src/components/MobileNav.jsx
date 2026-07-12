@@ -59,14 +59,14 @@ const MobileNav = () => {
             color: colors.textSecondary,
           },
           '& .MuiBottomNavigationAction-label': {
-            fontSize: '0.7rem',
+            typography: 'navLabel',
             fontWeight: 700,
           },
           '& .Mui-selected': {
             color: colors.primary,
           },
           '& .Mui-selected .MuiBottomNavigationAction-label': {
-            fontSize: '0.7rem',
+            typography: 'navLabel',
             fontWeight: 900,
           },
         }}

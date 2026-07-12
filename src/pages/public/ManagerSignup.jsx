@@ -19,13 +19,14 @@ import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
 
 import AppCard from '../../components/AppCard'
+import { fieldLabelSx, finePrintSx } from '../../styles/recipes'
 import { colors } from '../../styles/tokens'
 import { useAuthContext } from '../../auth/useAuthContext'
 
 const FieldLabel = ({ children }) => (
     <Typography
         variant="body2"
-        sx={{ fontWeight: 600, fontSize: 13, color: colors.textPrimary, mb: 0.5, textAlign: 'left' }}
+        sx={fieldLabelSx}
     >
         {children}
     </Typography>
@@ -230,7 +231,7 @@ export default function ManagerSignup() {
                 </Box>
 
                 {error && (
-                    <Typography variant="body2" sx={{ color: 'error.main', fontSize: 13 }}>
+                    <Typography variant="body2" sx={{ ...finePrintSx, color: 'error.main' }}>
                         {error}
                     </Typography>
                 )}
@@ -247,11 +248,11 @@ export default function ManagerSignup() {
                     {isLoading ? 'Creating account…' : 'Continue — choose your plan'}
                 </Button>
 
-                <Typography variant="body2" sx={{ textAlign: 'center', color: colors.textSecondary, fontSize: 14 }}>
+                <Typography variant="body2" sx={{ textAlign: 'center', color: colors.textSecondary }}>
                     Already have an account?{' '}
                     <Typography
                         component={RouterLink} to="/login" variant="body2"
-                        sx={{ color: colors.primary, fontWeight: 700, fontSize: 14, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                        sx={{ color: colors.primary, fontWeight: 700, textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
                     >
                         Log in
                     </Typography>

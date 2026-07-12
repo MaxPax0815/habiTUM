@@ -13,12 +13,13 @@ import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined'
 
 import { useForgotPassword } from '../../auth/useForgotPassword'
 import AppCard from '../../components/AppCard'
+import { fieldLabelSx, finePrintSx } from '../../styles/recipes'
 import { colors } from '../../styles/tokens'
 
 const FieldLabel = ({ children }) => (
     <Typography
         variant="body2"
-        sx={{ fontWeight: 600, fontSize: 13, color: colors.textPrimary, mb: 0.5, textAlign: 'left' }}
+        sx={fieldLabelSx}
     >
         {children}
     </Typography>
@@ -107,13 +108,13 @@ const ForgotPassword = () => {
                     </Box>
 
                     {error && (
-                        <Typography variant="body2" sx={{ color: 'error.main', fontSize: 13 }}>
+                        <Typography variant="body2" sx={{ ...finePrintSx, color: 'error.main' }}>
                             {error}
                         </Typography>
                     )}
 
                     {submitted && !error && (
-                        <Typography variant="body2" sx={{ color: colors.textSecondary, fontSize: 13 }}>
+                        <Typography variant="body2" sx={{ ...finePrintSx, color: colors.textSecondary }}>
                             If an account exists for this email, the password reset has been prepared.
                         </Typography>
                     )}
@@ -132,7 +133,7 @@ const ForgotPassword = () => {
 
                     <Typography
                         variant="body2"
-                        sx={{ textAlign: 'center', mt: 0.5, color: colors.textSecondary, fontSize: 14 }}
+                        sx={{ textAlign: 'center', mt: 0.5, color: colors.textSecondary }}
                     >
                         <Typography
                             component={RouterLink}
@@ -141,7 +142,6 @@ const ForgotPassword = () => {
                             sx={{
                                 color: colors.primary,
                                 fontWeight: 700,
-                                fontSize: 14,
                                 textDecoration: 'none',
                                 '&:hover': { textDecoration: 'underline' },
                             }}

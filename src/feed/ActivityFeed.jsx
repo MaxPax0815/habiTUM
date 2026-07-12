@@ -80,7 +80,7 @@ const ActivityItem = ({ activity }) => {
         sx={{
           width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
           display: 'grid', placeItems: 'center',
-          bgcolor: colorFor(actorName), color: '#fff', fontWeight: 700, fontSize: 15,
+          bgcolor: colorFor(actorName), color: '#fff', typography: 'body2', fontWeight: 700,
         }}
       >
         {actorName[0].toUpperCase()}
@@ -116,7 +116,7 @@ const ActivityFeed = ({ communityId, challengeId = null, title = 'Community feed
     // Mobile stacks with spacing; desktop rail top-aligns and scrolls within the viewport.
     <PageSection
       title={title}
-      titleSx={{ mb: 1, letterSpacing: 0, textTransform: 'none' }}
+      titleSx={{ typography: 'feedTitle', mb: 1, letterSpacing: 0, textTransform: 'none' }}
       actions={feedActions(status, onClose)}
       sx={{ mt: { xs: 4, lg: 0 }, mb: 0 }}
     >

@@ -152,7 +152,7 @@ const ManagerPlanCard = ({ user, onAdd, onRemove, isLoading }) => {
                 </span>
               </Tooltip>
 
-              <Typography sx={{ fontWeight: 900, minWidth: 28, textAlign: 'center', fontSize: '1.1rem' }}>
+              <Typography sx={{ typography: 'subtitle1', fontWeight: 900, minWidth: 28, textAlign: 'center' }}>
                 {maxCommunities}
               </Typography>
 

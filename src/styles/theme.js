@@ -63,6 +63,16 @@ const theme = createTheme({
       lineHeight: 1.4,
       fontWeight: 800,
     },
+    subtitle1: {
+      fontSize: '1.125rem',
+      lineHeight: 1.4,
+      fontWeight: 700,
+    },
+    subtitle2: {
+      fontSize: '0.875rem',
+      lineHeight: 1.4,
+      fontWeight: 800,
+    },
     body1: {
       fontSize: '1rem',
       lineHeight: 1.5,
@@ -71,11 +81,75 @@ const theme = createTheme({
       fontSize: '0.875rem',
       lineHeight: 1.45,
     },
+    caption: {
+      fontSize: '0.8125rem',
+      lineHeight: 1.35,
+    },
+    overline: {
+      fontSize: '0.75rem',
+      lineHeight: 1.4,
+      fontWeight: 800,
+      letterSpacing: '0.14em',
+      textTransform: 'uppercase',
+    },
     button: {
       fontSize: '1rem',
       lineHeight: 1.25,
       textTransform: 'none',
       fontWeight: 800,
+    },
+    fieldLabel: {
+      fontSize: '0.8125rem',
+      lineHeight: 1.35,
+      fontWeight: 600,
+    },
+    finePrint: {
+      fontSize: '0.8125rem',
+      lineHeight: 1.45,
+    },
+    micro: {
+      fontSize: '0.625rem',
+      lineHeight: 1.3,
+    },
+    navLabel: {
+      fontSize: '0.7rem',
+      lineHeight: 1.2,
+    },
+    sectionTitle: {
+      fontSize: '0.95rem',
+      lineHeight: 1.25,
+      fontWeight: 900,
+      letterSpacing: '0.14em',
+      textTransform: 'uppercase',
+    },
+    feedTitle: {
+      fontSize: '0.95rem',
+      lineHeight: 1.25,
+      fontWeight: 900,
+    },
+    metricValue: {
+      fontSize: '1.25rem',
+      lineHeight: 1,
+      fontWeight: 900,
+    },
+    metricLabel: {
+      fontSize: '1.125rem',
+      lineHeight: 1,
+      fontWeight: 700,
+    },
+    landingDisplay: {
+      fontSize: 'clamp(2.625rem, 6vw, 4.25rem)',
+      lineHeight: 1.02,
+      fontWeight: 900,
+    },
+    landingSectionTitle: {
+      fontSize: 'clamp(1.875rem, 3.5vw, 2.375rem)',
+      lineHeight: 1.15,
+      fontWeight: 900,
+    },
+    landingLead: {
+      fontSize: 'clamp(1rem, 2vw, 1.125rem)',
+      lineHeight: 1.7,
     },
   },
   shape: {

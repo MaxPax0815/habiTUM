@@ -19,7 +19,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import MenuIcon from "@mui/icons-material/Menu";
 
 import { colors } from '../styles/tokens'
-import { outlinedPillButtonSx, pillButtonSx } from '../styles/recipes'
+import { linkResetSx, outlinedPillButtonSx, pillButtonSx } from '../styles/recipes'
 import { useAuthContext } from '../auth/useAuthContext'
 import { useCancelManagerSignup } from '../auth/useCancelManagerSignup'
 
@@ -33,23 +33,6 @@ const sectionLinks = [
     { label: "Challenges", href: "#challenges" },
     { label: "Plans", href: "#plans" },
 ];
-
-// Shared style object that strips the default anchor styling (underline, borders,
-// visited color) and adds a consistent keyboard focus ring. Spread into every
-// clickable link below (<LogoLink /> and <SectionNav />) so they behave uniformly.
-const linkResetSx = {
-  textDecoration: "none",
-  border: "none",
-  borderBottom: "none",
-  backgroundColor: "transparent",
-  boxShadow: "none",
-
-  "&:focus-visible": {
-    outline: `2px solid ${colors.primary}`,
-    outlineOffset: 4,
-    borderRadius: 8,
-  },
-};
 
 // Brand logo + "HabiTUM" wordmark, rendered on the left of every header.
 // The whole logo is a router link back to "/" (the landing page).

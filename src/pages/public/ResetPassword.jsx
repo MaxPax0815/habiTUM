@@ -16,12 +16,13 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff'
 
 import { useResetPassword } from '../../auth/useResetPassword'
 import AppCard from '../../components/AppCard'
+import { fieldLabelSx, finePrintSx } from '../../styles/recipes'
 import { colors } from '../../styles/tokens'
 
 const FieldLabel = ({ children }) => (
     <Typography
         variant="body2"
-        sx={{ fontWeight: 600, fontSize: 13, color: colors.textPrimary, mb: 0.5, textAlign: 'left' }}
+        sx={fieldLabelSx}
     >
         {children}
     </Typography>
@@ -134,7 +135,7 @@ const ResetPassword = () => {
 
                 {success ? (
                     <Box sx={{ textAlign: 'center' }}>
-                        <Typography variant="body2" sx={{ color: colors.green, fontSize: 14, mb: 3 }}>
+                        <Typography variant="body2" sx={{ color: colors.green, mb: 3 }}>
                             Password reset successful! You can now log in with your new password.
                         </Typography>
                         <Typography
@@ -144,7 +145,6 @@ const ResetPassword = () => {
                             sx={{
                                 color: colors.primary,
                                 fontWeight: 700,
-                                fontSize: 14,
                                 textDecoration: 'none',
                                 '&:hover': { textDecoration: 'underline' },
                             }}
@@ -166,19 +166,19 @@ const ResetPassword = () => {
 
                         {(clientError || error) && (
                             <Box>
-                                <Typography variant="body2" sx={{ color: 'error.main', fontSize: 13 }}>
+                                <Typography variant="body2" sx={{ ...finePrintSx, color: 'error.main' }}>
                                     {clientError || error}
                                 </Typography>
                                 {error && error.includes('expired') && (
-                                    <Typography variant="body2" sx={{ fontSize: 13, mt: 0.5 }}>
+                                    <Typography variant="body2" sx={{ ...finePrintSx, mt: 0.5 }}>
                                         <Typography
                                             component={RouterLink}
                                             to="/forgot-password"
                                             variant="body2"
                                             sx={{
+                                                ...finePrintSx,
                                                 color: colors.primary,
                                                 fontWeight: 700,
-                                                fontSize: 13,
                                                 textDecoration: 'none',
                                                 '&:hover': { textDecoration: 'underline' },
                                             }}
@@ -204,7 +204,7 @@ const ResetPassword = () => {
 
                         <Typography
                             variant="body2"
-                            sx={{ textAlign: 'center', mt: 0.5, color: colors.textSecondary, fontSize: 14 }}
+                            sx={{ textAlign: 'center', mt: 0.5, color: colors.textSecondary }}
                         >
                             <Typography
                                 component={RouterLink}
@@ -213,7 +213,6 @@ const ResetPassword = () => {
                                 sx={{
                                     color: colors.primary,
                                     fontWeight: 700,
-                                    fontSize: 14,
                                     textDecoration: 'none',
                                     '&:hover': { textDecoration: 'underline' },
                                 }}

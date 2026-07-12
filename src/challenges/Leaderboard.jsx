@@ -47,7 +47,7 @@ const getRankMarker = (rank) => {
   }
 
   return (
-    <Typography sx={{ color: colors.muted, fontWeight: 900, fontSize: 18 }}>
+    <Typography sx={{ color: colors.muted, typography: "subtitle1", fontWeight: 900 }}>
       {rank}
     </Typography>
   );
@@ -142,7 +142,7 @@ const Leaderboard = ({ challengeId, initialData }) => {
                   borderColor: colors.border,
                   color: colors.muted,
                   fontWeight: 900,
-                  fontSize: 18,
+                  typography: "subtitle1",
                 }}
               >
                 Participant
@@ -153,7 +153,7 @@ const Leaderboard = ({ challengeId, initialData }) => {
                   borderColor: colors.border,
                   color: colors.muted,
                   fontWeight: 900,
-                  fontSize: 18,
+                  typography: "subtitle1",
                 }}
               >
                 🔥 Streak
@@ -209,7 +209,7 @@ const Leaderboard = ({ challengeId, initialData }) => {
                           bgcolor: getAvatarColor(rank || 1),
                           color: colors.surface,
                           fontWeight: 900,
-                          fontSize: 18,
+                          typography: "subtitle1",
                         }}
                       >
                         {getInitial(name)}
@@ -220,7 +220,7 @@ const Leaderboard = ({ challengeId, initialData }) => {
                           sx={{
                             color: entry.isCurrentUser ? colors.primary : colors.textPrimary,
                             fontWeight: 900,
-                            fontSize: 18,
+                            typography: "subtitle1",
                             lineHeight: 1.2,
                           }}
                         >
@@ -236,7 +236,7 @@ const Leaderboard = ({ challengeId, initialData }) => {
                             sx={{
                               color: entry.doneToday ? colors.green : colors.muted,
                               fontWeight: 700,
-                              fontSize: 17,
+                              typography: "body1",
                               lineHeight: 1.2,
                             }}
                           >
@@ -255,7 +255,7 @@ const Leaderboard = ({ challengeId, initialData }) => {
                         gap: 0.5,
                         color: colors.textPrimary,
                         fontWeight: 900,
-                        fontSize: 18,
+                        typography: "subtitle1",
                       }}
                     >
                       <WhatshotIcon sx={{ fontSize: 17, color: colors.orange }} />

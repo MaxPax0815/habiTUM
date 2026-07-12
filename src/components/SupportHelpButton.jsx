@@ -2,6 +2,7 @@ import { IconButton, Tooltip } from '@mui/material'
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined'
 
 import { colors, shadows } from '../styles/tokens'
+import { tooltipContentSx } from '../styles/recipes'
 
 const supportEmail = 'habitumsupport@gmail.com'
 
@@ -15,12 +16,7 @@ const SupportHelpButton = ({ isMobile = false }) => {
       arrow
       slotProps={{
         tooltip: {
-          sx: {
-            fontSize: 16,
-            px: 2,
-            py: 1.25,
-            maxWidth: 320,
-          },
+          sx: tooltipContentSx,
         },
         arrow: {
           sx: {

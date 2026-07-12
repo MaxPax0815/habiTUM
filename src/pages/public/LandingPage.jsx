@@ -67,7 +67,7 @@ function AvatarDot({ label, color }) {
         borderRadius: "50%",
         bgcolor: color,
         color: "#fff",
-        fontSize: 13,
+        typography: "fieldLabel",
         fontWeight: 800,
         display: "flex",
         alignItems: "center",
@@ -449,7 +449,7 @@ export default function LandingPage() {
               <Typography
                 variant="h1"
                 sx={{
-                  fontSize: { xs: 42, sm: 56, md: 68 },
+                  typography: "landingDisplay",
                   lineHeight: 0.95,
                   letterSpacing: "-0.05em",
                   maxWidth: 620,
@@ -466,7 +466,7 @@ export default function LandingPage() {
                 sx={{
                   mt: 3,
                   maxWidth: 500,
-                  fontSize: { xs: 16, md: 18 },
+                  typography: "landingLead",
                   color: "text.secondary",
                   lineHeight: 1.7,
                 }}
@@ -554,7 +554,7 @@ export default function LandingPage() {
             <Typography
               variant="h2"
               sx={{
-                fontSize: { xs: 30, md: 38 },
+                typography: "landingSectionTitle",
                 letterSpacing: "-0.035em",
               }}
             >
@@ -667,7 +667,7 @@ export default function LandingPage() {
                 <Typography
                   variant="h3"
                   sx={{
-                    fontSize: { xs: 30, md: 38 },
+                    typography: "landingSectionTitle",
                     lineHeight: 1.05,
                     mb: 3,
                   }}
@@ -745,7 +745,7 @@ export default function LandingPage() {
             </Typography>
             <Typography
               variant="h2"
-              sx={{ fontSize: { xs: 30, md: 38 }, letterSpacing: "-0.035em" }}
+              sx={{ typography: "landingSectionTitle", letterSpacing: "-0.035em" }}
             >
               Trending challenges
             </Typography>
@@ -778,7 +778,7 @@ export default function LandingPage() {
             </Typography>
             <Typography
               variant="h2"
-              sx={{ fontSize: { xs: 30, md: 38 }, letterSpacing: "-0.035em" }}
+              sx={{ typography: "landingSectionTitle", letterSpacing: "-0.035em" }}
             >
               Choose your plan
             </Typography>
@@ -812,7 +812,7 @@ export default function LandingPage() {
                         px: 1.4,
                         py: 0.4,
                         borderRadius: "999px",
-                        fontSize: "0.875rem",
+                        typography: "body2",
                         fontWeight: 800,
                         color: colors.textSecondary,
                         bgcolor: colors.softNeutral,
@@ -879,7 +879,7 @@ export default function LandingPage() {
                         px: 1.4,
                         py: 0.4,
                         borderRadius: "999px",
-                        fontSize: "0.875rem",
+                        typography: "body2",
                         fontWeight: 800,
                         color: "#fff",
                         bgcolor: colors.primary,
@@ -949,7 +949,7 @@ export default function LandingPage() {
                         px: 1.4,
                         py: 0.4,
                         borderRadius: "999px",
-                        fontSize: "0.875rem",
+                        typography: "body2",
                         fontWeight: 800,
                         color: colors.orange,
                         bgcolor: colors.softOrange,
@@ -1051,18 +1051,19 @@ export default function LandingPage() {
             }}
           >
             <Typography
-            variant="overline"
-            sx={{
-              color: colors.muted,
-              fontWeight: 900,
-              letterSpacing: "0.18em",
-            }}
+              variant="overline"
+              sx={{
+                color: colors.muted,
+                fontWeight: 900,
+                letterSpacing: "0.18em",
+              }}
             >
               READY TO START?
             </Typography>
-            <Typography              variant="h2"
+            <Typography
+              variant="h2"
               sx={{
-                fontSize: { xs: 30, md: 38 },
+                typography: "landingSectionTitle",
                 letterSpacing: "-0.035em",
                 textAlign: "center",
               }}
@@ -1073,7 +1074,7 @@ export default function LandingPage() {
                 sx={{
                   mt: 3,
                   maxWidth: 500,
-                  fontSize: { xs: 16, md: 18 },
+                  typography: "landingLead",
                   color: "text.secondary",
                   lineHeight: 1.7,
                 }}

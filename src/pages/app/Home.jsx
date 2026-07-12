@@ -181,7 +181,7 @@ const Home = () => {
   // Html structure: we show the stats in the header, then the list of habits, and the form to add new habits.
   
     return (
-    <div className="home-page">
+    <Box>
       <PageHeader
         eyebrow={format(now, "EEEE, MMMM d")}
         title={`${greetingFor(now)}, ${user?.firstName || "there"}.`}
@@ -413,7 +413,7 @@ const Home = () => {
       >
         <HabitForm onClose={() => setShowForm(false)} />
       </AppDialog>
-    </div>
+    </Box>
   )
 }
 

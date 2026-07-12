@@ -1,5 +1,5 @@
 import { Box, Chip, IconButton, Paper, Stack, Tooltip, Typography } from '@mui/material'
-import { colors } from '../styles/tokens'
+import { compactCardBodySx, compactCardMetaSx, compactCardTitleSx } from '../styles/recipes'
 
 const formatDateTime = (value) => {
   if (!value) return null
@@ -51,7 +51,7 @@ const CommunityPostCard = ({ bodyLineClamp, canManage, onDelete, onTogglePin, po
               {eventDate && <Chip label={eventDate} size="small" variant="outlined" />}
             </Stack>
 
-            <Typography variant="h6" sx={{ fontWeight: 800, color: colors.textPrimary }}>
+            <Typography component="h3" sx={compactCardTitleSx}>
               {post.title}
             </Typography>
           </Box>
@@ -80,9 +80,8 @@ const CommunityPostCard = ({ bodyLineClamp, canManage, onDelete, onTogglePin, po
         {post.body && (
           <Typography
             sx={{
+              ...compactCardBodySx,
               mt: 1,
-              color: colors.textSecondary,
-              lineHeight: 1.55,
               ...(bodyLineClamp
                 ? {
                     display: '-webkit-box',
@@ -97,7 +96,7 @@ const CommunityPostCard = ({ bodyLineClamp, canManage, onDelete, onTogglePin, po
           </Typography>
         )}
 
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
+        <Typography sx={{ ...compactCardMetaSx, display: 'block', mt: 2 }}>
           {getAuthorName(post.author)}{createdAt ? ` · ${createdAt}` : ''}
         </Typography>
       </Box>

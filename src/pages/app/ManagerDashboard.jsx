@@ -260,7 +260,7 @@ const CommunityRow = ({ communities, onOpen }) => (
               bgcolor: barColor, borderRadius: 2, transition: 'width 0.6s ease',
             }} />
           </Box>
-          <Typography variant="caption" color="text.secondary" sx={{ fontSize: 10 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ typography: 'micro' }}>
             {engagement === null ? 'no members yet' : `${engagement}% weekly engagement`}
           </Typography>
         </Paper>

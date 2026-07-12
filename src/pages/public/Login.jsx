@@ -17,12 +17,13 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff'
 
 import { useLogin } from '../../auth/useLogin'
 import AppCard from '../../components/AppCard'
+import { fieldLabelSx, finePrintSx } from '../../styles/recipes'
 import { colors } from '../../styles/tokens'
 
 const FieldLabel = ({ children }) => (
     <Typography
         variant="body2"
-        sx={{ fontWeight: 600, fontSize: 13, color: colors.textPrimary, mb: 0.5, textAlign: 'left' }}
+        sx={fieldLabelSx}
     >
         {children}
     </Typography>
@@ -168,8 +169,8 @@ const Login = () => {
                             to="/forgot-password"
                             variant="body2"
                             sx={{
+                                ...finePrintSx,
                                 color: colors.textSecondary,
-                                fontSize: 13,
                                 textDecoration: 'none',
                                 '&:hover': { color: colors.primary, textDecoration: 'underline' },
                             }}
@@ -179,12 +180,12 @@ const Login = () => {
                     </Typography>
 
                     {error && (
-                        <Typography variant="body2" sx={{ color: 'error.main', fontSize: 13 }}>
+                        <Typography variant="body2" sx={{ ...finePrintSx, color: 'error.main' }}>
                             {error}
                         </Typography>
                     )}
                     {success && (
-                        <Typography variant="body2" sx={{ color: colors.green, fontSize: 13 }}>
+                        <Typography variant="body2" sx={{ ...finePrintSx, color: colors.green }}>
                             Login successful! Redirecting…
                         </Typography>
                     )}
@@ -206,7 +207,7 @@ const Login = () => {
                     {/* Bottom link */}
                     <Typography
                         variant="body2"
-                        sx={{ textAlign: 'center', mt: 0.5, color: colors.textSecondary, fontSize: 14 }}
+                        sx={{ textAlign: 'center', mt: 0.5, color: colors.textSecondary }}
                     >
                         Don't have an account?{' '}
                         <Typography
@@ -216,7 +217,6 @@ const Login = () => {
                             sx={{
                                 color: colors.primary,
                                 fontWeight: 700,
-                                fontSize: 14,
                                 textDecoration: 'none',
                                 '&:hover': { textDecoration: 'underline' },
                             }}

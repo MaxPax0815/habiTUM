@@ -16,7 +16,7 @@ import {
 } from "@mui/material"
 
 import { colors } from '../../../styles/tokens'
-import { sectionTitleSx } from '../../../styles/recipes'
+import { sectionTitleSx, tooltipContentSx } from '../../../styles/recipes'
 
 
 import {
@@ -69,12 +69,7 @@ const InfoTooltip = ({ text }) => (
     arrow
     slotProps={{
       tooltip: {
-        sx: {
-          fontSize: 16,
-          px: 2,
-          py: 1.25,
-          maxWidth: 320,
-        },
+        sx: tooltipContentSx,
       },
       arrow: {
         sx: {
@@ -283,7 +278,7 @@ const HabitHealthRow = ({ habits, selectedId, onSelect, now }) => (
               bgcolor: barColor, borderRadius: 2, transition: "width 0.6s ease",
             }} />
           </Box>
-          <Typography variant="caption" color="text.secondary" sx={{ fontSize: 10 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ typography: "micro" }}>
             {rate}% completion
           </Typography>
         </Paper>
@@ -442,7 +437,7 @@ const Heatmap = ({ cells, habitType, fromCreation, startDate, completedCount, to
       {/* Month labels spanning across the grid columns */}
       <Box sx={{ display: "grid", gridTemplateColumns: `repeat(${totalCols}, 1fr)`, gap: 0.5, mb: 0.25 }}>
         {Array.from({ length: totalCols }, (_, col) => (
-          <Typography key={col} variant="caption" color="text.secondary" sx={{ fontSize: 10 }}>
+          <Typography key={col} variant="caption" color="text.secondary" sx={{ typography: "micro" }}>
             {monthLabels[col] || ""}
           </Typography>
         ))}
@@ -452,7 +447,7 @@ const Heatmap = ({ cells, habitType, fromCreation, startDate, completedCount, to
       <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 0.5, mb: 0.5 }}>
         {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
           <Typography key={i} variant="caption" color="text.secondary"
-            sx={{ textAlign: "center", fontSize: 10 }}>{d}</Typography>
+            sx={{ textAlign: "center", typography: "micro" }}>{d}</Typography>
         ))}
       </Box>
 
@@ -528,7 +523,7 @@ const WeeklyHeatmap = ({ cells, habitType, fromCreation, startDate, completedCou
           <Box key={i} sx={{ position: "relative" }}>
             {monthLabels[i] && (
               <Typography variant="caption" color="text.secondary"
-                sx={{ position: "absolute", bottom: "100%", left: 0, fontSize: 10, whiteSpace: "nowrap" }}>
+                sx={{ position: "absolute", bottom: "100%", left: 0, typography: "micro", whiteSpace: "nowrap" }}>
                 {monthLabels[i]}
               </Typography>
             )}
@@ -1034,7 +1029,7 @@ const Progress = () => {
               <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mt: 0.5 }}>
                 {recovery.details.slice(0, 6).map((d, i) => (
                   <Chip key={i} label={formatPeriodDuration(d, habit.frequency)} size="small"
-                    sx={{ height: 20, fontSize: 11, bgcolor: "#f1f5f9" }} />
+                    sx={{ height: 20, typography: "micro", bgcolor: "#f1f5f9" }} />
                 ))}
               </Box>
             </Box>

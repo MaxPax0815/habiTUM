@@ -143,7 +143,7 @@ const BillingInformationCard = ({ user, paymentMethod }) => {
                 sx={{
                   px: 4,
                   py: 1.3,
-                  fontSize: '1rem',
+                  typography: 'body1',
                   fontWeight: 900,
                   minWidth: {
                     xs: '100%',
@@ -244,7 +244,7 @@ const BillingInformationCard = ({ user, paymentMethod }) => {
                 sx={{
                   height: 32,
                   px: 1.2,
-                  fontSize: '0.875rem',
+                  typography: 'body2',
                   fontWeight: 900,
                   color: colors.green,
                   backgroundColor: colors.softGreen

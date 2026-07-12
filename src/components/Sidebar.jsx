@@ -195,7 +195,7 @@ const Sidebar = ({ user }) => {
               width: 36,
               height: 36,
               backgroundColor: colors.primary,
-              fontSize: 14,
+              typography: "body2",
               fontWeight: 800,
             }}
           >

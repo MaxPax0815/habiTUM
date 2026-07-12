@@ -22,6 +22,7 @@ import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
 
 import { colors } from '../../styles/tokens'
+import { fieldLabelSx, finePrintSx } from '../../styles/recipes'
 import { useSignup } from '../../auth/useSignup'
 import AppCard from '../../components/AppCard'
 
@@ -41,7 +42,7 @@ const PREMIUM_BENEFITS = [
 const FieldLabel = ({ children }) => (
     <Typography
         variant="body2"
-        sx={{ fontWeight: 600, fontSize: 13, color: colors.textPrimary, mb: 0.5, textAlign: 'left' }}
+        sx={fieldLabelSx}
     >
         {children}
     </Typography>
@@ -148,7 +149,7 @@ const Signup = () => {
                     {benefits.map((text) => (
                         <Box key={text} sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
                             <CheckCircleOutlinedIcon sx={{ color: isPremiumSignup ? colors.primary : colors.green, fontSize: 18, flexShrink: 0 }} />
-                            <Typography variant="body2" sx={{ color: colors.textSecondary, fontSize: 14 }}>
+                            <Typography variant="body2" sx={{ color: colors.textSecondary }}>
                                 {text}
                             </Typography>
                         </Box>
@@ -326,12 +327,12 @@ const Signup = () => {
                     </Box>
 
                     {error && (
-                        <Typography variant="body2" sx={{ color: 'error.main', fontSize: 13 }}>
+                        <Typography variant="body2" sx={{ ...finePrintSx, color: 'error.main' }}>
                             {error}
                         </Typography>
                     )}
                     {success && (
-                        <Typography variant="body2" sx={{ color: colors.green, fontSize: 13 }}>
+                        <Typography variant="body2" sx={{ ...finePrintSx, color: colors.green }}>
                             Account created! Redirecting…
                         </Typography>
                     )}
@@ -353,7 +354,7 @@ const Signup = () => {
                     {/* Bottom link */}
                     <Typography
                         variant="body2"
-                        sx={{ textAlign: 'center', mt: 0.5, color: colors.textSecondary, fontSize: 14 }}
+                        sx={{ textAlign: 'center', mt: 0.5, color: colors.textSecondary }}
                     >
                         Already have an account?{' '}
                         <Typography
@@ -363,7 +364,6 @@ const Signup = () => {
                             sx={{
                                 color: colors.primary,
                                 fontWeight: 700,
-                                fontSize: 14,
                                 textDecoration: 'none',
                                 '&:hover': { textDecoration: 'underline' },
                             }}

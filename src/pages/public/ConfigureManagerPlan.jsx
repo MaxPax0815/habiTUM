@@ -17,6 +17,7 @@ import { useAuthContext } from '../../auth/useAuthContext'
 import { useCancelManagerSignup } from '../../auth/useCancelManagerSignup'
 import { useBilling } from '../../billing/useBillings'
 import AppCard from '../../components/AppCard'
+import { finePrintSx } from '../../styles/recipes'
 import { colors, radii } from '../../styles/tokens'
 
 // Pricing mirror for the pending-manager checkout UI; backend config is final source.
@@ -146,7 +147,7 @@ export default function ConfigureManagerPlan() {
                 </Box>
 
                 {error && (
-                    <Typography variant="body2" sx={{ color: 'error.main', fontSize: 13, textAlign: 'center' }}>
+                    <Typography variant="body2" sx={{ ...finePrintSx, color: 'error.main', textAlign: 'center' }}>
                         {error}
                     </Typography>
                 )}
@@ -168,20 +169,20 @@ export default function ConfigureManagerPlan() {
                 </Typography>
 
                 {cancelError && (
-                    <Typography variant="body2" sx={{ color: 'error.main', fontSize: 13, textAlign: 'center' }}>
+                    <Typography variant="body2" sx={{ ...finePrintSx, color: 'error.main', textAlign: 'center' }}>
                         {cancelError}
                     </Typography>
                 )}
 
                 {/* Pending managers cannot enter the app; cancel deletes the pending account. */}
-                <Typography variant="body2" sx={{ textAlign: 'center', color: colors.textSecondary, fontSize: 13 }}>
+                <Typography variant="body2" sx={{ ...finePrintSx, textAlign: 'center', color: colors.textSecondary }}>
                     Changed your mind?{' '}
                     <Link
                         component="button"
                         type="button"
                         onClick={cancelManagerSignup}
                         disabled={isCancelling}
-                        sx={{ color: 'error.main', fontWeight: 700, fontSize: 13, verticalAlign: 'baseline' }}
+                        sx={{ typography: 'finePrint', color: 'error.main', fontWeight: 700, verticalAlign: 'baseline' }}
                     >
                         {isCancelling ? 'Cancelling…' : 'Cancel manager signup'}
                     </Link>

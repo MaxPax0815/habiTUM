@@ -24,6 +24,7 @@ import { Link as RouterLink } from "react-router-dom";
 
 import AppCard from "../components/AppCard";
 import { colors } from '../styles/tokens'
+import { compactCardBodySx, compactCardMetaSx, compactCardTitleSx } from '../styles/recipes'
 
 // ---------------------------------------------------------------------------
 // Challenges.jsx
@@ -71,7 +72,7 @@ const getChallengeCommunity = (challenge) =>
 const getChallengeDifficulty = (challenge) =>
   challenge?.difficulty || "medium";
 
-const ChallengeJoinButton = ({ isJoined = false, label, sx = {}, ...buttonProps }) => {
+const ChallengeJoinButton = ({ compact = false, isJoined = false, label, sx = {}, ...buttonProps }) => {
   const joined = Boolean(isJoined);
   const { "&:hover": hoverSx, ...buttonSx } = sx;
 
@@ -80,10 +81,10 @@ const ChallengeJoinButton = ({ isJoined = false, label, sx = {}, ...buttonProps 
       variant={joined ? "outlined" : "contained"}
       startIcon={joined ? <CheckIcon /> : undefined}
       sx={{
-        px: 3,
-        py: 1.2,
+        px: compact ? 2 : 3,
+        py: compact ? 0.9 : 1.2,
         borderRadius: 2,
-        fontSize: 18,
+        typography: compact ? "body2" : "subtitle1",
         fontWeight: 800,
         borderColor: colors.primary,
         bgcolor: joined ? colors.softBlue : colors.primary,
@@ -118,19 +119,18 @@ const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
   return (
     <AppCard
       sx={{
-        minHeight: 280,
+        minHeight: 250,
       }}
       contentSx={{
         height: "100%",
-        p: { xs: 3, md: 4 },
+        p: 2.5,
         display: "flex",
         flexDirection: "column",
       }}
     >
       <Stack direction="row" spacing={2} sx={{ alignItems: "center", justifyContent: "space-between" }}>
         <Typography
-          variant="body1"
-          sx={{ color: colors.muted, fontWeight: 700, fontSize: { xs: 18, md: 20 } }}
+          sx={{ ...compactCardMetaSx, fontWeight: 800 }}
         >
           {category}
         </Typography>
@@ -139,25 +139,20 @@ const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
           label={difficulty}
           size="small"
           sx={{
-            height: 34,
-            px: 1,
             bgcolor: colors.softOrange,
             color: colors.orange,
-            fontSize: 18,
+            typography: "caption",
             fontWeight: 800,
             textTransform: "capitalize",
-            "& .MuiChip-label": { px: 1 },
           }}
         />
       </Stack>
 
       <Typography
-        variant="h5"
+        component="h3"
         sx={{
-          mt: 3,
-          color: colors.textPrimary,
-          fontWeight: 800,
-          lineHeight: 1.2,
+          ...compactCardTitleSx,
+          mt: 1.5,
         }}
       >
         {challenge?.title || "Untitled challenge"}
@@ -165,10 +160,12 @@ const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
 
       <Typography
         sx={{
-          mt: 2,
-          color: colors.textSecondary,
-          fontSize: { xs: 18, md: 20 },
-          lineHeight: 1.5,
+          ...compactCardBodySx,
+          mt: 1,
+          display: "-webkit-box",
+          overflow: "hidden",
+          WebkitBoxOrient: "vertical",
+          WebkitLineClamp: 3,
         }}
       >
         {challenge?.description || "No description yet."}
@@ -176,20 +173,20 @@ const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
 
       <Stack
         direction="row"
-        spacing={2.5}
+        spacing={2}
         useFlexGap
-        sx={{ mt: 3.5, color: colors.muted, flexWrap: "wrap" }}
+        sx={{ mt: 2.5, color: colors.muted, flexWrap: "wrap" }}
       >
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <GroupsOutlinedIcon sx={{ fontSize: 22 }} />
-          <Typography sx={{ fontSize: { xs: 16, md: 18 }, fontWeight: 700 }}>
+          <GroupsOutlinedIcon sx={{ fontSize: 18 }} />
+          <Typography sx={{ ...compactCardMetaSx, fontWeight: 700 }}>
             {formatParticipants(participantCount)}
           </Typography>
         </Stack>
 
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <AccessTimeOutlinedIcon sx={{ fontSize: 22 }} />
-          <Typography sx={{ fontSize: { xs: 16, md: 18 }, fontWeight: 700 }}>
+          <AccessTimeOutlinedIcon sx={{ fontSize: 18 }} />
+          <Typography sx={{ ...compactCardMetaSx, fontWeight: 700 }}>
             {daysLeft === null ? "No end date" : `${daysLeft}d left`}
           </Typography>
         </Stack>
@@ -198,7 +195,7 @@ const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
       <Box
         sx={{
           mt: "auto",
-          pt: 4,
+          pt: 3,
           display: "flex",
           flexWrap: "wrap",
           gap: 1.5,
@@ -216,10 +213,10 @@ const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
             : {})}
           startIcon={<VisibilityOutlinedIcon />}
           sx={{
-            px: 2.5,
-            py: 1.2,
+            px: 2,
+            py: 0.9,
             color: colors.textSecondary,
-            fontSize: 18,
+            typography: "body2",
             fontWeight: 800,
             flex: showJoinAction ? "1 1 150px" : "0 0 auto",
             minWidth: 120,
@@ -230,6 +227,7 @@ const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
 
         {showJoinAction && (
           <ChallengeJoinButton
+            compact
             isJoined={joined}
             onClick={joined ? undefined : onJoin}
             sx={{
@@ -325,7 +323,7 @@ export const ExtendedChallengeCard = ({
                 height: 32,
                 bgcolor: colors.softBlue,
                 color: colors.primary,
-                fontSize: 15,
+                typography: "subtitle2",
                 fontWeight: 800,
                 "& .MuiChip-label": { px: 1.5 },
               }}
@@ -337,7 +335,7 @@ export const ExtendedChallengeCard = ({
                 height: 32,
                 bgcolor: colors.softOrange,
                 color: colors.orange,
-                fontSize: 15,
+                typography: "subtitle2",
                 fontWeight: 800,
                 textTransform: "capitalize",
                 "& .MuiChip-label": { px: 1.5 },
@@ -424,7 +422,7 @@ export const ExtendedChallengeCard = ({
                 color: colors.textPrimary,
                 fontWeight: 900,
                 lineHeight: 1.15,
-                fontSize: { xs: 28, md: 34 },
+                typography: "landingSectionTitle",
               }}
             >
               {challenge?.title || "Untitled challenge"}
@@ -434,7 +432,7 @@ export const ExtendedChallengeCard = ({
               sx={{
                 mt: 2.5,
                 color: colors.textSecondary,
-                fontSize: { xs: 18, md: 20 },
+                typography: { xs: "subtitle1", md: "h5" },
                 lineHeight: 1.45,
               }}
             >
@@ -474,10 +472,10 @@ export const ExtendedChallengeCard = ({
           <Stack direction="row" spacing={1.25} alignItems="center">
             <GroupsOutlinedIcon sx={{ fontSize: 24, color: colors.muted }} />
             <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75 }}>
-              <Typography sx={{ color: colors.textPrimary, fontSize: 20, fontWeight: 900, lineHeight: 1 }}>
+              <Typography sx={{ color: colors.textPrimary, typography: "metricValue" }}>
                 {participants.toLocaleString()}
               </Typography>
-              <Typography sx={{ color: colors.muted, fontSize: 18, fontWeight: 700, lineHeight: 1 }}>
+              <Typography sx={{ color: colors.muted, typography: "metricLabel" }}>
                 {participants === 1 ? "participant" : "participants"}
               </Typography>
             </Box>
@@ -486,10 +484,10 @@ export const ExtendedChallengeCard = ({
           <Stack direction="row" spacing={1.25} alignItems="center">
             <AccessTimeOutlinedIcon sx={{ fontSize: 24, color: colors.muted }} />
             <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75 }}>
-              <Typography sx={{ color: colors.textPrimary, fontSize: 20, fontWeight: 900, lineHeight: 1 }}>
+              <Typography sx={{ color: colors.textPrimary, typography: "metricValue" }}>
                 {daysLeft === null ? "--" : daysLeft}
               </Typography>
-              <Typography sx={{ color: colors.muted, fontSize: 18, fontWeight: 700, lineHeight: 1 }}>
+              <Typography sx={{ color: colors.muted, typography: "metricLabel" }}>
                 days left
               </Typography>
             </Box>
@@ -499,10 +497,10 @@ export const ExtendedChallengeCard = ({
             <Stack direction="row" spacing={1.25} alignItems="center">
               <EmojiEventsOutlinedIcon sx={{ fontSize: 24, color: colors.primary }} />
               <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75 }}>
-                <Typography sx={{ color: colors.primary, fontSize: 20, fontWeight: 900, lineHeight: 1 }}>
+                <Typography sx={{ color: colors.primary, typography: "metricValue" }}>
                   #{rank}
                 </Typography>
-                <Typography sx={{ color: colors.muted, fontSize: 18, fontWeight: 700, lineHeight: 1 }}>
+                <Typography sx={{ color: colors.muted, typography: "metricLabel" }}>
                   your rank
                 </Typography>
               </Box>

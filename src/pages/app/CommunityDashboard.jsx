@@ -65,7 +65,8 @@ const CommunityLogo = ({ community }) => (
           bgcolor: colorFor(community.name),
           color: '#fff',
           fontWeight: 800,
-          fontSize: 30,
+          typography: 'h4',
+          lineHeight: 1,
         }}
       >
         {(community.name?.[0] || '?').toUpperCase()}
@@ -543,7 +544,7 @@ const CommunityDashboard = () => {
               value={inviteLink}
               readOnly
               fullWidth
-              sx={{ fontSize: 14, color: colors.textSecondary }}
+              sx={{ typography: 'body2', color: colors.textSecondary }}
               onFocus={(e) => e.target.select()}
             />
             <Tooltip title={inviteCopied ? 'Copied!' : 'Copy link'} placement="top" arrow>

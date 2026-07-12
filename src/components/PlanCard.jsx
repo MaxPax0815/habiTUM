@@ -67,7 +67,7 @@ const PlanCard = ({
                 px: 1.4,
                 py: 0.4,
                 borderRadius: radii.pill,
-                fontSize: '0.875rem',
+                typography: 'body2',
                 fontWeight: 800,
                 color: accentColor,
                 backgroundColor: priceBadgeBackground
