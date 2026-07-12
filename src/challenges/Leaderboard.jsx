@@ -16,7 +16,8 @@ import CheckIcon from "@mui/icons-material/Check";
 import WhatshotIcon from "@mui/icons-material/Whatshot";
 
 import { useAuthContext } from "../auth/useAuthContext";
-import { avatarColors, colors } from "../theme";
+import { avatarColors, colors, radii } from '../styles/tokens'
+import { sectionTitleSx } from '../styles/recipes'
 
 // ---------------------------------------------------------------------------
 // Leaderboard.jsx
@@ -46,7 +47,7 @@ const getRankMarker = (rank) => {
   }
 
   return (
-    <Typography sx={{ color: colors.muted, fontWeight: 900, fontSize: 18 }}>
+    <Typography sx={{ color: colors.muted, typography: "subtitle1", fontWeight: 900 }}>
       {rank}
     </Typography>
   );
@@ -113,25 +114,15 @@ const Leaderboard = ({ challengeId, initialData }) => {
 
   return (
     <Box>
-      <Typography
-        variant="overline"
-        sx={{
-          display: "block",
-          mb: 1.5,
-          color: colors.muted,
-          fontWeight: 900,
-          fontSize: 18,
-          letterSpacing: "0.16em",
-        }}
-      >
+      <Typography component="h2" sx={sectionTitleSx}>
         Leaderboard — Ranked by Streak
       </Typography>
 
       <TableContainer
         sx={{
           border: `1px solid ${colors.border}`,
-          borderRadius: 2,
-          bgcolor: colors.surface,
+          borderRadius: radii.card,
+          bgcolor: 'background.paper',
           overflow: "hidden",
         }}
       >
@@ -151,7 +142,7 @@ const Leaderboard = ({ challengeId, initialData }) => {
                   borderColor: colors.border,
                   color: colors.muted,
                   fontWeight: 900,
-                  fontSize: 18,
+                  typography: "subtitle1",
                 }}
               >
                 Participant
@@ -162,7 +153,7 @@ const Leaderboard = ({ challengeId, initialData }) => {
                   borderColor: colors.border,
                   color: colors.muted,
                   fontWeight: 900,
-                  fontSize: 18,
+                  typography: "subtitle1",
                 }}
               >
                 🔥 Streak
@@ -218,7 +209,7 @@ const Leaderboard = ({ challengeId, initialData }) => {
                           bgcolor: getAvatarColor(rank || 1),
                           color: colors.surface,
                           fontWeight: 900,
-                          fontSize: 18,
+                          typography: "subtitle1",
                         }}
                       >
                         {getInitial(name)}
@@ -229,7 +220,7 @@ const Leaderboard = ({ challengeId, initialData }) => {
                           sx={{
                             color: entry.isCurrentUser ? colors.primary : colors.textPrimary,
                             fontWeight: 900,
-                            fontSize: 18,
+                            typography: "subtitle1",
                             lineHeight: 1.2,
                           }}
                         >
@@ -245,7 +236,7 @@ const Leaderboard = ({ challengeId, initialData }) => {
                             sx={{
                               color: entry.doneToday ? colors.green : colors.muted,
                               fontWeight: 700,
-                              fontSize: 17,
+                              typography: "body1",
                               lineHeight: 1.2,
                             }}
                           >
@@ -264,7 +255,7 @@ const Leaderboard = ({ challengeId, initialData }) => {
                         gap: 0.5,
                         color: colors.textPrimary,
                         fontWeight: 900,
-                        fontSize: 18,
+                        typography: "subtitle1",
                       }}
                     >
                       <WhatshotIcon sx={{ fontSize: 17, color: colors.orange }} />

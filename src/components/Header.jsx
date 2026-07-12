@@ -1,10 +1,27 @@
+import { useState } from "react";
 import { Link as RouterLink, useLocation } from "react-router-dom";
-import { Box, Button, IconButton, Stack, Typography } from "@mui/material";
+import {
+    Alert,
+    Box,
+    Button,
+    Drawer,
+    IconButton,
+    List,
+    ListItemButton,
+    ListItemText,
+    Snackbar,
+    Stack,
+    Typography,
+} from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import CloseIcon from "@mui/icons-material/Close";
+import MenuIcon from "@mui/icons-material/Menu";
 
-import { colors } from "../theme"
-import { outlinedPillButtonSx, pillButtonSx } from "../styles/buttonSx";
+import { colors } from '../styles/tokens'
+import { linkResetSx, outlinedPillButtonSx, pillButtonSx } from '../styles/recipes'
+import { useAuthContext } from '../auth/useAuthContext'
+import { useCancelManagerSignup } from '../auth/useCancelManagerSignup'
 
 // Source of truth for the landing page's in-page navigation.
 // Each `href` is an anchor (#features, #habits, #challenges) that scrolls to the
@@ -12,33 +29,29 @@ import { outlinedPillButtonSx, pillButtonSx } from "../styles/buttonSx";
 const sectionLinks = [
     { label: "Habits", href: "#habits" },
     { label: "Features", href: "#features" },
+    { label: "Communities", href: "#communities" },
     { label: "Challenges", href: "#challenges" },
+    { label: "Plans", href: "#plans" },
 ];
-
-// Shared style object that strips the default anchor styling (underline, borders,
-// visited color) and adds a consistent keyboard focus ring. Spread into every
-// clickable link below (<LogoLink /> and <SectionNav />) so they behave uniformly.
-const linkResetSx = {
-  textDecoration: "none",
-  border: "none",
-  borderBottom: "none",
-  backgroundColor: "transparent",
-  boxShadow: "none",
-
-  "&:focus-visible": {
-    outline: `2px solid ${colors.primary}`,
-    outlineOffset: 4,
-    borderRadius: 8,
-  },
-};
 
 // Brand logo + "HabiTUM" wordmark, rendered on the left of every header.
 // The whole logo is a router link back to "/" (the landing page).
 // When `showBackArrow` is true (i.e. we're NOT on the landing page), an extra
 // back-arrow IconButton is shown so users can return home from sub-pages.
 // Used by <Header /> via `showBackArrow={!isLandingPage}`.
-const LogoLink = ({ showBackArrow = false}) => {
+const LogoLink = ({ showBackArrow = false, scrollToHabits = false}) => {
+    const handleLogoClick = (event) => {
+        if (!scrollToHabits) return 
 
+        event.preventDefault()
+
+        const habitsSection = document.getElementById("habits")
+        if (habitsSection) {
+            habitsSection.scrollIntoView({ behavior: "smooth", block: "start" })
+        }
+
+        window.history.replaceState(null, "", "/#habits") // Update URL without reloading the page
+    }
 
     return (
         <Stack 
@@ -78,6 +91,7 @@ const LogoLink = ({ showBackArrow = false}) => {
             <Box
                 component={RouterLink}
                 to="/"
+                onClick={handleLogoClick}
                 sx={{
                 ...linkResetSx,  
                 display: "flex",
@@ -168,6 +182,107 @@ const SectionNav = () => {
   );
 };
 
+// Mobile-only section navigation for the landing page. It reuses `sectionLinks`
+// so the burger menu and desktop nav always point to the same page sections.
+const LandingSectionMenu = () => {
+    const [isOpen, setIsOpen] = useState(false)
+
+    const closeMenu = () => setIsOpen(false)
+
+    return (
+        <>
+            <IconButton
+                aria-label="Open section navigation"
+                aria-controls="landing-section-menu"
+                aria-expanded={isOpen ? "true" : undefined}
+                onClick={() => setIsOpen(true)}
+                sx={{
+                    ...linkResetSx,
+                    display: { xs: "inline-flex", md: "none" },
+                    color: colors.textPrimary,
+                    p: 1,
+                    mr: 0.5,
+
+                    "&:hover": {
+                        backgroundColor: colors.softBlue,
+                    },
+                }}
+            >
+                <MenuIcon />
+            </IconButton>
+
+            <Drawer
+                id="landing-section-menu"
+                anchor="left"
+                open={isOpen}
+                onClose={closeMenu}
+                PaperProps={{
+                    sx: {
+                        width: 280,
+                        borderRadius: 0,
+                        borderRight: `1px solid ${colors.border}`,
+                    },
+                }}
+            >
+                <Box sx={{ p: 2 }}>
+                    <Stack
+                        direction="row"
+                        sx={{
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            mb: 1,
+                        }}
+                    >
+                        <Typography sx={{ fontWeight: 900, color: colors.textPrimary }}>
+                            Habi
+                            <Box component="span" sx={{ color: colors.primary }}>
+                                TUM
+                            </Box>
+                        </Typography>
+
+                        <IconButton
+                            aria-label="Close section navigation"
+                            onClick={closeMenu}
+                            sx={{ color: colors.textSecondary }}
+                        >
+                            <CloseIcon />
+                        </IconButton>
+                    </Stack>
+
+                    <List component="nav" aria-label="Landing page sections" sx={{ py: 0 }}>
+                        {sectionLinks.map((link) => (
+                            <ListItemButton
+                                key={link.href}
+                                component="a"
+                                href={link.href}
+                                onClick={closeMenu}
+                                sx={{
+                                    borderRadius: 2,
+                                    px: 1.5,
+                                    py: 1.25,
+                                    color: colors.textSecondary,
+
+                                    "&:hover": {
+                                        color: colors.textPrimary,
+                                        backgroundColor: colors.softBlue,
+                                    },
+                                }}
+                            >
+                                <ListItemText
+                                    primary={link.label}
+                                    primaryTypographyProps={{
+                                        fontWeight: 800,
+                                    }}
+                                />
+                            </ListItemButton>
+                        ))}
+                    </List>
+                </Box>
+            </Drawer>
+        </>
+    )
+}
+
 // Top-level header shown across the app. It's context-aware: it reads the current
 // route and adapts which pieces it renders.
 //   - Composes the helpers above: always <LogoLink />, plus <SectionNav /> and the
@@ -177,11 +292,19 @@ const SectionNav = () => {
 // Props: `title`, `subtitle` — heading text for sub-pages (ignored on landing).
 const Header = () => {
     const location = useLocation()
+    const { user } = useAuthContext()
+    const { cancelManagerSignup, isCancelling, error: cancelError } = useCancelManagerSignup()
 
     // Route flags drive all the conditional rendering below.
-    const isSignupPage = location.pathname === '/signup'
+    const isSignupPage = location.pathname === '/signup' || location.pathname === '/signup/manager'
     const isLoginPage = location.pathname === '/login'
     const isLandingPage = location.pathname === '/'
+    const isConfigurePlanPage = location.pathname === '/configure-manager-plan'
+
+    // A pending manager is logged in but hasn't paid yet. The header must not
+    // offer the normal auth CTAs (they'd only bounce off the route guards) —
+    // instead it offers exactly two actions: continue setup or cancel the signup.
+    const isPendingManager = user?.accountType === 'manager' && user?.subscription === 'manager_pending'
 
     return (  
         <Box
@@ -206,23 +329,80 @@ const Header = () => {
                     px: 2,
                     py: 1,
                     display: "grid",
-                    gridTemplateColumns: "1fr auto 1fr",
+                    gridTemplateColumns: { xs: "auto 1fr auto", md: "1fr auto 1fr" },
                     alignItems: "center",
                 }}
             >
-                {/* Left */}
-                <Box sx={{ justifySelf: "start" }}>
-                    <LogoLink showBackArrow={!isLandingPage} />
+                {/* Left — no back arrow for pending managers: they should not be
+                    steered back to the landing page mid-signup (the logo still
+                    points to "/", which itself renders the pending-manager state) */}
+                <Box sx={{ justifySelf: "start", display: "flex", alignItems: "center", minWidth: 0 }}>
+                    {isLandingPage && !isPendingManager && <LandingSectionMenu />}
+                    <LogoLink 
+                        showBackArrow={!isLandingPage && !isPendingManager} 
+                        scrollToHabits={isLandingPage && !isPendingManager}
+                    />
                 </Box>
 
-                {/* Center */}
-                <Box sx={{ justifySelf: "center" }}>
-                    {isLandingPage && <SectionNav />}
+                {/* Center — section anchors only exist on the normal landing page */}
+                <Box sx={{ justifySelf: "center", display: { xs: "none", md: "block" } }}>
+                    {isLandingPage && !isPendingManager && <SectionNav />}
                 </Box>
 
                 {/* Right */}
-                <Stack direction="row" spacing={2} sx={{ justifySelf: "end"}}>
-                    {isLandingPage && (
+                <Stack
+                    direction="row"
+                    spacing={{ xs: 1, sm: 2 }}
+                    sx={{
+                        justifySelf: "end",
+                        alignItems: "center",
+                        minWidth: 0,
+                    }}
+                >
+                    {isPendingManager && (
+                        <>
+                            <Button
+                                onClick={cancelManagerSignup}
+                            disabled={isCancelling}
+                            variant="outlined"
+                            size="small"
+                                sx={{
+                                    ...outlinedPillButtonSx,
+                                    color: 'error.main',
+                                    borderColor: 'error.main',
+                                    "&:hover": {
+                                        border: '1px solid',
+                                        borderColor: 'error.main',
+                                        backgroundColor: '#FDECEA', // light red fill on hover
+                                    },
+                            }}
+                        >
+                                {isCancelling ? 'Cancelling…' : 'Cancel Manager Signup'}
+                            </Button>
+
+                            {/* Hidden on the configure page itself — the page's own
+                                CTA is the way forward there */}
+                            {!isConfigurePlanPage && (
+                                <Button
+                                    component={RouterLink}
+                                    to="/configure-manager-plan"
+                                    variant="contained"
+                                    size="small"
+                                    startIcon={<ArrowForwardIcon />}
+                                    sx={{
+                                        ...pillButtonSx,
+                                        backgroundColor: colors.primary,
+                                        color: colors.surface,
+                                        "&:hover": { backgroundColor: colors.primaryDark },
+                                    }}
+                                >
+                                    Continue Setup
+                                </Button>
+                            )}
+                        </>
+                    )}
+
+                    {!isPendingManager && isLandingPage && (
                         <>
                             <Button
                                 component={RouterLink}
@@ -232,24 +412,18 @@ const Header = () => {
                                 sx={{
                                     ...outlinedPillButtonSx,
                                     color: colors.textPrimary,
-                                }}
-                            >
-                                Login
-                            </Button>
+                                    display: { xs: "none", sm: "inline-flex" },
+                            }}
+                        >
+                            Log In
+                        </Button>
 
                             <Button
                                 component={RouterLink}
                                 to="/signup"
                                 variant="contained"
                                 size="small"
-                                /* There should not be a need for explicitly defining the color of the arrow icon.
-                                 It seems like the rules of the habit.css file also affect every other link
-===========================================================================================================
-
-                                    TODO: Please fix the habit.css 
-                                    
-===========================================================================================================*/
-                                endIcon={<ArrowForwardIcon sx={{color: colors.surface}}/>}
+                                startIcon={<ArrowForwardIcon />}
                                 sx={{
                                     ...pillButtonSx,
                                     backgroundColor: colors.primary,
@@ -265,7 +439,7 @@ const Header = () => {
                         </>
                     )}
 
-                    {isSignupPage && (
+                    {!isPendingManager && isSignupPage && (
                         <Button
                             component={RouterLink}
                             to="/login"
@@ -273,11 +447,11 @@ const Header = () => {
                             size="small"
                             sx={outlinedPillButtonSx}
                         >
-                            Login
+                            Log In
                         </Button>
                     )}
 
-                    {isLoginPage && (
+                    {!isPendingManager && isLoginPage && (
                         <Button
                             component={RouterLink}
                             to="/signup"
@@ -285,11 +459,19 @@ const Header = () => {
                             size="small"
                             sx={outlinedPillButtonSx}
                         >
-                            Sign up
+                            Sign Up
                         </Button>
                     )}
                 </Stack>
             </Box>
+
+            {/* Surface backend errors from the cancel flow (e.g. server down) */}
+            <Snackbar
+                open={Boolean(cancelError)}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert severity="error" variant="filled">{cancelError}</Alert>
+            </Snackbar>
         </Box>
   )
 };

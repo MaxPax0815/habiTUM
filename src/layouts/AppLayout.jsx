@@ -1,12 +1,19 @@
 import { Outlet } from 'react-router-dom'
-import { Box } from '@mui/material'
+import { Box, useMediaQuery } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 
+import MobileNav from '../components/MobileNav'
 import Sidebar from '../components/Sidebar'
-import { colors } from '../theme'
+import SupportHelpButton from '../components/SupportHelpButton'
+import PageContainer from '../components/layout/PageContainer'
+import { colors } from '../styles/tokens'
 import { useAuthContext } from '../auth/useAuthContext'
 
 const AppLayout = () => {
-  const { user } = useAuthContext() 
+  // AppLayout is only rendered behind App.jsx's auth wall, so user should exist here.
+  const { user } = useAuthContext()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
   return (
     <Box
@@ -16,7 +23,7 @@ const AppLayout = () => {
         backgroundColor: colors.background,
       }}
     >
-      <Sidebar user={user} />
+      {!isMobile && <Sidebar user={user} />}
 
       <Box
         component="main"
@@ -24,20 +31,23 @@ const AppLayout = () => {
           flex: 1,
           minWidth: 0,
           minHeight: '100vh',
-          px: { xs: 3, md: 8, lg: 6 },
-          py: { xs: 3, md: 4 },
+          px: { xs: 2, sm: 3, md: 8, lg: 6 },
+          pt: { xs: 3, md: 4 },
+          pb: isMobile
+            ? 'calc(88px + env(safe-area-inset-bottom))'
+            : { sm: 3, md: 4 },
           display: 'flex',
-          justifyContent: 'center'
+          justifyContent: 'center',
         }}
       >
-        <Box
-          sx={{
-            width: '100%',
-            maxWidth: 1120
-          }} >
+        <PageContainer>
+          {/* React Router renders the matched protected child route here. */}
           <Outlet />
-        </Box>
+        </PageContainer>
       </Box>
+
+      {isMobile && <MobileNav />}
+      <SupportHelpButton isMobile={isMobile} />
     </Box>
   )
 }

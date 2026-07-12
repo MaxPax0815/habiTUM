@@ -1,15 +1,16 @@
+import { useEffect, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import {
+  Alert,
   Box,
   Button,
   Chip,
+  CircularProgress,
   Container,
-  CssBaseline,
+  Divider,
   Grid,
   Stack,
-  ThemeProvider,
   Typography,
-  createTheme,
 } from "@mui/material";
 
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -18,89 +19,38 @@ import WhatshotIcon from "@mui/icons-material/Whatshot";
 import GroupsIcon from "@mui/icons-material/Groups";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import MilitaryTechIcon from "@mui/icons-material/MilitaryTech";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+
+import ChallengePreview from "../../challenges/ChallengePreview";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
+import WorkspacePremiumOutlinedIcon from "@mui/icons-material/WorkspacePremiumOutlined";
+import BusinessCenterOutlinedIcon from "@mui/icons-material/BusinessCenterOutlined";
 
 import mockupDashboard from '../../assets/mockup_dashboard.png';
 import AppCard from "../../components/AppCard";
-import { outlinedPillButtonSx } from '../../styles/buttonSx'
-
-// ------------------------------------------------------
-// Global color variables
-// Easy to replace later when the final palette is defined
-// ------------------------------------------------------
-
-const colors = {
-  primary: "#0066FF",
-  primaryDark: "#00213D",
-  secondary: "#00B894",
-  background: "#F4F7FB",
-  surface: "#FFFFFF",
-  textPrimary: "#071D35",
-  textSecondary: "#5B6B7F",
-  muted: "#94A3B8",
-  border: "#DDE5EF",
-  softBlue: "#EAF2FF",
-  softOrange: "#FFF1E8",
-  softGreen: "#E9FFF5",
-  orange: "#FF7A1A",
-  green: "#00A86B",
-};
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: colors.primary,
-      dark: colors.primaryDark,
-    },
-    secondary: {
-      main: colors.secondary,
-    },
-    background: {
-      default: colors.background,
-      paper: colors.surface,
-    },
-    text: {
-      primary: colors.textPrimary,
-      secondary: colors.textSecondary,
-    },
-  },
-  typography: {
-    fontFamily: `"Inter", "Roboto", "Helvetica", "Arial", sans-serif`,
-    h1: {
-      fontWeight: 800,
-    },
-    h2: {
-      fontWeight: 800,
-    },
-    h3: {
-      fontWeight: 800,
-    },
-    button: {
-      textTransform: "none",
-      fontWeight: 700,
-    },
-  },
-  shape: {
-    borderRadius: 14,
-  },
-});
+import { colors, radii, shadows } from '../../styles/tokens'
+import { useAuthContext } from '../../auth/useAuthContext'
+import { useCancelManagerSignup } from '../../auth/useCancelManagerSignup'
 
 // ------------------------------------------------------
 // Small helper components
 // ------------------------------------------------------
 
-function IconBadge({ children, bg = colors.softBlue, color = colors.primary }) {
+function IconBadge({ children, bg = colors.softBlue, color = colors.primary, sx = {} }) {
   return (
     <Box
       sx={{
         width: 34,
         height: 34,
-        borderRadius: 2.2,
+        borderRadius: radii.small,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         bgcolor: bg,
         color,
         mb: 2,
+        ...sx,
       }}
     >
       {children}
@@ -117,7 +67,7 @@ function AvatarDot({ label, color }) {
         borderRadius: "50%",
         bgcolor: color,
         color: "#fff",
-        fontSize: 13,
+        typography: "fieldLabel",
         fontWeight: 800,
         display: "flex",
         alignItems: "center",
@@ -133,16 +83,16 @@ function AvatarDot({ label, color }) {
 
 function MiniStat({ value, label, icon, bg, color }) {
   return (
-    <Stack direction="row" spacing={1.5} alignItems="center">
+    <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
       <IconBadge bg={bg} color={color} sx={{ mb: 0 }}>
         {icon}
       </IconBadge>
 
       <Box>
-        <Typography fontWeight={800} color="text.primary">
+        <Typography sx={{ fontWeight: 800, color: "text.primary" }}>
           {value}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{ color: "text.secondary" }}>
           {label}
         </Typography>
       </Box>
@@ -160,11 +110,12 @@ function DashboardMockup() {
       sx={{
         width: "100%",
         maxWidth: 560,
-        borderRadius: 3,
+        borderRadius: radii.card,
         overflow: "hidden",
-        boxShadow: "0 24px 56px rgba(7, 29, 53, 0.18)",
-        border: `1px solid ${colors.border}`,
-        bgcolor: colors.surface,
+        boxShadow: shadows.dialog,
+        border: "1px solid",
+        borderColor: "divider",
+        bgcolor: "background.paper",
       }}
     >
       <Box
@@ -182,22 +133,297 @@ function DashboardMockup() {
 }
 
 // ------------------------------------------------------
+// Challenges section — the three most trending challenges (live from the public
+// API) on the left, a marketing card explaining challenges on the right.
+// ------------------------------------------------------
+
+const DIFFICULTY_STYLES = {
+  easy: { label: "Easy", bg: colors.softGreen, color: colors.green },
+  medium: { label: "Medium", bg: colors.softBlue, color: colors.primary },
+  hard: { label: "Hard", bg: colors.softOrange, color: colors.orange },
+};
+
+// Right-side card that markets the idea behind challenges.
+function ChallengesInfoCard() {
+  const highlights = [
+    { title: "Live leaderboards", text: "See exactly where you rank as everyone's streaks grow." },
+    { title: "Real-time trackers", text: "Watch progress update as your community checks in." },
+    { title: "Friendly competition", text: "A little rivalry that makes habits actually stick." },
+  ];
+
+  return (
+    <AppCard
+      sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+      contentSx={{ flex: 1, display: "flex", flexDirection: "column" }}
+    >
+      <IconBadge bg={colors.softOrange} color={colors.orange}>
+        <EmojiEventsIcon fontSize="small" />
+      </IconBadge>
+
+      <Typography
+        variant="overline"
+        sx={{ color: colors.muted, fontWeight: 900, letterSpacing: "0.18em" }}
+      >
+        Why challenges?
+      </Typography>
+
+      <Typography variant="h5" sx={{ fontWeight: 800, mt: 0.5, mb: 1.5, lineHeight: 1.2 }}>
+        Push each other to the next level
+      </Typography>
+
+      <Typography sx={{ color: "text.secondary", lineHeight: 1.7, mb: 3 }}>
+        Challenges turn solo habits into a team effort — motivate and push each
+        other inside your community.
+      </Typography>
+
+      <Stack spacing={2} sx={{ flex: 1 }}>
+        {highlights.map((item) => (
+          <Box key={item.title} sx={{ display: "flex", alignItems: "flex-start", gap: 1.25 }}>
+            <CheckCircleOutlinedIcon
+              sx={{ fontSize: 20, color: colors.orange, mt: "2px", flexShrink: 0 }}
+            />
+            <Box>
+              <Typography sx={{ fontWeight: 800, color: "text.primary", lineHeight: 1.3 }}>
+                {item.title}
+              </Typography>
+              <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.5 }}>
+                {item.text}
+              </Typography>
+            </Box>
+          </Box>
+        ))}
+      </Stack>
+
+      <Box sx={{ mt: "auto", pt: 3 }}>
+        <Divider sx={{ mb: 2 }} />
+        <Typography sx={{ color: "text.secondary", lineHeight: 1.6 }}>
+          Hit{" "}
+          <Box component="span" sx={{ fontWeight: 800, color: colors.orange }}>
+            View
+          </Box>{" "}
+          on any challenge to explore its leaderboard yourself.
+        </Typography>
+      </Box>
+    </AppCard>
+  );
+}
+
+function TrendingChallengeCard({ challenge, onView }) {
+  const difficulty = DIFFICULTY_STYLES[challenge.difficulty] || DIFFICULTY_STYLES.medium;
+
+  return (
+    <AppCard>
+      <Stack
+        direction="row"
+        spacing={1}
+        sx={{ alignItems: "flex-start", justifyContent: "space-between", mb: 0.5 }}
+      >
+        <Typography sx={{ fontWeight: 800, color: "text.primary", lineHeight: 1.3 }}>
+          {challenge.title}
+        </Typography>
+        <Chip
+          label={difficulty.label}
+          size="small"
+          sx={{
+            bgcolor: difficulty.bg,
+            color: difficulty.color,
+            fontWeight: 800,
+            flexShrink: 0,
+          }}
+        />
+      </Stack>
+
+      {challenge.community?.name && (
+        <Typography variant="body2" sx={{ color: colors.muted, fontWeight: 700, mb: 1 }}>
+          {challenge.community.name}
+        </Typography>
+      )}
+
+      {challenge.description && (
+        <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.6, mb: 1.5 }}>
+          {challenge.description}
+        </Typography>
+      )}
+
+      <Stack
+        direction="row"
+        spacing={2}
+        sx={{ alignItems: "center", justifyContent: "space-between", mt: 0.5 }}
+      >
+        <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+          <GroupsIcon sx={{ fontSize: 18, color: colors.primary }} />
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            <Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>
+              {challenge.participantCount}
+            </Box>{" "}
+            {challenge.participantCount === 1 ? "participant" : "participants"}
+          </Typography>
+        </Stack>
+
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<VisibilityOutlinedIcon />}
+          onClick={() => onView(challenge)}
+          sx={{ fontWeight: 800, flexShrink: 0 }}
+        >
+          View
+        </Button>
+      </Stack>
+    </AppCard>
+  );
+}
+
+function TrendingChallenges() {
+  const [challenges, setChallenges] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [previewId, setPreviewId] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+
+    const fetchTrending = async () => {
+      try {
+        // Public endpoint — no auth header. Registered before requireAuth so
+        // logged-out visitors can load it.
+        const response = await fetch("/api/challenges/trending");
+        if (!response.ok) throw new Error("Could not load trending challenges.");
+        const data = await response.json();
+        if (active) setChallenges(Array.isArray(data) ? data : []);
+      } catch (err) {
+        if (active) setError(err.message);
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    fetchTrending();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return <Alert severity="error">{error}</Alert>;
+  }
+
+  if (challenges.length === 0) {
+    return (
+      <AppCard sx={{ textAlign: "center", py: 5 }}>
+        <Typography sx={{ fontSize: 34, mb: 1 }}>🏆</Typography>
+        <Typography sx={{ fontWeight: 800, mb: 0.5 }}>
+          No trending challenges yet
+        </Typography>
+        <Typography sx={{ color: "text.secondary" }}>
+          Join a community and be the first to start one.
+        </Typography>
+      </AppCard>
+    );
+  }
+
+  return (
+    <>
+      <Stack spacing={2} sx={{ height: "100%" }}>
+        {challenges.slice(0, 3).map((challenge) => (
+          <TrendingChallengeCard
+            key={challenge._id}
+            challenge={challenge}
+            onView={(selected) => setPreviewId(selected._id)}
+          />
+        ))}
+      </Stack>
+
+      <ChallengePreview
+        challengeId={previewId}
+        open={Boolean(previewId)}
+        onClose={() => setPreviewId(null)}
+      />
+    </>
+  );
+}
+
+// ------------------------------------------------------
 // Main page
 // ------------------------------------------------------
 
-export default function LandingPage() {
-  return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+const sectionAnchorSx = {
+  scrollMarginTop: "85px",
+};
 
-      <Box sx={{ bgcolor: "background.default", minHeight: "100vh" }}>
+export default function LandingPage() {
+  const { user } = useAuthContext()
+  const { cancelManagerSignup, isCancelling, error: cancelError } = useCancelManagerSignup()
+
+  // A logged-in pending manager must not see the normal marketing CTAs
+  // (Login / Signup / Go Premium / Create manager account) — every one of them
+  // would just bounce off the route guards back to /configure-manager-plan.
+  // Show an explicit "finish or cancel your signup" state instead.
+  const isPendingManager = user?.accountType === 'manager' && user?.subscription === 'manager_pending'
+
+  if (isPendingManager) {
+    return (
+      <Container maxWidth="sm" sx={{ py: { xs: 8, md: 12 }, textAlign: 'center' }}>
+        <BusinessCenterOutlinedIcon sx={{ fontSize: 64, color: colors.primary, mb: 2 }} />
+
+        <Typography variant="h4" sx={{ fontWeight: 900, mb: 1.5 }}>
+          Complete your manager signup
+        </Typography>
+
+        <Typography sx={{ color: colors.textSecondary, mb: 4, lineHeight: 1.6 }}>
+          Your manager account has been created, but your subscription is not
+          active yet. Please continue the setup or cancel the manager signup.
+        </Typography>
+
+        {cancelError && (
+          <Alert severity="error" sx={{ mb: 3, textAlign: 'left' }}>{cancelError}</Alert>
+        )}
+
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
+          <Button
+            component={RouterLink}
+            to="/configure-manager-plan"
+            variant="contained"
+            size="large"
+            startIcon={<ArrowForwardIcon />}
+          >
+            Continue Manager Setup
+          </Button>
+
+          <Button
+            variant="outlined"
+            color="error"
+            size="large"
+            onClick={cancelManagerSignup}
+            disabled={isCancelling}
+          >
+            {isCancelling ? 'Cancelling…' : 'Cancel Manager Signup'}
+          </Button>
+        </Stack>
+
+        <Typography variant="caption" sx={{ color: colors.muted, display: 'block', mt: 3 }}>
+          Cancelling deletes your pending account — you can sign up again anytime.
+        </Typography>
+      </Container>
+    )
+  }
+
+  return (
+    <Box sx={{ bgcolor: "background.default", minHeight: "100vh" }}>
         {/* Hero Section */}
-        <Container id="habits" maxWidth="lg" sx={{ pt: { xs: 4, md: 6 }, pb: { xs: 7, md: 10 } }}>
+        <Container id="habits" maxWidth="lg" sx={{ ...sectionAnchorSx, pt: { xs: 4, md: 6 }, pb: { xs: 7, md: 10 } }}>
           <Grid
             container
             spacing={{ xs: 5, md: 7 }}
-            alignItems="center"
-            justifyContent="center"
+            sx={{ alignItems: "center", justifyContent: "center" }}
           >
             <Grid
               size={{ xs: 12, md: 6 }}
@@ -223,7 +449,7 @@ export default function LandingPage() {
               <Typography
                 variant="h1"
                 sx={{
-                  fontSize: { xs: 42, sm: 56, md: 68 },
+                  typography: "landingDisplay",
                   lineHeight: 0.95,
                   letterSpacing: "-0.05em",
                   maxWidth: 620,
@@ -240,7 +466,7 @@ export default function LandingPage() {
                 sx={{
                   mt: 3,
                   maxWidth: 500,
-                  fontSize: { xs: 16, md: 18 },
+                  typography: "landingLead",
                   color: "text.secondary",
                   lineHeight: 1.7,
                 }}
@@ -252,24 +478,20 @@ export default function LandingPage() {
               <Stack
                 direction={{ xs: "column", sm: "row" }}
                 spacing={2}
-                sx={{ mt: 4 }}
-                alignItems={{ xs: "stretch", sm: "center" }}
-                justifyContent={{ xs: "center", md: "flex-start" }}
+                sx={{
+                  mt: 4,
+                  alignItems: { xs: "stretch", sm: "center" },
+                  justifyContent: { xs: "center", md: "flex-start" },
+                }}
               >
                 <Button
                   component={RouterLink}
                   to="/signup"
                   variant="contained"
                   size="large"
-                  endIcon={<ArrowForwardIcon />}
-                  sx={{
-                    px: 3,
-                    py: 1.4,
-                    borderRadius: 2,
-                    boxShadow: "0 12px 24px rgba(0, 102, 255, 0.28)",
-                  }}
+                  startIcon={<ArrowForwardIcon />}
                 >
-                  Get started — it’s free
+                  Get Started — It’s Free
                 </Button>
 
                 <Button
@@ -277,26 +499,19 @@ export default function LandingPage() {
                   to="/login"
                   variant="outlined"
                   size="large"
-                  sx={{
-                    ...outlinedPillButtonSx,
-                    px: 3,
-                    py: 1.4,
-                    borderRadius: 2,
-                    borderColor: colors.border,
-                    color: "text.primary",
-                    bgcolor: colors.surface,
-                  }}
                 >
-                  Login
+                  Log In
                 </Button>
               </Stack>
 
               <Stack
                 direction="row"
-                alignItems="center"
-                justifyContent={{ xs: "center", md: "flex-start" }}
                 spacing={2}
-                sx={{ mt: 4 }}
+                sx={{
+                  mt: 4,
+                  alignItems: "center",
+                  justifyContent: { xs: "center", md: "flex-start" },
+                }}
               >
                 <Stack direction="row">
                   <AvatarDot label="M" color={colors.primary} />
@@ -323,8 +538,8 @@ export default function LandingPage() {
         </Container>
 
         {/* Why HabiTUM */}
-        <Container id="features" maxWidth="lg" sx={{ pb: { xs: 7, md: 10 } }}>
-          <Box textAlign="center" sx={{ mb: 1 }}>
+        <Container id="features" maxWidth="lg" sx={{ ...sectionAnchorSx, pb: { xs: 7, md: 10 } }}>
+          <Box sx={{ mb: 1, textAlign: "center" }}>
             <Typography
               variant="overline"
               sx={{
@@ -339,7 +554,7 @@ export default function LandingPage() {
             <Typography
               variant="h2"
               sx={{
-                fontSize: { xs: 30, md: 38 },
+                typography: "landingSectionTitle",
                 letterSpacing: "-0.035em",
               }}
             >
@@ -357,12 +572,13 @@ export default function LandingPage() {
                 <Typography sx={{ color: colors.muted,
                       fontWeight: 900,
                       letterSpacing: "0.18em",
+                      mb: 1,
                  }} 
-                 fontWeight={900} mb={1}>
+                >
                   BUILD BETTER HABITS
                 </Typography>
 
-                <Typography color="text.secondary" lineHeight={1.7}>
+                <Typography sx={{ color: "text.secondary", lineHeight: 1.7 }}>
                   Define daily habits, track your streaks, and watch your consistency grow day
                   by day with clear progress indicators.
                 </Typography>
@@ -378,12 +594,13 @@ export default function LandingPage() {
                 <Typography sx={{ color: colors.muted,
                       fontWeight: 900,
                       letterSpacing: "0.18em",
+                      mb: 1,
                  }}
-                  fontWeight={900} mb={1}>
+                >
                   BREAK BAD HABITS
                 </Typography>
 
-                <Typography color="text.secondary" lineHeight={1.7}>
+                <Typography sx={{ color: "text.secondary", lineHeight: 1.7 }}>
                   HabiTUM’s break-habit mode helps you reduce and eliminate habits you want
                   to quit, with the same tracking power.
                 </Typography>
@@ -400,12 +617,13 @@ export default function LandingPage() {
                 sx={{ color: colors.muted,
                       fontWeight: 900,
                       letterSpacing: "0.18em",
+                      mb: 1,
                  }}
-                fontWeight={900} mb={1}>
+                >
                   STAY ACCOUNTABLE
                 </Typography>
 
-                <Typography color="text.secondary" lineHeight={1.7}>
+                <Typography sx={{ color: "text.secondary", lineHeight: 1.7 }}>
                   Join student communities, take on shared challenges, and keep each other
                   accountable — together you go further.
                 </Typography>
@@ -414,18 +632,18 @@ export default function LandingPage() {
           </Grid>
         </Container>
 
-        {/* Community Section */}
-        <Container id="challenges" maxWidth="lg" sx={{ pb: { xs: 7, md: 10 } }}>
+        {/* Communities Section */}
+        <Container id="communities" maxWidth="lg" sx={{ ...sectionAnchorSx, pb: { xs: 7, md: 10 } }}>
           <Box
             sx={{
               bgcolor: colors.primaryDark,
               color: "#fff",
-              borderRadius: 3,
+              borderRadius: radii.card,
               p: { xs: 3, sm: 4, md: 5 }
             }}
             
           >
-            <Grid container spacing={4} alignItems="center" justifyContent="center">
+            <Grid container spacing={4} sx={{ alignItems: "center", justifyContent: "center" }}>
               <Grid
                 size={{ xs: 12, md: 5 }}
                 sx={{
@@ -449,7 +667,7 @@ export default function LandingPage() {
                 <Typography
                   variant="h3"
                   sx={{
-                    fontSize: { xs: 30, md: 38 },
+                    typography: "landingSectionTitle",
                     lineHeight: 1.05,
                     mb: 3,
                   }}
@@ -471,7 +689,7 @@ export default function LandingPage() {
                 }}
               >
                 <Stack spacing={2} sx={{ width: "100%", maxWidth: 560 }}>
-                  <AppCard sx={{ boxShadow: "none", textAlign: "center" }}>
+                  <AppCard sx={{ textAlign: "center" }}>
                     <Typography sx={{ fontSize: 34, mb: 1 }}>👥</Typography>
 
                     <Typography
@@ -485,14 +703,14 @@ export default function LandingPage() {
                       Communities
                     </Typography>
 
-                    <Typography color="text.secondary" lineHeight={1.7}>
+                    <Typography sx={{ color: "text.secondary", lineHeight: 1.7 }}>
                       Find your people and build routines together — from fitness groups to
                       study accountability circles.
                     </Typography>
                   </AppCard>
 
-                  <AppCard sx={{ boxShadow: "none", textAlign: "center" }}>
-                    <Typography sx={{ fontSize: 34, mb: 1 }}>🏆</Typography>
+                  <AppCard sx={{ textAlign: "center" }}>
+                    <Typography sx={{ fontSize: 34, mb: 1 }}>🤝</Typography>
 
                     <Typography
                       variant="overline"
@@ -502,18 +720,284 @@ export default function LandingPage() {
                         letterSpacing: "0.18em",
                       }}
                     >
-                      Challenges
+                      Stay accountable
                     </Typography>
 
-                    <Typography color="text.secondary" lineHeight={1.7}>
-                      30-day sprints, reading goals, detox weeks — take on challenges and earn
-                      your place on the leaderboard.
+                    <Typography sx={{ color: "text.secondary", lineHeight: 1.7 }}>
+                      Share progress, cheer each other on, and keep your streaks alive with a
+                      group that has your back — public groups or invite-only circles.
                     </Typography>
                   </AppCard>
                 </Stack>
               </Grid>
             </Grid>
           </Box>
+        </Container>
+
+        {/* Challenges Section — trending challenges (live) + info card */}
+        <Container id="challenges" maxWidth="lg" sx={{ ...sectionAnchorSx, pb: { xs: 7, md: 10 } }}>
+          <Box sx={{ mb: 4, textAlign: "center" }}>
+            <Typography
+              variant="overline"
+              sx={{ color: colors.muted, fontWeight: 900, letterSpacing: "0.18em" }}
+            >
+              Compete & stay motivated
+            </Typography>
+            <Typography
+              variant="h2"
+              sx={{ typography: "landingSectionTitle", letterSpacing: "-0.035em" }}
+            >
+              Trending challenges
+            </Typography>
+            <Typography sx={{ color: "text.secondary", mt: 1, maxWidth: 520, mx: "auto" }}>
+              Jump into what the community is doing right now and climb the leaderboard.
+            </Typography>
+          </Box>
+
+          <Grid container spacing={4} sx={{ alignItems: "stretch" }}>
+            {/* Left — trending challenges, live from the backend */}
+            <Grid size={{ xs: 12, md: 7 }} sx={{ order: { xs: 2, md: 1 } }}>
+              <TrendingChallenges />
+            </Grid>
+
+            {/* Right — marketing card explaining challenges */}
+            <Grid size={{ xs: 12, md: 5 }} sx={{ display: "flex", order: { xs: 1, md: 2 } }}>
+              <ChallengesInfoCard />
+            </Grid>
+          </Grid>
+        </Container>
+
+        {/* Plans / Pricing Section */}
+        <Container id="plans" maxWidth="lg" sx={{ ...sectionAnchorSx, pb: { xs: 7, md: 10 } }}>
+          <Box sx={{ mb: 1, textAlign: "center" }}>
+            <Typography
+              variant="overline"
+              sx={{ color: colors.muted, fontWeight: 900, letterSpacing: "0.18em" }}
+            >
+              PRICING
+            </Typography>
+            <Typography
+              variant="h2"
+              sx={{ typography: "landingSectionTitle", letterSpacing: "-0.035em" }}
+            >
+              Choose your plan
+            </Typography>
+            <Typography
+              sx={{ color: "text.secondary", mt: 1, maxWidth: 480, mx: "auto" }}
+            >
+              Start for free. Upgrade when you're ready to go further.
+            </Typography>
+          </Box>
+
+          <Grid container spacing={3} sx={{ mt: 3 }} alignItems="stretch">
+            {/* ── Free ── */}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <AppCard
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+                contentSx={{ flex: 1, display: "flex", flexDirection: "column" }}
+              >
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
+                    <IconBadge bg={colors.softNeutral} color={colors.textSecondary} sx={{ mb: 0 }}>
+                      <TrackChangesIcon fontSize="small" />
+                    </IconBadge>
+                    <Typography variant="h6" sx={{ fontWeight: 800 }}>Free</Typography>
+                    <Typography
+                      sx={{
+                        ml: "auto",
+                        px: 1.4,
+                        py: 0.4,
+                        borderRadius: "999px",
+                        typography: "body2",
+                        fontWeight: 800,
+                        color: colors.textSecondary,
+                        bgcolor: colors.softNeutral,
+                      }}
+                    >
+                      0 €
+                    </Typography>
+                  </Box>
+
+                  <Typography sx={{ color: "text.secondary", mb: 2, minHeight: 48 }}>
+                    Everything you need to build lasting habits — no credit card required.
+                  </Typography>
+
+                  <Divider sx={{ mb: 2 }} />
+
+                  <Stack spacing={1}>
+                    {["Track unlimited personal habits", "Daily & weekly habit frequency", "Join communities & challenges"].map((f) => (
+                      <Box key={f} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                        <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: colors.green, mt: "3px", flexShrink: 0 }} />
+                        <Typography sx={{ color: "text.secondary", lineHeight: 1.5 }}>{f}</Typography>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+
+                <Box sx={{ mt: "auto", pt: 3 }}>
+                  <Button
+                    component={RouterLink}
+                    to="/signup"
+                    variant="outlined"
+                    fullWidth
+                    size="large"
+                    startIcon={<ArrowForwardIcon />}
+                    sx={{ height: 52, whiteSpace: "nowrap" }}
+                  >
+                    Start For Free
+                  </Button>
+                </Box>
+              </AppCard>
+            </Grid>
+
+            {/* ── Premium ── */}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <AppCard
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  border: `1px solid ${colors.primary}`,
+                  boxShadow: `inset 0 0 0 1px ${colors.primary}`,
+                  bgcolor: colors.softBlue,
+                }}
+                contentSx={{ flex: 1, display: "flex", flexDirection: "column" }}
+              >
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
+                    <IconBadge bg={colors.primary} color="#fff" sx={{ mb: 0 }}>
+                      <WorkspacePremiumOutlinedIcon fontSize="small" />
+                    </IconBadge>
+                    <Typography variant="h6" sx={{ fontWeight: 800 }}>Premium</Typography>
+                    <Typography
+                      sx={{
+                        ml: "auto",
+                        px: 1.4,
+                        py: 0.4,
+                        borderRadius: "999px",
+                        typography: "body2",
+                        fontWeight: 800,
+                        color: "#fff",
+                        bgcolor: colors.primary,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      3.99 € / month
+                    </Typography>
+                  </Box>
+
+                  <Typography sx={{ color: "text.secondary", mb: 2, minHeight: 48 }}>
+                    Unlock advanced analytics and deepen your habit insights.
+                  </Typography>
+
+                  <Divider sx={{ mb: 2 }} />
+
+                  <Stack spacing={1}>
+                    {[
+                      "Everything in Free",
+                      "Progress analytics dashboard",
+                      "Streak recovery stats & heatmaps",
+                      "Create your own private Communities & Challenges",
+                    ].map((f) => (
+                      <Box key={f} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                        <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: colors.primary, mt: "3px", flexShrink: 0 }} />
+                        <Typography sx={{ color: "text.secondary", lineHeight: 1.5 }}>{f}</Typography>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+
+                <Box sx={{ mt: "auto", pt: 3 }}>
+                  <Button
+                    component={RouterLink}
+                    to="/signup?plan=premium"
+                    variant="contained"
+                    fullWidth
+                    size="large"
+                    startIcon={<ArrowForwardIcon />}
+                    sx={{ height: 52, whiteSpace: "nowrap" }}
+                  >
+                    Go Premium
+                  </Button>
+                </Box>
+              </AppCard>
+            </Grid>
+
+            {/* ── Manager ── */}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <AppCard
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+                contentSx={{ flex: 1, display: "flex", flexDirection: "column" }}
+              >
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
+                    <IconBadge bg={colors.softOrange} color={colors.orange} sx={{ mb: 0 }}>
+                      <BusinessCenterOutlinedIcon fontSize="small" />
+                    </IconBadge>
+                    <Typography variant="h6" sx={{ fontWeight: 800 }}>Manager</Typography>
+                    <Typography
+                      sx={{
+                        ml: "auto",
+                        px: 1.4,
+                        py: 0.4,
+                        borderRadius: "999px",
+                        typography: "body2",
+                        fontWeight: 800,
+                        color: colors.orange,
+                        bgcolor: colors.softOrange,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      from 50 €
+                    </Typography>
+                  </Box>
+
+                  <Typography sx={{ color: "text.secondary", mb: 2, minHeight: 48 }}>
+                    Host branded communities and run challenges for your institution.
+                  </Typography>
+
+                  <Divider sx={{ mb: 2 }} />
+
+                  <Stack spacing={1}>
+                    {[
+                      "Everything in Premium",
+                      "Create branded public communities",
+                      "Launch challenges & leaderboards",
+                      "50 € base with 1 community already included",
+                      "Add up to 15 additional communities for 5€ each",
+                    ].map((f) => (
+                      <Box key={f} sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+                        <CheckCircleOutlinedIcon sx={{ fontSize: 18, color: colors.orange, mt: "3px", flexShrink: 0 }} />
+                        <Typography sx={{ color: "text.secondary", lineHeight: 1.5 }}>{f}</Typography>
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+
+                <Box sx={{ mt: "auto", pt: 3 }}>
+                  <Button
+                    component={RouterLink}
+                    to="/signup/manager"
+                    variant="outlined"
+                    fullWidth
+                    size="large"
+                    startIcon={<ArrowForwardIcon />}
+                    sx={{ height: 52, whiteSpace: "nowrap", borderColor: colors.orange, color: colors.orange, "&:hover": { borderColor: colors.orange, bgcolor: colors.softOrange } }}
+                  >
+                    Create Manager Account
+                  </Button>
+                </Box>
+              </AppCard>
+            </Grid>
+          </Grid>
         </Container>
 
         {/* Stats Section */}
@@ -523,7 +1007,7 @@ export default function LandingPage() {
             sx={{
               justifyContent: "space-around",
             }}>
-              <Grid item xs={12} sm={4}>
+              <Grid size={{ xs: 12, sm: 4 }}>
                 <MiniStat
                   value="820+"
                   label="Active users"
@@ -533,7 +1017,7 @@ export default function LandingPage() {
                 />
               </Grid>
 
-              <Grid item xs={12} sm={4}>
+              <Grid size={{ xs: 12, sm: 4 }}>
                 <MiniStat
                   value="12k+"
                   label="Habits tracked"
@@ -543,7 +1027,7 @@ export default function LandingPage() {
                 />
               </Grid>
 
-              <Grid item xs={12} sm={4}>
+              <Grid size={{ xs: 12, sm: 4 }}>
                 <MiniStat
                   value="48"
                   label="Active challenges"
@@ -567,18 +1051,19 @@ export default function LandingPage() {
             }}
           >
             <Typography
-            variant="overline"
-            sx={{
-              color: colors.muted,
-              fontWeight: 900,
-              letterSpacing: "0.18em",
-            }}
+              variant="overline"
+              sx={{
+                color: colors.muted,
+                fontWeight: 900,
+                letterSpacing: "0.18em",
+              }}
             >
               READY TO START?
             </Typography>
-            <Typography              variant="h2"
+            <Typography
+              variant="h2"
               sx={{
-                fontSize: { xs: 30, md: 38 },
+                typography: "landingSectionTitle",
                 letterSpacing: "-0.035em",
                 textAlign: "center",
               }}
@@ -589,7 +1074,7 @@ export default function LandingPage() {
                 sx={{
                   mt: 3,
                   maxWidth: 500,
-                  fontSize: { xs: 16, md: 18 },
+                  typography: "landingLead",
                   color: "text.secondary",
                   lineHeight: 1.7,
                 }}
@@ -599,24 +1084,20 @@ export default function LandingPage() {
               <Stack
                 direction={{ xs: "column", sm: "row" }}
                 spacing={2}
-                sx={{ mt: 4 }}
-                alignItems={{ xs: "stretch", sm: "center" }}
-                justifyContent="center"
+                sx={{
+                  mt: 4,
+                  alignItems: { xs: "stretch", sm: "center" },
+                  justifyContent: "center",
+                }}
               >
                 <Button
                   component={RouterLink}
                   to="/signup"
                   variant="contained"
                   size="large"
-                  endIcon={<ArrowForwardIcon />}
-                  sx={{
-                    px: 3,
-                    py: 1.4,
-                    borderRadius: 2,
-                    boxShadow: "0 12px 24px rgba(0, 102, 255, 0.28)",
-                  }}
+                  startIcon={<ArrowForwardIcon />}
                 >
-                  Get started — it’s free
+                  Get Started — It’s Free
                 </Button>
 
                 <Button
@@ -624,21 +1105,12 @@ export default function LandingPage() {
                   to="/login"
                   variant="outlined"
                   size="large"
-                  sx={{
-                    px: 3,
-                    py: 1.4,
-                    borderRadius: 2,
-                    borderColor: colors.border,
-                    color: "text.primary",
-                    bgcolor: colors.surface,
-                  }}
                 >
-                  Login
+                  Log In
                 </Button>
               </Stack>
           </Box>
         </Container>
-      </Box>
-    </ThemeProvider>
+    </Box>
   );
 }

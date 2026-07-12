@@ -12,12 +12,17 @@ import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Typography from '@mui/material/Typography'
 
-import { colors } from '../theme'
+import { colors } from '../styles/tokens'
+import { sectionTitleSx } from '../styles/recipes'
 
 // allowed categories — must match the enum in the backend habitModel.js
 const CATEGORIES = ['Nutrition', 'Fitness', 'Learning', 'Wellness', 'Productivity', 'Other']
 
-const HabitForm = ({ onClose }) => {
+// Without props the form creates a personal habit (POST /api/habits) and pushes
+// it into the HabitsContext. With a challengeId it creates a challenge habit
+// (POST /api/challenges/:id/habits) instead and reports it via onHabitCreated —
+// challenge habits belong to the challenge, not to the user's personal list.
+const HabitForm = ({ onClose, challengeId, onHabitCreated }) => {
   const { dispatch } = useHabitsContext()
   // get the current user from the auth context, so we can include their token in the API request to create a new habit
   const { user } = useAuthContext()
@@ -47,7 +52,8 @@ const HabitForm = ({ onClose }) => {
 
     const habit = {title, frequency, motivation, habitType, category}
 
-    const response = await fetch('/api/habits', {
+    const endpoint = challengeId ? `/api/challenges/${challengeId}/habits` : '/api/habits'
+    const response = await fetch(endpoint, {
       method: 'POST',
       body: JSON.stringify(habit),
       headers: {
@@ -68,7 +74,11 @@ const HabitForm = ({ onClose }) => {
       setFrequency('')
       setMotivation('')
       setCategory('')
-      dispatch({type: 'CREATE_HABIT', payload: json})
+      if (challengeId) {
+        onHabitCreated?.(json) // challenge habit — let the challenge page update its own list
+      } else {
+        dispatch({type: 'CREATE_HABIT', payload: json}) // personal habit — goes into the global habits context
+      }
       onClose?.() // call the onClose callback to close the form after successful habit creation
     }
 
@@ -80,40 +90,42 @@ return (
       <Stack spacing={2}>
 
         {/* STEP 2a toggle: habit type toggle */}
-        <Typography variant="overline" color="text.secondary">Habit type</Typography>
-        <ToggleButtonGroup
-          value={habitType}
-          exclusive
-          onChange={(e, val) => val && setHabitType(val)}
-          fullWidth
-        >
-          <ToggleButton
-            value="build"
-            sx={{
-              '&.Mui-selected': {
-                color: colors.primary,
-                backgroundColor: colors.softBlue,
-                borderColor: colors.primary,
-                '&:hover': { backgroundColor: colors.softBlue },
-              },
-            }}
+        <Box>
+          <Typography component="h2" sx={sectionTitleSx}>Habit type</Typography>
+          <ToggleButtonGroup
+            value={habitType}
+            exclusive
+            onChange={(e, val) => val && setHabitType(val)}
+            fullWidth
           >
-            ↑ Build habit
-          </ToggleButton>
-          <ToggleButton
-            value="break"
-            sx={{
-              '&.Mui-selected': {
-                color: colors.orange,
-                backgroundColor: colors.softOrange,
-                borderColor: colors.orange,
-                '&:hover': { backgroundColor: colors.softOrange },
-              },
-            }}
-          >
-            ↓ Break habit
-          </ToggleButton>
-        </ToggleButtonGroup>
+            <ToggleButton
+              value="build"
+              sx={{
+                '&.Mui-selected': {
+                  color: colors.primary,
+                  backgroundColor: colors.softBlue,
+                  borderColor: colors.primary,
+                  '&:hover': { backgroundColor: colors.softBlue },
+                },
+              }}
+            >
+              ↑ Build habit
+            </ToggleButton>
+            <ToggleButton
+              value="break"
+              sx={{
+                '&.Mui-selected': {
+                  color: colors.orange,
+                  backgroundColor: colors.softOrange,
+                  borderColor: colors.orange,
+                  '&:hover': { backgroundColor: colors.softOrange },
+                },
+              }}
+            >
+              ↓ Break habit
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
 
         {/* STEP 3a textfield: habit name */}
         <TextField
@@ -153,20 +165,29 @@ return (
         </TextField>
 
         {/* STEP 2b toggle: frequency toggle */}
-        <Typography variant="overline" color="text.secondary">Frequency</Typography>
-        <ToggleButtonGroup
-          value={frequency}
-          exclusive
-          onChange={(e, val) => val && setFrequency(val)}
-          fullWidth
-        >
-          <ToggleButton value="daily">Daily</ToggleButton>
-          <ToggleButton value="weekly">Weekly</ToggleButton>
-        </ToggleButtonGroup>
+        <Box>
+          <Typography component="h2" sx={sectionTitleSx}>Frequency</Typography>
+          <ToggleButtonGroup
+            value={frequency}
+            exclusive
+            onChange={(e, val) => val && setFrequency(val)}
+            fullWidth
+          >
+            <ToggleButton value="daily">Daily</ToggleButton>
+            <ToggleButton value="weekly">Weekly</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
 
         {/* create / cancel */}
         <Stack direction="row" spacing={1}>
-          <Button type="submit" variant="contained" fullWidth>Create Habit →</Button>
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            startIcon={<span className="material-symbols-outlined">arrow_forward</span>}
+          >
+            Create Habit
+          </Button>
           <Button variant="outlined" onClick={onClose}>Cancel</Button>
         </Stack>
 

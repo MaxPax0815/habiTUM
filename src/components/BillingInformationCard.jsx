@@ -10,7 +10,8 @@ import {
 import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined'
 
 import UpgradeButton from '../billing/UpgradeButton'
-import { colors, sectionTitleSx, cardSx } from '../theme'
+import { colors } from '../styles/tokens'
+import { sectionTitleSx } from '../styles/recipes'
 
 const formatBillingDate = (dateString) => {
   if (!dateString) return '—'
@@ -56,6 +57,8 @@ const billingValueSx = {
 
 const BillingInformationCard = ({ user, paymentMethod }) => {
   const isPremium = user?.subscription === 'premium'
+  const isManager = user?.subscription === 'manager'
+  const hasActiveBilling = isPremium || isManager
 
   // Later this should come from Stripe via /api/billing/info.
   // For now, we use paymentMethod if passed in, otherwise a test fallback.
@@ -68,14 +71,22 @@ const BillingInformationCard = ({ user, paymentMethod }) => {
   const formattedStatusLabel =
     statusLabel.charAt(0).toUpperCase() + statusLabel.slice(1)
 
-  if (!isPremium) {
+  // For managers: 50 € base + 5 € per additional community (beyond the 1 included)
+  const managerAdditional = Math.max(0, (user?.maxCommunities || 1) - 1)
+  const monthlyAmountDisplay = isPremium
+    ? '€3.99'
+    : isManager
+      ? `€${50 + managerAdditional * 5}.00`
+      : null
+
+  if (!hasActiveBilling) {
     return (
       <Box sx={{ mt: 4 }}>
         <Typography component="h2" sx={sectionTitleSx}>
           Billing Information
         </Typography>
 
-        <Card sx={cardSx}>
+        <Card>
           <CardContent
             sx={{
               px: {
@@ -125,14 +136,14 @@ const BillingInformationCard = ({ user, paymentMethod }) => {
               </Typography>
 
               <UpgradeButton
-                label="Upgrade to Premium"
+                label="Upgrade To Premium"
                 showIcon
                 size="large"
                 showError={false}
                 sx={{
                   px: 4,
                   py: 1.3,
-                  fontSize: '1rem',
+                  typography: 'body1',
                   fontWeight: 900,
                   minWidth: {
                     xs: '100%',
@@ -153,7 +164,7 @@ const BillingInformationCard = ({ user, paymentMethod }) => {
         Billing Information
       </Typography>
 
-      <Card sx={cardSx}>
+      <Card>
         <CardContent
           sx={{
             px: {
@@ -209,7 +220,7 @@ const BillingInformationCard = ({ user, paymentMethod }) => {
               </Typography>
 
               <Typography variant="body1" sx={billingValueSx}>
-                €3.99
+                {monthlyAmountDisplay}
               </Typography>
             </Box>
 
@@ -233,8 +244,7 @@ const BillingInformationCard = ({ user, paymentMethod }) => {
                 sx={{
                   height: 32,
                   px: 1.2,
-                  borderRadius: 999,
-                  fontSize: '0.875rem',
+                  typography: 'body2',
                   fontWeight: 900,
                   color: colors.green,
                   backgroundColor: colors.softGreen

@@ -3,16 +3,12 @@ import { useAuthContext } from "./useAuthContext"
 
 export const useLogout = () => {
     const { dispatch } = useAuthContext()
-    const { dispatch: habitsDispatch } = useHabitsContext()
+    const { dispatch: habitsDispatch } = useHabitsContext() // rename to avoid two dispatch variables
 
+    // Clear persisted auth, AuthContext, and cached habits so the next user sees no old data.
     const logout = () => {
-        // remove user from local storage
         localStorage.removeItem('user')
-
-        // update auth context to set user to null
         dispatch({ type: 'LOGOUT' })
-
-        // update habits context to clear habits
         habitsDispatch({ type: 'SET_HABITS', payload: null })
     }
 

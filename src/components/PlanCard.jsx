@@ -8,7 +8,7 @@ import {
 } from '@mui/material'
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined'
 
-import { colors } from '../theme'
+import { colors, radii } from '../styles/tokens'
 
 /**
  * Reusable plan card for the Profile page.
@@ -38,12 +38,10 @@ const PlanCard = ({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        borderRadius: 4,
         border: isCurrent
           ? `2px solid ${accentColor}`
           : `1px solid ${colors.border}`,
-        backgroundColor: isCurrent ? activeBackground : colors.surface,
-        boxShadow: 'none'
+        backgroundColor: isCurrent ? activeBackground : colors.surface
       }}
     >
       <CardContent
@@ -68,8 +66,8 @@ const PlanCard = ({
                 ml: 'auto',
                 px: 1.4,
                 py: 0.4,
-                borderRadius: 999,
-                fontSize: '0.875rem',
+                borderRadius: radii.pill,
+                typography: 'body2',
                 fontWeight: 800,
                 color: accentColor,
                 backgroundColor: priceBadgeBackground
