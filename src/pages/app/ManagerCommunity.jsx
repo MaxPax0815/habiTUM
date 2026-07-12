@@ -21,6 +21,7 @@ import {
 } from 'recharts'
 
 import BackButton from '../../components/BackButton'
+import AppCard from '../../components/AppCard'
 import PageHeader from '../../components/layout/PageHeader'
 import AppDialog from '../../components/AppDialog'
 import ChallengeForm from '../../challenges/ChallengeForm'
@@ -313,16 +314,19 @@ const ManagerCommunity = () => {
   return (
     <Box>
       <BackButton text="Back to Manager Dashboard" to="/manager" sx={{ mb: 0 }} />
-      <PageHeader
-        eyebrow="Community"
-        title={community.name}
-        description={community.description}
-        actions={(
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setFormOpen(true)}>
-            New Challenge
-          </Button>
-        )}
-      />
+      <AppCard sx={{ mb: 4 }}>
+        <PageHeader
+          eyebrow="Community"
+          title={community.name}
+          description={community.description}
+          actions={(
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => setFormOpen(true)}>
+              New Challenge
+            </Button>
+          )}
+          sx={{ mb: 0 }}
+        />
+      </AppCard>
 
       {/* Summary tile row — mirrors the mockup's "SUMMARY · <community>" */}
       <Box sx={{ mb: 4 }}>
