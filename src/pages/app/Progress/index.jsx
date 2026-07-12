@@ -53,17 +53,14 @@ import {
 // Shared primitives
 // ---------------------------------------------------------------------------
 
-/** Section heading shown above each dashboard area — uses the app-wide sectionTitleSx. */
+// Section heading shared by each dashboard area.
 const SectionTitle = ({ children }) => (
   <Typography component="h2" sx={sectionTitleSx}>
     {children}
   </Typography>
 )
 
-/**
- * Small (i) icon that shows a plain-language explanation when hovered.
- * Used on metrics that aren't self-evident from their label alone.
- */
+// Small info icon with a wider MUI tooltip for metric explanations.
 const InfoTooltip = ({ text }) => (
   <Tooltip 
     title={text} 
@@ -91,10 +88,7 @@ const InfoTooltip = ({ text }) => (
   </Tooltip>
 )
 
-/**
- * Metric card with a large colored value and an optional caption.
- * Pass infoText to show an (i) button explaining how the metric is calculated.
- */
+// Reusable metric card; infoText toggles the explanatory tooltip.
 const StatCard = ({ label, value, sublabel, color = colors.primary, infoText }) => (
   <Paper sx={{ p: 2.5, flex: 1, minWidth: 120, minHeight: 132 }}>
     {/* Label row - info icon appears only when infoText is supplied */}
@@ -107,11 +101,7 @@ const StatCard = ({ label, value, sublabel, color = colors.primary, infoText }) 
   </Paper>
 )
 
-/**
- * Shared cell styling for both the daily Heatmap and the weekly WeeklyHeatmap,
- * so the two calendar variants read as one visual system.
- * For break habits, "checked" means a clean/slip day rather than done/missed.
- */
+// Shared daily/weekly heatmap cell colors; break habits render checked as green clean periods.
 const heatmapCellSx = (checked, isBreak) => ({
   aspectRatio: "1", borderRadius: 1,
   bgcolor: checked ? (isBreak ? colors.green : colors.primary) : "#e2e8f0",
@@ -125,18 +115,7 @@ const heatmapCellSx = (checked, isBreak) => ({
 // Hero Habit Pulse
 // ---------------------------------------------------------------------------
 
-/**
- * Circular gauge at the top of the page.
- *
- * The Habit Pulse score (0-100) is a combined measure of today's completions,
- * active streaks, and long-term consistency across all your habits.
- *   >= 70 → green ("Strong")
- *   >= 50 → orange ("Building")
- *   < 50  → red ("Needs attention")
- *
- * The insight line warns about at-risk streaks first; otherwise it reports
- * how many habits you've completed today.
- */
+// Top gauge: Habit Pulse plus at-risk/completed summary for all habits.
 const HeroHabitScore = ({ score, habits, now }) => {
   const status       = getReadinessStatus(score)
   const atRiskCount  = habits.filter(h => h.streak > 0 && !isCheckedInToday(h, now)).length
@@ -153,7 +132,7 @@ const HeroHabitScore = ({ score, habits, now }) => {
       ? "All habits done for today. Excellent execution."
       : `${checkedCount} of ${habits.length} habits completed today.`
 
-  // Plain-language description shown in the (i) tooltip
+  // Tooltip explains the Pulse formula in user-facing language.
   const pulseInfo =
     "Habit Pulse (0 to 100) combines today's completions, your active streaks, " +
     "and your long-term consistency across all habits. 100 = perfect on everything."
@@ -218,11 +197,7 @@ const HeroHabitScore = ({ score, habits, now }) => {
 // Signal cards (all-habits overview)
 // ---------------------------------------------------------------------------
 
-/**
- * Summary card for a single portfolio-level metric.
- * tone controls the value colour: "good" green, "warning" orange, "bad" red.
- * Pass infoText to show an (i) button explaining the calculation.
- */
+// Portfolio metric card; tone chooses the value color and infoText adds the tooltip.
 const SignalCard = ({ title, value, description, tone = "neutral", infoText }) => {
   const toneColor =
     tone === "good"    ? colors.green :
@@ -251,14 +226,7 @@ const SignalCard = ({ title, value, description, tone = "neutral", infoText }) =
 // Habit selector row
 // ---------------------------------------------------------------------------
 
-/**
- * Row of clickable habit cards. Selecting one switches the per-habit analytics
- * section below. Each card shows:
- *   - Habit name
- *   - Today's status icon (✓ done, ⚠ at risk)
- *   - Current streak (d = days, w = weeks)
- *   - All-time completion bar (green ≥ 70%, orange ≥ 40%, red below)
- */
+// Clickable habit cards switch the drilldown and show status, streak, and completion rate.
 const HabitHealthRow = ({ habits, selectedId, onSelect, now }) => (
   <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
     {habits.map(habit => {
@@ -328,7 +296,7 @@ const HabitHealthRow = ({ habits, selectedId, onSelect, now }) => (
 // Coach Insight card
 // ---------------------------------------------------------------------------
 
-/** Shows the highest-priority personalized tip for the selected habit. */
+// Shows the highest-priority personalized tip for the selected habit.
 const CoachInsightCard = ({ insight }) => (
   <Paper
     sx={{ p: 3, mb: 3, bgcolor: colors.softBlue, borderColor: `${colors.primary}33` }}
@@ -359,17 +327,7 @@ const CoachInsightCard = ({ insight }) => (
 // Weekly Performance line chart (all daily habits)
 // ---------------------------------------------------------------------------
 
-/**
- * Mon–Sun line chart comparing three series for all daily habits:
- *   • This week   – completion % for each day so far this week
- *   • Last week   – same days last week (reference line)
- *   • Baseline    – your all-time average for each weekday
- *
- * Days still in the future this week are shown as gaps (null values).
- *
- * Y-axis: completion rate in % (0–100, auto-scaled to the visible range).
- * X-axis: weekday abbreviations (Mon–Sun) — no axis label needed.
- */
+// Daily-habit line chart: this week, last week, and all-time weekday baseline.
 const WeeklyLineChart = ({ data }) => {
   const hasFutureDays = data.some(p => p.thisWeek === null)
   const allValues = data.flatMap(p =>
@@ -447,16 +405,7 @@ const WeeklyLineChart = ({ data }) => {
 // Calendar heatmap
 // ---------------------------------------------------------------------------
 
-/**
- * GitHub-style grid showing check-in history for the selected habit.
- * Layout: 7 columns (Mon–Sun), one row per week, newest day bottom-right.
- * Month names appear above the column where each new month starts.
- *
- * For regular habits: coloured cell = checked in, grey = missed.
- * For break habits:   green = clean day (no slip), grey = slip day.
- *
- * Caption shows total period, completions, and consistency percentage.
- */
+// Daily heatmap grid: Mon-Sun columns, month labels, and break-habit color semantics.
 const Heatmap = ({ cells, habitType, fromCreation, startDate, completedCount, totalCount }) => {
   if (!cells.length) return null
 
@@ -540,18 +489,7 @@ const Heatmap = ({ cells, habitType, fromCreation, startDate, completedCount, to
 // Fixed column count for the weekly heatmap grid (see WeeklyHeatmap below).
 const WEEKLY_HEATMAP_COLS = 6
 
-/**
- * Week-grain counterpart to Heatmap, used for weekly habits.
- * Each cell is one Monday-anchored week rather than one day, so — unlike the
- * daily grid — cells aren't aligned to weekday columns; they just wrap left to
- * right, oldest to newest, matching the daily heatmap's "newest bottom-right"
- * reading order. Shares heatmapCellSx so both calendars look like one system.
- *
- * For regular habits: coloured cell = checked in that week, grey = missed.
- * For break habits:   green = clean week (no slip), grey = slip week.
- *
- * Caption shows total window, completions, and consistency percentage.
- */
+// Weekly heatmap: one Monday-anchored week per cell, using the same colors as Heatmap.
 const WeeklyHeatmap = ({ cells, habitType, fromCreation, startDate, completedCount, totalCount }) => {
   if (!cells.length) return null
 
@@ -579,13 +517,7 @@ const WeeklyHeatmap = ({ cells, habitType, fromCreation, startDate, completedCou
         } · {completedCount}/{totalCount} completed · {consistency}% consistency
       </Typography>
 
-      {/* Week cells wrap left-to-right, oldest to newest; no weekday alignment needed,
-          so a fixed column count (rather than the daily grid's weekday-driven 7) is
-          used instead. Fixed columns + gap:0.5 mirrors the daily Heatmap exactly:
-          every cell fills its own track fully, so gaps stay tight and uniform
-          instead of the cells floating inside oversized auto-fit tracks. 6 columns
-          keeps cells noticeably larger than the daily grid's day-cells (there are
-          far fewer of them) while still wrapping cleanly for longer habits. */}
+      {/* Fixed columns keep weekly cells larger while matching the daily heatmap spacing. */}
       <Box sx={{
         display: "grid",
         gridTemplateColumns: `repeat(${WEEKLY_HEATMAP_COLS}, 1fr)`,
@@ -623,16 +555,7 @@ const WeeklyHeatmap = ({ cells, habitType, fromCreation, startDate, completedCou
 // Weekday bar chart
 // ---------------------------------------------------------------------------
 
-/**
- * Horizontal bar per weekday.
- *
- * variant="rate" (daily habits): historical completion rate against what was
- * expected that weekday. Color: green ≥ 70%, orange ≥ 40%, red below 40%.
- *
- * variant="distribution" (weekly habits): share of check-ins that landed on
- * each weekday — there's no "expected" weekday for a once-a-week habit, so
- * bars use one neutral accent color rather than a pass/fail threshold.
- */
+// Weekday bars: daily completion rates or weekly checkin-day distribution.
 const WeekdayBars = ({ data, variant = "rate", caption = "Completion rate (%) per weekday" }) => (
   <Stack spacing={1}>
     {/* Y-axis label above the bars */}
@@ -668,7 +591,7 @@ const WeekdayBars = ({ data, variant = "rate", caption = "Completion rate (%) pe
 // Paywall
 // ---------------------------------------------------------------------------
 
-/** Shown instead of the dashboard when the user does not have Premium. */
+// Shown instead of the dashboard when the user does not have Premium.
 const PaywallBanner = () => (
   <Box sx={{ textAlign: "center", py: 10, px: 4 }}>
     <Box sx={{ mb: 2, color: colors.primary }}>
@@ -709,18 +632,7 @@ const ProgressHeader = () => (
 // Main Progress page
 // ---------------------------------------------------------------------------
 
-/**
- * Progress dashboard — fetches habits on mount, then renders:
- *
- *   1. Habit Pulse gauge      — combined readiness score for today (0-100)
- *   2. Signal cards           — Consistency, Momentum, Recovery across all habits
- *   3. Weekly Performance     — Mon-Sun line chart for all daily habits
- *   4. Habit selector row     — click to see analytics for a specific habit
- *   5. Coach Insight          — highest-priority personalized tip
- *   6. Streak banner          — at-risk warning or daily completion confirmation
- *   7. Summary stat cards     — streak, best, rate, month, week for selected habit
- *   8. Calendar + By Weekday  — heatmap (last 45 days) and per-weekday bar chart
- */
+// Premium Progress dashboard: fetch habits once, compute portfolio + selected-habit analytics.
 const Progress = () => {
   const { user }             = useAuthContext()
   const { habits, dispatch } = useHabitsContext()
@@ -742,14 +654,8 @@ const Progress = () => {
     if (habits?.length && !selectedId) setSelectedId(habits[0]._id)
   }, [habits, selectedId])
 
-  // Every hook below must run unconditionally on every render, even while habits
-  // is still null/empty or the user isn't premium — the early returns further
-  // down only gate which JSX renders, never the hooks themselves. Bailing out
-  // via `if (...) return` *before* declaring a hook is what used to crash this
-  // page: the first render (habits === null) called fewer hooks than the next
-  // render (habits loaded), which React reports as "Rendered more hooks than
-  // during the previous render." Each compute* call below is fed `habits || []`
-  // so it degrades to its own empty-state default instead of throwing.
+  // Keep useMemo hooks before render guards; React requires identical hook order each render.
+  // Empty arrays let analytics return safe defaults while habits are loading.
 
   // Frozen once on mount so every calculation shares the same "now"
   const now = useMemo(() => new Date(), [])
@@ -770,9 +676,7 @@ const Progress = () => {
   // ---- Per-habit analytics — only recomputes when the selection changes ----
   const habitAnalytics = useMemo(() => {
     const habit = selectedHabit
-    // No habit selected yet (habits still loading or empty) — nothing to
-    // analyze. The early returns below render a loading/empty state instead
-    // of the JSX that reads this, so these defaults are never actually shown.
+    // Loading/empty fallback: early JSX returns below prevent these defaults from rendering.
     if (!habit) {
       return {
         expected: 0, completed: 0, completionRate: 0, bestStreak: 0,
@@ -791,20 +695,16 @@ const Progress = () => {
     const completed = uniqueCheckinDays(checkins).length
     const completionRate = Math.min(100, Math.round(completed / expected * 100))
 
-    // Use the server-computed bestStreak when available (it uses exact period logic)
+    // Prefer server bestStreak because it uses exact backend period-key logic.
     const bestStreak    = habit.bestStreak ?? computeBestStreak(checkins, habit.frequency)
     const isWeeklyHabit = habit.frequency === "weekly"
 
-    // Weekly habits get a day-of-week *distribution* (which day you tend to check
-    // in on) instead of a per-weekday completion *rate* — there's no "expected"
-    // weekday for a once-a-week habit. Both share the same { day, rate } shape,
-    // so the same WeekdayBars component renders either one.
+    // Weekly habits show checkin-day distribution; daily habits show expected-day rates.
     const weekdayData = isWeeklyHabit
       ? computeCheckinDayDistribution(checkins)
       : computeWeekdayRates(checkins, created, now)
 
-    // Calendar: one cell per week for weekly habits, one cell per day otherwise.
-    // maxDays=45 / maxWeeks=24 both keep the calendar compact next to the second box.
+    // Calendar uses weekly or daily cells; both windows stay compact beside WeekdayBars.
     const heatmap = isWeeklyHabit
       ? computeWeeklyHeatmap(checkins, created, now, 24)
       : computeHeatmap(checkins, created, now, 45)
@@ -815,13 +715,12 @@ const Progress = () => {
       habit, checkins, completionRate, weekdayData, recovery, bestStreak, now
     )
 
-    // Most common check-in weekday — weekly habits only, needs a few data points
-    // to be meaningful (otherwise a single check-in reads as a misleading "100%").
+    // Weekly preferred day needs at least 3 checkins to avoid misleading 100% labels.
     const mostFrequentDay = isWeeklyHabit && checkins.length >= 3
       ? [...weekdayData].sort((a, b) => b.rate - a.rate)[0]
       : null
 
-    // This-week rate — daily habits only; weekly habits show "Preferred day" instead
+    // Daily-only this-week rate; weekly habits show Preferred day instead.
     let thisWeekRate = null, thisWeekSub = null
     if (!isWeeklyHabit) {
       const todayN  = new Date(now); todayN.setHours(0, 0, 0, 0)
@@ -1037,9 +936,7 @@ const Progress = () => {
               "The 'Best' label shows your highest monthly rate across all previous months."
             }
           />
-          {/* This week (daily) — completion rate from Monday through today.
-              Preferred day (weekly) — the weekday you most often check in on,
-              paired with the "By Check-in Day" distribution box below. */}
+          {/* Daily shows this-week rate; weekly shows the most common checkin weekday. */}
           {isWeekly ? (
             <StatCard
               label="Preferred day"

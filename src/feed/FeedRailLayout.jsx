@@ -1,15 +1,6 @@
 import { Box } from '@mui/material'
 
-// Puts the live activity feed in a sticky right rail on desktop — always in
-// view next to the page content, which makes live arrivals far more
-// noticeable than a section at the bottom. On mobile the feed stacks below
-// the content instead.
-//
-// All layout logic lives HERE on purpose: the pages that use it
-// (CommunityDashboard, ChallengePage) are under active rework by teammates,
-// so they only wrap their existing JSX in this component and pass the feed
-// as a prop — the smallest possible merge-conflict surface. When `feed` is
-// falsy (e.g. non-members), the children render exactly as before.
+// Sticky desktop feed rail; mobile stacks below, and falsy feed leaves children unchanged.
 const FeedRailLayout = ({ feed, children }) => {
   if (!feed) return children
 

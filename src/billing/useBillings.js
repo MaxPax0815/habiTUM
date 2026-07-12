@@ -6,6 +6,7 @@ export const useBilling = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
 
+  // Re-fetch /me after Stripe changes so AuthContext has current subscription/limits.
   const refreshCurrentUser = async () => {
     const response = await fetch('/api/user/me', {
       headers: {
@@ -112,9 +113,7 @@ export const useBilling = () => {
     }
   }
 
-  // Create the initial Stripe Checkout Session for a pending manager account.
-  // numAdditional = additional communities beyond the 1 included in base (0–15).
-  // Returns the Stripe checkout URL so the caller can redirect.
+  // Pending-manager checkout: additional communities beyond base; returns Stripe URL.
   const createManagerCheckoutSession = async (numAdditional) => {
     setIsLoading(true)
     setError(null)
@@ -142,8 +141,7 @@ export const useBilling = () => {
     }
   }
 
-  // Add or remove a community slot on the manager subscription.
-  // delta = +1 to add, -1 to remove. Returns the updated { maxCommunities, activeCommunityCount }.
+  // Manager slot update: delta +1/-1, then merge returned limits into AuthContext.
   const updateManagerCommunities = async (delta) => {
     setIsLoading(true)
     setError(null)
@@ -164,7 +162,6 @@ export const useBilling = () => {
         throw new Error(data.error || 'Could not update community slots.')
       }
 
-      // Merge updated fields (maxCommunities, activeCommunityCount) into context
       dispatch({ type: 'UPDATE_USER', payload: data })
       return data
     } catch (err) {

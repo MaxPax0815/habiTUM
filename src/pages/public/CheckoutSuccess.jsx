@@ -7,9 +7,7 @@ import ErrorOutlinedIcon from '@mui/icons-material/ErrorOutlined'
 import { useAuthContext } from '../../auth/useAuthContext'
 import { colors } from '../../styles/tokens'
 
-// Stripe redirects here after a successful checkout.
-// We verify the session with the backend (not just trust the redirect URL),
-// update the user context, then navigate to the appropriate dashboard.
+// Stripe success return: verify session server-side, update AuthContext, then redirect by account type.
 export default function CheckoutSuccess() {
     const { user, dispatch } = useAuthContext()
     const navigate = useNavigate()
@@ -32,11 +30,12 @@ export default function CheckoutSuccess() {
         }
 
         if (!user?.token) {
-            // User lost their session — send them to login
+            // Session missing after Stripe return; user must log in before activation can finish.
             navigate('/login', { replace: true })
             return
         }
 
+        // Confirms Stripe session with backend; URL alone is not trusted as proof of payment.
         const verifyAndActivate = async () => {
             try {
                 const response = await fetch('/api/billing/confirm-checkout-session', {
@@ -54,11 +53,10 @@ export default function CheckoutSuccess() {
                     throw new Error(data.error || 'Could not confirm payment.')
                 }
 
-                // Merge updated subscription/accountType into the stored user
                 dispatch({ type: 'UPDATE_USER', payload: data })
                 setStatus('success')
 
-                // Short pause so the user can read the success message before redirecting
+                // Brief success flash before routing to the right post-payment home.
                 setTimeout(() => {
                     if (data.accountType === 'manager') {
                         navigate('/manager', { replace: true })

@@ -19,7 +19,7 @@ import { useBilling } from '../../billing/useBillings'
 import AppCard from '../../components/AppCard'
 import { colors, radii } from '../../styles/tokens'
 
-// Must match Backend/config.js values
+// Pricing mirror for the pending-manager checkout UI; backend config is final source.
 const MANAGER_BASE_EUR = 50
 const COMMUNITY_PRICE_EUR = 5
 const BASE_COMMUNITIES = 1
@@ -42,13 +42,13 @@ export default function ConfigureManagerPlan() {
     const totalCommunities = BASE_COMMUNITIES + numAdditional
     const totalEur = MANAGER_BASE_EUR + numAdditional * COMMUNITY_PRICE_EUR
 
+    // Starts a fresh Stripe Checkout for the chosen community count.
     const handleSubmit = async () => {
         try {
-            // Always requests a fresh Stripe Checkout Session — old sessions are never reused
             const url = await createManagerCheckoutSession(numAdditional)
             window.location.href = url
         } catch {
-            // error is shown via useBilling state
+            // useBilling exposes the error for rendering below.
         }
     }
 
@@ -173,8 +173,7 @@ export default function ConfigureManagerPlan() {
                     </Typography>
                 )}
 
-                {/* Pending managers cannot reach the app sidebar — the only exit
-                    offered here is aborting the signup (deletes the pending account) */}
+                {/* Pending managers cannot enter the app; cancel deletes the pending account. */}
                 <Typography variant="body2" sx={{ textAlign: 'center', color: colors.textSecondary, fontSize: 13 }}>
                     Changed your mind?{' '}
                     <Link

@@ -3,8 +3,7 @@ import { Box, Button, Container, Stack, Typography } from '@mui/material'
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined'
 import { colors } from '../../styles/tokens'
 
-// Stripe redirects here when the user cancels the checkout.
-// No charges were made. We offer them a way back.
+// Stripe cancel return: no charge occurred; user can restart from plans/profile.
 export default function CheckoutCancel() {
     const navigate = useNavigate()
 

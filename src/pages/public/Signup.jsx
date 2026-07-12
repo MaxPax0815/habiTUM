@@ -49,7 +49,7 @@ const FieldLabel = ({ children }) => (
 
 const Signup = () => {
     const [searchParams] = useSearchParams()
-    // Read the plan from the URL (?plan=premium). Defaults to 'free' for the standard signup flow.
+    // Read ?plan=premium from the URL; every other value stays on free signup.
     const plan = searchParams.get('plan') === 'premium' ? 'premium' : 'free'
     const isPremiumSignup = plan === 'premium'
 
@@ -65,14 +65,13 @@ const Signup = () => {
     const { signup, error, isLoading } = useSignup()
     const navigate = useNavigate()
 
+    // Creates the account; premium gets a Stripe URL, free enters /today after success.
     const handleSubmit = async (e) => {
         e.preventDefault()
         const result = await signup(firstName, lastName, username, email, password, plan)
         if (result?.checkoutUrl) {
-            // Premium signup: backend created a Stripe Checkout Session — redirect there now
             window.location.href = result.checkoutUrl
         } else if (result) {
-            // Free signup: account is ready, go to the dashboard
             setSuccess(true)
             setTimeout(() => navigate('/today'), 1000)
         }

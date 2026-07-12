@@ -14,6 +14,7 @@ createRoot(document.getElementById('root')).render(
     <AuthContextProvider>
       <ThemeProvider theme={theme}>
         <CssBaseline />
+        {/* Habits sits inside Auth so logout can clear both user and cached habits. */}
         <HabitsContextProvider>
           <App />
         </HabitsContextProvider>

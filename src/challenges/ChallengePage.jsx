@@ -291,8 +291,7 @@ const ChallengePage = () => {
   }
 
   return (
-    // FeedRailLayout: challenge-scoped feed as sticky right rail on desktop,
-    // stacked below on mobile; layout logic lives in the feed module.
+    // key={challengeId} remounts the challenge-scoped feed so cursor/list state resets.
     <FeedRailLayout
       feed={isCommunityMember && challenge.community?._id && (
         <ActivityFeed key={challengeId} communityId={challenge.community._id} challengeId={challengeId} title="Challenge activity" />

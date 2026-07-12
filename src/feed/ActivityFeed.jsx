@@ -6,8 +6,11 @@ import { useCommunityFeed } from './useCommunityFeed'
 import { formatActivityMessage } from './formatActivityMessage'
 
 const avatarColors = [colors.primary, '#A21CAF', '#B91C1C', colors.secondary, colors.orange]
+
+// Stable avatar color from the actor name's first character.
 const colorFor = (name) => avatarColors[(name?.charCodeAt(0) || 0) % avatarColors.length]
 
+// Global keyframes used by live-item flash and the status chip pulse.
 const feedAnimations = (
   <GlobalStyles
     styles={{
@@ -24,6 +27,7 @@ const feedAnimations = (
   />
 )
 
+// Poll-loop status indicator: live, connecting, or retrying.
 const statusChip = (status) => {
   if (status === 'live') {
     return (
@@ -62,7 +66,7 @@ const ActivityItem = ({ activity }) => {
         px: 2,
         py: 1.5,
         borderRadius: 2,
-        // Items that arrived during polling flash briefly so new activity is visible.
+        // isLive comes from mergeUpdates and flashes newly polled items once.
         ...(activity.isLive && { animation: 'habitumFeedFlash 2.5s ease-out' }),
       }}
     >
@@ -98,22 +102,15 @@ const ActivityItem = ({ activity }) => {
   )
 }
 
-// The community's activity feed: challenge-habit checkins only, refreshed by
-// lightweight polling. Fully self-contained (data fetching, spacing, loading/error/empty
-// states) so consumers integrate it with a single JSX line — see
-// CommunityDashboard, where it renders as a full-width section below the
-// challenges. Keep it that way: the dashboard layout is under active rework
-// and a one-line integration keeps merge conflicts trivial.
+// Self-contained feed panel: hook state, status chip, loading/error/empty/list, and load more.
 const ActivityFeed = ({ communityId, challengeId = null, title = 'Activity', enabled = true }) => {
   const { activities, hasMore, loading, error, status, loadMore } = useCommunityFeed(communityId, { challengeId, enabled })
 
   return (
-    // mt: spacing when stacked below content on mobile; in the desktop right
-    // rail (FeedRailLayout) the section is top-aligned and gets a tall,
-    // viewport-bound scroll area instead.
+    // Mobile stacks with spacing; desktop rail top-aligns and scrolls within the viewport.
     <PageSection title={title} actions={statusChip(status)} sx={{ mt: { xs: 4, lg: 0 }, mb: 0 }}>
       {feedAnimations}
-      {/* aria-live: screen readers announce items arriving during polling */}
+      {/* aria-live lets screen readers announce polled-in items politely. */}
       <Paper
         variant="outlined"
         aria-live="polite"

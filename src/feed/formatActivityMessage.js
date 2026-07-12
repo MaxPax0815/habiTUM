@@ -1,9 +1,4 @@
-// Pure formatter: turns an Activity document into renderable text segments.
-// Everything comes from activity.meta — the snapshot taken at write time —
-// so this never needs to fetch users or habits.
-//
-// Returned shape: [{ text, bold?, italic? }, ...] so the component can render
-// the actor bold and the habit title italic without dangerouslySetInnerHTML.
+// Pure meta formatter: returns styled text segments without fetching or raw HTML.
 
 const streakUnit = (frequency) => (frequency === 'weekly' ? 'week' : 'day')
 
@@ -11,9 +6,7 @@ export const formatActivityMessage = (activity) => {
   const { actorName = 'Someone', habitTitle = 'a habit', streak = 0, frequency } = activity.meta || {}
   const unit = streakUnit(frequency)
 
-  // Legacy only: separate milestone items are no longer created (the checkin
-  // message itself turns celebratory instead), but documents from older
-  // seeds/databases may still carry this type — keep rendering them.
+  // Legacy milestone docs still render, though new milestones are checkin variants.
   if (activity.type === 'streak_milestone') {
     return [
       { text: '🔥 ' },
@@ -23,8 +16,7 @@ export const formatActivityMessage = (activity) => {
     ]
   }
 
-  // Milestone-as-message-variant: every 7th streak step gets a fire prefix
-  // instead of being an extra feed item — one post per checkin, always.
+  // Every 7th streak step gets a celebratory variant, not a second feed post.
   const isMilestone = streak > 0 && streak % 7 === 0
 
   const segments = [
@@ -34,7 +26,7 @@ export const formatActivityMessage = (activity) => {
     { text: habitTitle, italic: true },
   ]
 
-  // "for 1 day in a row" reads like a bug, so the suffix starts at streak 2.
+  // Hide "1 day in a row"; the suffix starts once streak > 1.
   if (streak > 1) {
     segments.push({ text: ` for ${streak} ${unit}s in a row`, bold: isMilestone })
   }

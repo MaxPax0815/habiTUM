@@ -10,6 +10,7 @@ import { colors } from '../styles/tokens'
 import { useAuthContext } from '../auth/useAuthContext'
 
 const AppLayout = () => {
+  // AppLayout is only rendered behind App.jsx's auth wall, so user should exist here.
   const { user } = useAuthContext()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -40,6 +41,7 @@ const AppLayout = () => {
         }}
       >
         <PageContainer>
+          {/* React Router renders the matched protected child route here. */}
           <Outlet />
         </PageContainer>
       </Box>

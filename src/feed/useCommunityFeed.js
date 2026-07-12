@@ -1,15 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuthContext } from '../auth/useAuthContext'
 
-// Near-live community activity feed:
-//   1. initial page via GET /api/communities/:id/feed
-//   2. lightweight polling every 5s via /feed/updates?since=<feedCursor>
-// Polling is intentionally simpler than SSE for the free MongoDB tier: no
-// stream tickets, no persistent EventSource, and no MongoDB change stream.
+// Active feed client: initial page, then 5s cursor polling instead of legacy SSE.
 const POLL_INTERVAL_MS = 5000
 
-// Options: { challengeId } narrows the feed to one challenge (ChallengePage
-// mini-feed). Both the initial fetch and polling update fetch filter server-side.
+// challengeId narrows both initial and update requests to one challenge feed.
 export const useCommunityFeed = (communityId, { challengeId = null, enabled = true } = {}) => {
   const { user } = useAuthContext()
   const token = user?.token
@@ -21,11 +16,10 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
   // 'connecting' | 'live' | 'reconnecting'
   const [status, setStatus] = useState('connecting')
 
+  // Cursor changes every poll but should not rerender; refs are mutable without state updates.
   const lastEventIdRef = useRef(null)
 
-  // NOTE: this hook holds per-community state and does not reset it when
-  // communityId changes — the consumer remounts it instead (ActivityFeed is
-  // rendered with key={communityId}), which resets state and refs for free.
+  // Per-community reset is handled by ActivityFeed key={communityId}, not internal state clearing.
   useEffect(() => {
     if (!communityId || !token || !enabled) return
 
@@ -36,10 +30,12 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
 
     const authHeader = { Authorization: `Bearer ${token}` }
 
+    // Store the newest server cursor for the next /updates request.
     const rememberCursor = (cursor) => {
       if (cursor) lastEventIdRef.current = cursor
     }
 
+    // Conditional challenge query param keeps one hook working for full and mini feeds.
     const feedParams = (extraParams = {}) => {
       const params = new URLSearchParams(extraParams)
       if (challengeId) params.set('challenge', challengeId)
@@ -47,6 +43,7 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
       return query ? `?${query}` : ''
     }
 
+    // AbortController lets cleanup cancel in-flight fetches when the feed unmounts.
     const requestJson = async (url, fallbackMessage) => {
       const controller = new AbortController()
       activeController = controller
@@ -56,6 +53,7 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
       return json
     }
 
+    // Apply server deltas: revoked removes, new prepends, same _id replaces.
     const mergeUpdates = (updates) => {
       if (!updates?.length) return
 
@@ -64,10 +62,12 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
 
         for (const activity of updates) {
           if (activity.revoked) {
+            // Undo arrives as a revoked row; remove the existing card locally.
             next = next.filter((existing) => existing._id !== activity._id)
             continue
           }
 
+          // isLive drives the one-time flash animation in ActivityItem.
           const liveActivity = { ...activity, isLive: true }
           const existingIndex = next.findIndex((existing) => existing._id === activity._id)
           if (existingIndex === -1) {
@@ -83,6 +83,7 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
       })
     }
 
+    // setTimeout loop avoids overlapping intervals and can be skipped/cleared safely.
     const schedulePoll = () => {
       clearTimeout(pollTimer)
       if (!stopped) {
@@ -93,10 +94,12 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
     async function pollUpdates() {
       if (stopped) return
       if (document.hidden) {
+        // Hidden tabs skip work; visibilitychange triggers immediate catch-up on return.
         schedulePoll()
         return
       }
       if (inFlight || !lastEventIdRef.current) {
+        // No overlapping polls and no updates request before the first cursor exists.
         schedulePoll()
         return
       }
@@ -115,10 +118,12 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
         if (err.name !== 'AbortError') setStatus('reconnecting')
       } finally {
         inFlight = false
+        // Keep polling after success or transient failure.
         schedulePoll()
       }
     }
 
+    // First page seeds the list, hasMore flag, and cursor before polling starts.
     const loadInitial = async () => {
       inFlight = true
       try {
@@ -144,6 +149,7 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
       }
     }
 
+    // Returning to a visible tab should refresh immediately instead of waiting 5s.
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         clearTimeout(pollTimer)
@@ -155,6 +161,7 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
     loadInitial()
 
     return () => {
+      // Stop timers/fetches and prevent async callbacks from updating an unmounted feed.
       stopped = true
       clearTimeout(pollTimer)
       activeController?.abort()
@@ -162,6 +169,7 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
     }
   }, [communityId, challengeId, token, enabled])
 
+  // Load older non-revoked rows using the oldest current _id as the "before" cursor.
   const loadMore = useCallback(async () => {
     const oldest = activities[activities.length - 1]
     if (!oldest) return
@@ -175,6 +183,7 @@ export const useCommunityFeed = (communityId, { challengeId = null, enabled = tr
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Could not load more activity.')
       setActivities((prev) => {
+        // Dedupe by id in case a live update arrived while loading older rows.
         const known = new Set(prev.map((activity) => activity._id))
         return [...prev, ...json.activities.filter((activity) => !known.has(activity._id))]
       })

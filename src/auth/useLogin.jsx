@@ -6,6 +6,7 @@ export const useLogin = () => {
     const [isLoading, setIsLoading] = useState(null)
     const { dispatch } = useAuthContext()
 
+    // POST credentials, persist returned user/JWT, then dispatch LOGIN; returns true/false for the form.
     const login = async (email, password) => {
         setIsLoading(true)
         setError(null)
@@ -17,9 +18,7 @@ export const useLogin = () => {
                 body: JSON.stringify({ email, password })
             })
 
-            // Proxy errors (for example when the backend on port 4000 is down)
-            // can have an empty, non-JSON response body. Parsing those responses
-            // with response.json() hides the real problem behind a SyntaxError.
+            // Read text first: proxy/server errors may return empty or non-JSON bodies.
             const body = await response.text()
             let json = null
 
@@ -27,8 +26,7 @@ export const useLogin = () => {
                 try {
                     json = JSON.parse(body)
                 } catch {
-                    // The status-specific message below is more useful than a
-                    // JSON parsing error for HTML/plain-text proxy responses.
+                    // Keep json null so status-specific fallback errors are shown.
                 }
             }
 
@@ -47,6 +45,7 @@ export const useLogin = () => {
                 return false
             }
 
+            // AuthContext change triggers App.jsx route redirects; no navigate() needed here.
             localStorage.setItem('user', JSON.stringify(json))
             dispatch({ type: 'LOGIN', payload: json })
             return true
@@ -60,4 +59,3 @@ export const useLogin = () => {
 
     return { login, isLoading, error }
 }
-

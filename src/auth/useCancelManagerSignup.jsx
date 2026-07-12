@@ -4,11 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthContext } from './useAuthContext'
 import { useLogout } from './useLogout'
 
-// Cancels an unfinished manager signup from anywhere in the app:
-//   1. asks the backend to hard-delete the pending manager account
-//   2. logs out locally (clears localStorage + AuthContext + habits, via useLogout)
-//   3. returns to the public landing page
-// Used by Header, LandingPage and ConfigureManagerPlan so the flow stays identical.
+// Cancels manager_pending signup: backend deletes account, useLogout clears local state, then route home.
+// Shared by Header, LandingPage and ConfigureManagerPlan so the abort flow stays identical.
 export const useCancelManagerSignup = () => {
     const { user } = useAuthContext()
     const { logout } = useLogout()
@@ -17,6 +14,7 @@ export const useCancelManagerSignup = () => {
     const [isCancelling, setIsCancelling] = useState(false)
     const [error, setError] = useState(null)
 
+    // Requires the pending user's JWT; backend rejects non-manager_pending accounts.
     const cancelManagerSignup = async () => {
         setIsCancelling(true)
         setError(null)
@@ -33,7 +31,6 @@ export const useCancelManagerSignup = () => {
                 throw new Error(data.error || 'Could not cancel the manager signup.')
             }
 
-            // Backend account is gone — clear the local session and go home.
             logout()
             navigate('/', { replace: true })
             return true

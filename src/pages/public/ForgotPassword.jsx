@@ -30,14 +30,12 @@ const ForgotPassword = () => {
     const [submitted, setSubmitted] = useState(false)
     const { forgotPassword, isLoading, error } = useForgotPassword()
 
+    // Request reset; navigate only when backend returns a demo token for an existing account.
     const handleSubmit = async (e) => {
         e.preventDefault()
         setSubmitted(false)
         const result = await forgotPassword(email)
 
-        // Anti-enumeration: only an existing account yields a token to
-        // continue with; every other accepted request shows the same neutral
-        // confirmation, so the form never reveals whether an email is registered.
         if (result?.resetToken) {
             navigate(`/reset-password/${encodeURIComponent(result.resetToken)}`, { replace: true })
         } else if (result) {

@@ -309,8 +309,7 @@ const CommunityDashboard = () => {
   }
 
   return (
-    // FeedRailLayout: feed as sticky right rail on desktop, stacked below on
-    // mobile; all layout logic lives in the feed module, not in this page.
+    // key={id} remounts the feed so cursor/list state resets when communities change.
     <FeedRailLayout feed={isMember && <ActivityFeed key={id} communityId={id} />}>
     <Box sx={{ textAlign: 'left' }}>
       <BackButton text="Back to Communities" to="/communities" sx={{ mb: 0 }} />

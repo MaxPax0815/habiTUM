@@ -35,19 +35,12 @@ const Login = () => {
     const [success, setSuccess] = useState(false)
     const { login, error, isLoading } = useLogin()
 
+    // Submit credentials; AuthContext LOGIN makes App.jsx redirect automatically.
     const handleSubmit = async (e) => {
         e.preventDefault()
         const ok = await login(email, password)
         if (ok) {
             setSuccess(true)
-            // No navigate() here: App.jsx's "/login" route already renders
-            // <Navigate to="/today"/> the instant `user` becomes truthy, so this
-            // component redirects itself as soon as AuthContext updates. A
-            // setTimeout(navigate, 1000) used to run in parallel with that and
-            // was never cleared on unmount — it fired a second, stale redirect
-            // to /today a full second later regardless of where the user had
-            // since navigated (very noticeable at low Vite dev-server speeds,
-            // where the timer's execution gets pushed back several seconds).
         }
     }
 

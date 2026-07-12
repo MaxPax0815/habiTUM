@@ -5,12 +5,14 @@ export const useResetPassword = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [success, setSuccess] = useState(false)
 
+    // Spend the URL token to set a new password; returns true and success=true on completion.
     const resetPassword = async (token, password) => {
         setIsLoading(true)
         setError(null)
         setSuccess(false)
 
         try {
+            // encodeURIComponent makes the token safe inside the /:token URL segment.
             const response = await fetch(`/api/user/reset-password/${encodeURIComponent(token)}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

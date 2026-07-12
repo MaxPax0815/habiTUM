@@ -19,24 +19,24 @@ import { useLogout } from '../auth/useLogout';
 import { colors } from '../styles/tokens'
 
 
-// user is passed down from AppLayout, which reads it from AuthContext (set on login, persisted in localStorage)
+// Role-aware app nav; route guards still enforce permissions server/page-side.
 const Sidebar = ({ user }) => {
   const { logout } = useLogout()
   const navigate = useNavigate()
 
-  // pages visible to all logged-in users
+  // Everyone logged in sees these app pages.
   const baseNavItems = [
     { label: "Today",       icon: <HomeOutlinedIcon />,    path: "/today" },
     { label: "Communities", icon: <GroupsOutlinedIcon />,  path: "/communities" },
     { label: "Progress",    icon: <BarChartOutlinedIcon />, path: "/progress" },
   ]
 
-  // extra pages only shown when accountType === 'manager'; prepended so Dashboard appears first
+  // Managers get Dashboard first; this is UX only, not the real route guard.
   const managerNavItems = [
     { label: "Dashboard", icon: <DashboardOutlinedIcon />, path: "/manager" },
   ]
 
-  // accountType comes from the login response (userController) → stored in AuthContext → passed via AppLayout
+  // Spread concat builds one nav array without mutating either source list.
   const navItems = user?.accountType === 'manager'
     ? [...managerNavItems, ...baseNavItems]
     : baseNavItems
@@ -46,7 +46,7 @@ const Sidebar = ({ user }) => {
     navigate('/')
   }
 
-  // Generate user initials for the avatar; fallback to "U" if no name info is available
+  // Avatar initials fallback to "U"; nested ternary checks full name, first name, then none.
   const initials = user?.firstName && user?.lastName
   ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() // $
   : user?.firstName
@@ -224,12 +224,11 @@ const Sidebar = ({ user }) => {
                 alignItems: "center",
                 gap: 0.5,
                 color: "rgba(255,255,255,0.35)",
-                // subscription values come lowercase from the backend ("free",
-                // "premium") — always display them with a capital first letter
+                // Backend sends lowercase tiers; capitalize only for display.
                 textTransform: "capitalize",
               }}
             >
-              {/* managers show a role badge instead of their subscription tier, since free/premium doesn't apply to them */}
+              {/* Managers show role badge; users show subscription tier. */}
               {user?.accountType === 'manager'
                 ? <AdminPanelSettingsOutlinedIcon sx={{ fontSize: 12 }} />
                 : <AutoAwesomeIcon sx={{ fontSize: 12 }} />}

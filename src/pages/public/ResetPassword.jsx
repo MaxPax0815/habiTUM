@@ -35,6 +35,7 @@ const ResetPassword = () => {
     const [clientError, setClientError] = useState(null)
     const { resetPassword, isLoading, error, success } = useResetPassword()
 
+    // Validate client-only confirmation, then send URL token + new password to backend.
     const handleSubmit = async (e) => {
         e.preventDefault()
         setClientError(null)
@@ -56,6 +57,7 @@ const ResetPassword = () => {
         }
     }
 
+    // Small render helper for the two password fields; only the first gets visibility toggle.
     const passwordField = (label, value, setter, autocomplete) => (
         <Box>
             <FieldLabel>{label}</FieldLabel>

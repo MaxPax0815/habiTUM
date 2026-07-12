@@ -49,6 +49,7 @@ export default function ManagerSignup() {
 
     const passwordMismatch = confirmPassword.length > 0 && confirmPassword !== password
 
+    // Creates a manager_pending account, stores its JWT, then sends the user to plan config.
     const handleSubmit = async (e) => {
         e.preventDefault()
         if (passwordMismatch) return
@@ -69,8 +70,7 @@ export default function ManagerSignup() {
             const data = await response.json()
 
             if (!response.ok) {
-                // A duplicate email usually means an earlier manager signup whose Stripe
-                // checkout was cancelled — point the user to login instead of a dead end.
+                // Duplicate email can be an unfinished manager signup; login can resume it.
                 if (data.error === 'The email is already in use.') {
                     setError('An account already exists for this email. Please log in to complete your manager subscription.')
                 } else {
@@ -80,9 +80,7 @@ export default function ManagerSignup() {
                 return
             }
 
-            // Persist pending manager account, then continue to plan configuration.
-            // replace: true keeps the filled signup form out of the history stack,
-            // so the browser back button doesn't resurface it.
+            // replace keeps the filled signup form out of browser history.
             localStorage.setItem('user', JSON.stringify(data))
             dispatch({ type: 'LOGIN', payload: data })
             navigate('/configure-manager-plan', { replace: true })
