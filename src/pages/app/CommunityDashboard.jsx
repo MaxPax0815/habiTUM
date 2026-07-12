@@ -91,6 +91,7 @@ const CommunityDashboard = () => {
   const [postDialogKey, setPostDialogKey] = useState(0)
   const [postSubmitting, setPostSubmitting] = useState(false)
   const [isChallengeDialogOpen, setIsChallengeDialogOpen] = useState(false) // creator-only "New Challenge" popup
+  const [editingChallenge, setEditingChallenge] = useState(null) // creator-only "Edit Challenge" popup target
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false) // creator/admin invite-link popup
   const [inviteCopied, setInviteCopied] = useState(false)
   const [inviteLink, setInviteLink] = useState('')
@@ -189,6 +190,20 @@ const CommunityDashboard = () => {
     else {
       const json = await res.json()
       setError(json.error)
+    }
+  }
+
+  const handleDeleteChallenge = async (challenge) => {
+    if (!window.confirm(`Delete "${challenge.title}"? This cannot be undone.`)) return
+
+    const authHeader = { 'Authorization': `Bearer ${token}` }
+    const res = await fetch(`/api/challenges/${challenge._id}`, { method: 'DELETE', headers: authHeader })
+
+    if (res.ok) {
+      fetchCommunityChallenges()
+    } else {
+      const json = await res.json()
+      setChallengesError(json.error || 'Could not delete challenge.')
     }
   }
 
@@ -486,6 +501,9 @@ const CommunityDashboard = () => {
                 key={challenge._id}
                 challenge={challenge}
                 onJoin={isMember ? () => handleJoinChallenge(challenge._id) : undefined}
+                canManage={isCreator}
+                onEdit={setEditingChallenge}
+                onDelete={handleDeleteChallenge}
               />
             ))}
           </Box>
@@ -516,6 +534,17 @@ const CommunityDashboard = () => {
           onChallengeCreated={fetchCommunityChallenges}
           onClose={() => setIsChallengeDialogOpen(false)}
         />
+      </AppDialog>
+
+      {/* Creator-only: edit an existing challenge. Same form in edit mode. */}
+      <AppDialog open={Boolean(editingChallenge)} onClose={() => setEditingChallenge(null)}>
+        {editingChallenge && (
+          <ChallengeForm
+            challenge={editingChallenge}
+            onChallengeUpdated={fetchCommunityChallenges}
+            onClose={() => setEditingChallenge(null)}
+          />
+        )}
       </AppDialog>
 
       {/* Creator-only: share a dummy invite link with a copy-to-clipboard button. */}

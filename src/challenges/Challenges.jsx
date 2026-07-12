@@ -106,12 +106,13 @@ const ChallengeJoinButton = ({ compact = false, isJoined = false, label, sx = {}
 // ---------------------------------------------------------------------------
 // Compact challenge card
 // ---------------------------------------------------------------------------
-const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
+const ChallengeCard = ({ challenge, isJoined, onJoin, canManage = false, onEdit, onDelete }) => {
   const daysLeft = getDaysLeft(challenge?.ends);
   const participantCount = getParticipantCount(challenge);
   const challengeId = challenge?._id || challenge?.id;
   const joined = Boolean(isJoined ?? challenge?.isJoined);
   const showJoinAction = joined || Boolean(onJoin);
+  const showManageActions = Boolean(canManage && (onEdit || onDelete));
 
   const category = getChallengeCategory(challenge);
   const difficulty = getChallengeDifficulty(challenge);
@@ -192,50 +193,74 @@ const ChallengeCard = ({ challenge, isJoined, onJoin }) => {
         </Stack>
       </Stack>
 
-      <Box
-        sx={{
-          mt: "auto",
-          pt: 3,
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 1.5,
-          alignItems: "stretch",
-          justifyContent: showJoinAction ? "flex-start" : "center",
-        }}
-      >
-        <Button
-          variant="outlined"
-          {...(challengeId
-            ? {
-              component: RouterLink,
-              to: `/challenges/${challengeId}`,
-            }
-            : {})}
-          startIcon={<VisibilityOutlinedIcon />}
+      <Box sx={{ mt: "auto", pt: 3, display: "flex", flexDirection: "column", gap: 1.5 }}>
+        {/* Creator-only management row, on one line directly above the Join button.
+            Styled to match the community page's Invite/Delete buttons. */}
+        {showManageActions && (
+          <Stack direction="row" spacing={1.5}>
+            <Button
+              variant="outlined"
+              onClick={() => onEdit?.(challenge)}
+              startIcon={<span className="material-symbols-outlined">edit</span>}
+              sx={{ flex: 1, py: 0.9, typography: "body2", fontWeight: 800 }}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={() => onDelete?.(challenge)}
+              startIcon={<span className="material-symbols-outlined">delete</span>}
+              sx={{ flex: 1, py: 0.9, typography: "body2", fontWeight: 800 }}
+            >
+              Delete
+            </Button>
+          </Stack>
+        )}
+
+        <Box
           sx={{
-            px: 2,
-            py: 0.9,
-            color: colors.textSecondary,
-            typography: "body2",
-            fontWeight: 800,
-            flex: showJoinAction ? "1 1 150px" : "0 0 auto",
-            minWidth: 120,
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 1.5,
+            alignItems: "stretch",
+            justifyContent: showJoinAction ? "flex-start" : "center",
           }}
         >
-          View
-        </Button>
-
-        {showJoinAction && (
-          <ChallengeJoinButton
-            compact
-            isJoined={joined}
-            onClick={joined ? undefined : onJoin}
+          <Button
+            variant="outlined"
+            {...(challengeId
+              ? {
+                component: RouterLink,
+                to: `/challenges/${challengeId}`,
+              }
+              : {})}
+            startIcon={<VisibilityOutlinedIcon />}
             sx={{
-              flex: "1 1 220px",
-              minWidth: { xs: "100%", sm: 220 },
+              px: 2,
+              py: 0.9,
+              color: colors.textSecondary,
+              typography: "body2",
+              fontWeight: 800,
+              flex: showJoinAction ? "1 1 150px" : "0 0 auto",
+              minWidth: 120,
             }}
-          />
-        )}
+          >
+            View
+          </Button>
+
+          {showJoinAction && (
+            <ChallengeJoinButton
+              compact
+              isJoined={joined}
+              onClick={joined ? undefined : onJoin}
+              sx={{
+                flex: "1 1 220px",
+                minWidth: { xs: "100%", sm: 220 },
+              }}
+            />
+          )}
+        </Box>
       </Box>
     </AppCard>
   );
@@ -253,6 +278,11 @@ export const ExtendedChallengeCard = ({
   canManageChallenge = false,
   onManageChallenge,
   onLeaveChallenge,
+  // Creator-only edit/delete controls, shown in the card header next to the chips.
+  // Separate from canManageChallenge/onManageChallenge (the joined-user action menu).
+  canManage = false,
+  onEdit,
+  onDelete,
   showHeading = true,
   readOnly = false,
 }) => {
@@ -265,6 +295,7 @@ export const ExtendedChallengeCard = ({
   const hasManageAction = Boolean(canManageChallenge && onManageChallenge);
   const hasLeaveAction = Boolean(isJoined && onLeaveChallenge);
   const hasActionMenu = Boolean(isJoined && (hasManageAction || hasLeaveAction));
+  const showManageActions = Boolean(canManage && (onEdit || onDelete));
   const isActionMenuOpen = Boolean(actionAnchorEl);
   const canJoinChallenge = Boolean(isCommunityMember);
 
@@ -343,29 +374,58 @@ export const ExtendedChallengeCard = ({
             />
           </Box>
 
-          {hasActionMenu && (
-            <IconButton
-              aria-label="Challenge actions"
-              aria-controls={isActionMenuOpen ? "challenge-actions-menu" : undefined}
-              aria-haspopup="menu"
-              aria-expanded={isActionMenuOpen ? "true" : undefined}
-              onClick={handleActionMenuOpen}
-              sx={{
-                width: 40,
-                height: 40,
-                flexShrink: 0,
-                border: `1px solid ${colors.border}`,
-                color: colors.textSecondary,
-                bgcolor: colors.surface,
-                "&:hover": {
-                  borderColor: colors.primary,
-                  bgcolor: colors.softBlue,
-                  color: colors.primary,
-                },
-              }}
-            >
-              <MoreHorizIcon />
-            </IconButton>
+          {(showManageActions || hasActionMenu) && (
+            <Stack direction="row" spacing={1} sx={{ flexShrink: 0, alignItems: "center" }}>
+              {/* Creator-only edit/delete, aligned with the community/difficulty chips. */}
+              {showManageActions && (
+                <>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => onEdit?.(challenge)}
+                    startIcon={<span className="material-symbols-outlined">edit</span>}
+                    sx={{ fontWeight: 800 }}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    color="error"
+                    onClick={() => onDelete?.(challenge)}
+                    startIcon={<span className="material-symbols-outlined">delete</span>}
+                    sx={{ fontWeight: 800 }}
+                  >
+                    Delete
+                  </Button>
+                </>
+              )}
+
+              {hasActionMenu && (
+                <IconButton
+                  aria-label="Challenge actions"
+                  aria-controls={isActionMenuOpen ? "challenge-actions-menu" : undefined}
+                  aria-haspopup="menu"
+                  aria-expanded={isActionMenuOpen ? "true" : undefined}
+                  onClick={handleActionMenuOpen}
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    flexShrink: 0,
+                    border: `1px solid ${colors.border}`,
+                    color: colors.textSecondary,
+                    bgcolor: colors.surface,
+                    "&:hover": {
+                      borderColor: colors.primary,
+                      bgcolor: colors.softBlue,
+                      color: colors.primary,
+                    },
+                  }}
+                >
+                  <MoreHorizIcon />
+                </IconButton>
+              )}
+            </Stack>
           )}
         </Box>
 

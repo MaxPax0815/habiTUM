@@ -20,8 +20,9 @@ import { sectionTitleSx } from '../styles/recipes'
 
 // ---------------------------------------------------------------------------
 // ChallengeForm.jsx
-// Creates the challenge container only.
-// Challenge habits/tasks will be added from the challenge detail flow later.
+// Create or edit a challenge container (habits are managed from the detail flow).
+// Passing an existing `challenge` switches the form into edit mode: fields are
+// prefilled and submitting sends a PATCH instead of creating a new challenge.
 // ---------------------------------------------------------------------------
 
 const DIFFICULTIES = [
@@ -42,31 +43,40 @@ const toApiDate = (dateValue) => `${dateValue}T00:00:00.000Z`;
 
 const ChallengeForm = ({
   communityId,
+  challenge,
   onChallengeCreated,
+  onChallengeUpdated,
   onClose,
 }) => {
   const { user } = useAuthContext();
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [difficulty, setDifficulty] = useState("medium");
-  const [starts, setStarts] = useState(formatDateInput(new Date()));
-  const [ends, setEnds] = useState(formatDateInput(addDays(new Date(), 30)));
+  const isEditMode = Boolean(challenge);
+
+  const [title, setTitle] = useState(challenge?.title || "");
+  const [description, setDescription] = useState(challenge?.description || "");
+  const [difficulty, setDifficulty] = useState(challenge?.difficulty || "medium");
+  const [starts, setStarts] = useState(
+    challenge?.starts ? formatDateInput(new Date(challenge.starts)) : formatDateInput(new Date())
+  );
+  const [ends, setEnds] = useState(
+    challenge?.ends ? formatDateInput(new Date(challenge.ends)) : formatDateInput(addDays(new Date(), 30))
+  );
   const [emptyFields, setEmptyFields] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const canSubmit = Boolean(communityId && title && starts && ends && !isLoading);
+  // Editing works off the challenge id; creating needs a target community.
+  const canSubmit = Boolean((isEditMode || communityId) && title && starts && ends && !isLoading);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!user) {
-      setError("You must be logged in to create a challenge.");
+      setError(`You must be logged in to ${isEditMode ? "edit" : "create"} a challenge.`);
       return;
     }
 
-    if (!communityId) {
+    if (!isEditMode && !communityId) {
       setError("A community is required to create a challenge.");
       setEmptyFields(["community"]);
       return;
@@ -81,21 +91,32 @@ const ChallengeForm = ({
     setIsLoading(true);
     setError(null);
 
-    const response = await fetch("/api/challenges", {
-      method: "POST",
-      body: JSON.stringify({
-        community: communityId,
-        title,
-        description,
-        starts: toApiDate(starts),
-        ends: toApiDate(ends),
-        difficulty,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${user.token}`,
-      },
-    });
+    const payload = {
+      title,
+      description,
+      starts: toApiDate(starts),
+      ends: toApiDate(ends),
+      difficulty,
+    };
+
+    // Edit mode patches the existing challenge; the community is left untouched.
+    const response = isEditMode
+      ? await fetch(`/api/challenges/${challenge._id}`, {
+          method: "PATCH",
+          body: JSON.stringify(payload),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+        })
+      : await fetch("/api/challenges", {
+          method: "POST",
+          body: JSON.stringify({ community: communityId, ...payload }),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+        });
 
     const json = await response.json();
     setIsLoading(false);
@@ -107,6 +128,13 @@ const ChallengeForm = ({
     }
 
     setEmptyFields([]);
+
+    if (isEditMode) {
+      onChallengeUpdated?.(json);
+      onClose?.();
+      return;
+    }
+
     setTitle("");
     setDescription("");
     setDifficulty("medium");
@@ -119,10 +147,12 @@ const ChallengeForm = ({
   return (
     <Box component="form" onSubmit={handleSubmit}>
       <Typography variant="h5" sx={{ color: colors.textPrimary, fontWeight: 900 }}>
-        New Challenge
+        {isEditMode ? "Edit Challenge" : "New Challenge"}
       </Typography>
       <Typography sx={{ mt: 0.5, mb: 3, color: colors.muted, fontWeight: 700 }}>
-        Create a challenge to share with your communities.
+        {isEditMode
+          ? "Update the details of this challenge."
+          : "Create a challenge to share with your communities."}
       </Typography>
 
       <AppCard sx={{ boxShadow: "none" }} contentSx={{ p: { xs: 2.5, sm: 3 } }}>
@@ -211,7 +241,9 @@ const ChallengeForm = ({
 
           <Stack direction="row" spacing={1.5}>
             <Button type="submit" variant="contained" disabled={!canSubmit} fullWidth>
-              {isLoading ? "Creating..." : "Create Challenge"}
+              {isEditMode
+                ? (isLoading ? "Saving..." : "Save Changes")
+                : (isLoading ? "Creating..." : "Create Challenge")}
             </Button>
             <Button variant="outlined" onClick={onClose}>
               Cancel

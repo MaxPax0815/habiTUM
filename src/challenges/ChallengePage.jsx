@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Box, Button, CircularProgress, Paper, Stack, Typography } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { useAuthContext } from "../auth/useAuthContext";
 import { ExtendedChallengeCard } from "./Challenges";
+import ChallengeForm from "./ChallengeForm";
 import Leaderboard from "./Leaderboard";
 import { sectionTitleSx } from "../styles/recipes";
 import AppDialog from "../components/AppDialog";
@@ -21,6 +22,7 @@ import FeedRailLayout from "../feed/FeedRailLayout";
 const ChallengePage = () => {
   const { challengeId } = useParams();
   const { user } = useAuthContext();
+  const navigate = useNavigate();
 
   const [data, setData] = useState(null);
   const [challengeHabits, setChallengeHabits] = useState([]);
@@ -30,6 +32,7 @@ const ChallengePage = () => {
   const [communityMembershipStatus, setCommunityMembershipStatus] = useState(null);
   const [communityRole, setCommunityRole] = useState(null);
   const [showHabitForm, setShowHabitForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -270,6 +273,34 @@ const ChallengePage = () => {
     });
   };
 
+  // Refresh the challenge header after an edit so the new title/dates show.
+  const handleChallengeUpdated = () => {
+    setShowEditForm(false);
+    refreshChallengeData().catch((refreshError) => {
+      setError(refreshError.message || "Could not refresh challenge.");
+    });
+  };
+
+  const handleDeleteChallenge = async () => {
+    if (!window.confirm(`Delete "${challenge?.title}"? This cannot be undone.`)) return;
+
+    try {
+      const response = await fetch(`/api/challenges/${challengeId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+
+      if (!response.ok) {
+        const json = await response.json();
+        throw new Error(json.error || "Could not delete challenge.");
+      }
+
+      navigate(`/communities/${communityId}`);
+    } catch (deleteError) {
+      setError(deleteError.message || "Could not delete challenge.");
+    }
+  };
+
   if (isLoading) {
     return (
       <Box sx={{ display: "grid", minHeight: 360, placeItems: "center" }}>
@@ -320,7 +351,8 @@ const ChallengePage = () => {
             />
 
             {/* Title + description live inside the card (showHeading), above the
-                participants/days-left/rank row — see ExtendedChallengeCard. */}
+                participants/days-left/rank row — see ExtendedChallengeCard.
+                Creator-only Edit/Delete render in the card header next to the chips. */}
             <ExtendedChallengeCard
               challenge={challenge}
               currentUserRank={data.currentUserRank}
@@ -328,6 +360,9 @@ const ChallengePage = () => {
               isCommunityMember={isCommunityMember}
               onJoin={handleJoinChallenge}
               onLeaveChallenge={handleLeaveChallenge}
+              canManage={isCommunityCreator}
+              onEdit={() => setShowEditForm(true)}
+              onDelete={handleDeleteChallenge}
               showHeading
             />
           </Box>
@@ -409,6 +444,15 @@ const ChallengePage = () => {
           challengeId={challengeId}
           onHabitCreated={handleChallengeHabitCreated}
           onClose={() => setShowHabitForm(false)}
+        />
+      </AppDialog>
+
+      {/* Creator-only: edit this challenge's details in the shared form. */}
+      <AppDialog open={showEditForm} onClose={() => setShowEditForm(false)} maxWidth="sm">
+        <ChallengeForm
+          challenge={challenge}
+          onChallengeUpdated={handleChallengeUpdated}
+          onClose={() => setShowEditForm(false)}
         />
       </AppDialog>
         </Box>
