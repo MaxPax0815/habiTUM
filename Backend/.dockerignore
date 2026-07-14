@@ -1,0 +1,11 @@
+node_modules
+.git
+.DS_Store
+
+# Keep secrets out of the image layers — Compose injects them as env vars instead.
+.env
+.env.*
+!.env.example
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

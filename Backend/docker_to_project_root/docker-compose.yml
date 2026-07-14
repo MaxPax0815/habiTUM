@@ -1,0 +1,7 @@
+# Backend secrets live in Backend/.env (gitignored, see Backend/.env.example).
+# Passing it as env_file here lets Compose interpolate ${MONGODB_URI},
+# ${STRIPE_SECRET_KEY}, ... inside the included Backend/docker-compose.yml.
+include:
+  - path: ./Backend/docker-compose.yml
+    env_file: ./Backend/.env
+  - path: ./Frontend/docker-compose.yml

@@ -1,0 +1,55 @@
+# Secrets are interpolated from Backend/.env (never committed). Compose reads that
+# file because the root docker-compose.yml passes it as env_file for this include;
+# running this file directly works too, since .env sits next to it.
+# The :? form makes Compose abort with the given message instead of silently
+# starting with a missing or empty credential.
+
+x-stripe-config: &stripe-config
+  STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:?set STRIPE_SECRET_KEY in Backend/.env (copy .env.example)}
+  STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:?set STRIPE_WEBHOOK_SECRET in Backend/.env (copy .env.example)}
+  # Price IDs are public identifiers, not credentials — safe to keep as defaults.
+  STRIPE_PREMIUM_PRICE_ID: ${STRIPE_PREMIUM_PRICE_ID:-price_1Tm8AFPfbbKryRmHQTjOvGiJ}
+  STRIPE_MANAGER_BASE_PRICE_ID: ${STRIPE_MANAGER_BASE_PRICE_ID:-price_1TrH75PfbbKryRmHRfE8ksF2}
+  STRIPE_MANAGER_COMMUNITY_SLOT_PRICE_ID: ${STRIPE_MANAGER_COMMUNITY_SLOT_PRICE_ID:-price_1TrH8JPfbbKryRmHQtEgrHZw}
+
+services:
+  backend:
+    build:
+      context: .
+    ports:
+      - "4000:4000"
+    environment:
+      <<: *stripe-config
+      MONGODB_URI: ${MONGODB_URI:?set MONGODB_URI in Backend/.env (copy .env.example)}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in Backend/.env (copy .env.example)}
+      NODE_ENV: development
+      CLIENT_URL: http://localhost:3000
+      EMAIL_USER: ${EMAIL_USER:-}
+      EMAIL_PASS: ${EMAIL_PASS:-}
+      MANAGER_PAYMENT_TOKEN_TTL_HOURS: ${MANAGER_PAYMENT_TOKEN_TTL_HOURS:-168}
+      MANAGER_PASSWORD_SETUP_TTL_HOURS: ${MANAGER_PASSWORD_SETUP_TTL_HOURS:-24}
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://localhost:4000').then(() => process.exit(0)).catch(() => process.exit(1))
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+  stripe-cli:
+    image: stripe/stripe-cli:v1.42.0
+    depends_on:
+      backend:
+        condition: service_healthy
+    command:
+      - listen
+      - --api-key
+      - ${STRIPE_SECRET_KEY:?set STRIPE_SECRET_KEY in Backend/.env (copy .env.example)}
+      - --forward-to
+      - http://backend:4000/api/billing/webhook
+      - --events
+      - checkout.session.completed,customer.subscription.created,customer.subscription.updated,customer.subscription.deleted
+    restart: unless-stopped

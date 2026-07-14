@@ -1,0 +1,10 @@
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Installed dependencies
+node_modules/
+
+# Local npm configuration; may contain authentication tokens
+.npmrc
