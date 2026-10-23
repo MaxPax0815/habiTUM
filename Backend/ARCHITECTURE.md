@@ -1,34 +1,35 @@
-# HabiTUM Backend — Agent Context
+# HabiTUM Backend — Architecture
 
-Read this file fully before making changes here. It is the map of the Express/MongoDB API: what exists, how the pieces connect, and the conventions to follow when adding something new. If you change routes, models, or the permission model, update this file in the same change.
+Read this file before making changes to the backend. It is the map of the Express/MongoDB API: what exists, how the pieces connect, and the conventions to follow when adding something new. If you change routes, models, or the permission model, update this file in the same change.
 
-See also: [`../CLAUDE.md`](../CLAUDE.md) (whole-project overview) and [`../Frontend/CLAUDE.md`](../Frontend/CLAUDE.md) (the API's only consumer).
+See also: the [project README](../README.md) (overview and quick start) and [`../Frontend/README.md`](../Frontend/README.md) (the API's only consumer).
 
 ## What this is
 
 HabiTUM is a habit-tracking app built for a TUM SEBA course project. Users build personal habits (build good ones / break bad ones), track daily or weekly check-ins, join communities, and compete in time-boxed challenges with leaderboards. Premium subscribers (via Stripe) unlock analytics, community creation, and challenge creation.
 
-Stack: **Node.js + Express 5 + Mongoose 9 (MongoDB Atlas)**. Auth is JWT (`jsonwebtoken`), passwords hashed with `bcrypt`. No TypeScript. `npm test` runs Node's built-in test runner over `tests/`: password-reset controller coverage plus the activity-feed integration tests (the latter against an in-memory MongoDB via the `mongodb-memory-server` devDependency — see `tests/feed.test.js`). This is a course project: `config.js` intentionally commits secrets/URIs instead of using `.env` — see the comment block in that file before "fixing" it.
+Stack: **Node.js + Express 5 + Mongoose 9 (MongoDB Atlas)**. Auth is JWT (`jsonwebtoken`), passwords hashed with `bcrypt`. No TypeScript. `npm test` runs Node's built-in test runner over `tests/`: unit tests plus integration tests against an in-memory MongoDB (via the `mongodb-memory-server` devDependency), see the `tests/` entry in the directory map below. Secrets (MongoDB URI, JWT secret, Stripe keys) are read from the environment only — locally from `Backend/.env` (gitignored, template in `.env.example`) — and the server refuses to start if one is missing. Only non-secret values such as Stripe price IDs have committed defaults in `config.js`.
 
 ## Repo shape (important, non-obvious)
 
-- The project root (`HabiTUM_new/`) is **not** a git repo. `Backend/` and `Frontend/` are **each their own separate git repository** (`Backend/.git`, `Frontend/.git`), pushed to separate GitLab repos (see `package.json` → `repository.url`). Commits, branches, and `git log` must be run *inside* `Backend/` or `Frontend/`, never from the root.
-- `docker-compose.yml`, `README_Docker.md`, and `.node-version` live at the shared root (see `README_Docker.md` for the "move these out of Backend" note — that migration is already done in this checkout).
+- This is a monorepo: `Backend/` and `Frontend/` live side by side in one git repository. They were originally developed as two separate GitLab repositories during the course, which is why `Backend/package.json` still lists the old GitLab URL under `repository.url`.
+- The root `docker-compose.yml` includes `Backend/docker-compose.yml` and `Frontend/docker-compose.yml` and passes `Backend/.env` to the backend.
 
 ## Running it
 
 ```bash
 cd Backend
+cp .env.example .env  # then fill in MONGODB_URI, JWT_SECRET and the Stripe keys
 npm ci
 npm run dev          # nodemon server.js — http://localhost:4000
-npm run seed          # scripts/seedDevData.js — wipes and reseeds ALL collections
+npm run seed:prod     # scripts/seedDevData.js — wipes and reseeds ALL collections
 npm run dev:fresh     # seed then dev
 node scripts/seedPremiumUserData.js   # adds a realistic month of habits/checkins to premium@test.com only (non-destructive to other users)
 ```
 
-Or via Docker from the project root: `docker compose up --build` (backend on `:4000`, see root docs).
+Or via Docker from the project root: `docker compose up --build` (backend on `:4000`, frontend on `:3000`). Note that the backend container starts with `npm run dev:fresh`, so **every container start wipes and reseeds the configured database** — point `MONGODB_URI` at a dev database only.
 
-Demo accounts after `npm run seed` (password `Test1234` for all): `manager@test.com` (manager, premium), `premium@test.com` (premium), `free@test.com` (free), plus several streak-variety accounts (`streakleader@`, `consistent@`, `rookie@`, `comeback@`, `hydration@`) used to populate a realistic community leaderboard.
+Demo accounts after seeding (password `Test1234` for all): `manager@test.com` (manager, premium), `premium@test.com` (premium), `free@test.com` (free), plus several streak-variety accounts (`streakleader@`, `consistent@`, `rookie@`, `comeback@`, `hydration@`) used to populate a realistic community leaderboard.
 
 ## Request lifecycle
 
@@ -48,7 +49,7 @@ Backend/
 ├── config.js                     — PORT, MONGODB_URI, JWT_SECRET, Stripe keys, CLIENT_URL, direct-reset feature flag
 ├── auth/
 │   ├── userModel.js               — User schema + User.signup()/User.login() statics (bcrypt + validator); includes hashed passwordResetToken/passwordResetExpires fields
-│   ├── userController.js          — auth endpoints; direct reset token is demo-only and guarded by DIRECT_PASSWORD_RESET; forgot-password is anti-enumeration: unknown emails get the SAME 200 + message as known ones, just without a resetToken
+│   ├── userController.js          — auth endpoints; direct reset token is demo-only and guarded by DIRECT_PASSWORD_RESET (see the API table for the forgot-password behaviour)
 │   ├── user.js                    — router, mounted at /api/user (login/signup/forgot-password/reset-password public, /me behind requireAuth)
 │   └── requireAuth.js             — JWT verification middleware; sets req.user = { _id }
 ├── habit/
@@ -71,7 +72,7 @@ Backend/
 │   ├── communityMembershipModel.js — join table: user ↔ community, role (member/admin/creator) + membershipStatus
 │   ├── communityController.js      — list/get/create/join/leave/delete + get community's challenges
 │   ├── communities.js              — router, mounted at /api/communities, behind requireAuth
-│   └── requireCommunityCreatorAcsess.js — gates create/delete: must be premium or manager (NOTE: filename has a typo, "Acsess" — do not silently rename without updating the require() in communities.js)
+│   └── requireCommunityCreatorAccess.js — gates create/delete: must be premium or manager
 ├── activities/                     — the community activity feed
 │   ├── activityModel.js            — Activity schema: denormalized feed items (challenge-habit checkins only), single community ref resolved at write time; indexed { community, _id } for cursor pagination + reconnect catch-up
 │   ├── activityService.js          — recordCheckinActivity (guards kind==='challenge', snapshots actor/habit/streak into meta, milestones are a celebratory message VARIANT rendered by the frontend at streak %7 === 0, not separate feed items) + removeCheckinActivity (undo); called fire-and-forget from habitController. SPAM GUARD: undo revokes (soft-deletes) instead of deleting, a same-period re-checkin restores the original doc — with the unique (user, habit, type, periodKey) index the feed can never hold more than one post per user/habit/period, however fast someone toggles checkin/undo.
@@ -81,6 +82,8 @@ Backend/
 │   └── feed.js                     — legacy router, mounted at /api/feed (ticket only); active feed reads go through /api/communities/:id/feed and /feed/updates
 ├── institutions/
 │   └── institutionModel.js         — university/org directory (name, emailDomain, logoUrl). Not yet wired to any controller/route — exists for future institution-scoped communities.
+├── communityPosts/                — community posts (updates by admins/creators): model + controller (routes live in communities/communities.js)
+├── manager/                       — manager dashboard API (overview, community stats, challenge adherence), manager accounts only
 ├── billing/
 │   ├── stripeController.js         — create checkout session, create billing-portal session, schedule cancellation, get billing info
 │   ├── stripeWebhookController.js  — Stripe webhook handler; syncs subscription status → User document
@@ -88,8 +91,13 @@ Backend/
 ├── scripts/
 │   ├── seedDevData.js              — full destructive reseed: users, communities, challenges, challenge habits, progress, and feed activities generated from the recent seeded challenge checkins
 │   └── seedPremiumUserData.js      — additive/idempotent-per-user: rebuilds only premium@test.com's personal habits with a realistic month of data
-└── tests/
-    └── feed.test.js                — node:test integration tests (in-memory MongoDB): challenge checkin → activity in the right community feed, personal checkin → none, undo removal, membership/ticket auth, SSE stream delivery + reconnect catch-up
+└── tests/                          — node:test suites; the integration tests use an in-memory MongoDB (mongodb-memory-server)
+    ├── feed.test.js                — challenge checkin → activity in the right community feed, personal checkin → none, undo removal, membership/ticket auth, SSE stream delivery + reconnect catch-up
+    ├── communityMembers.test.js    — member listing and role changes (creator vs admin permissions)
+    ├── communityPosts.test.js      — who may create community posts
+    ├── passwordReset.test.js       — forgot/reset-password controller
+    ├── periodUtils.test.js         — period-key date math
+    └── profileLanguage.test.js     — offensive-language filter on profile fields at signup
 ```
 
 Naming convention: each resource folder holds `<name>Model.js`, `<name>Controller.js`, and a router file. The router file for `habit` and `communities`/`challenges` is *not* suffixed `Routes.js` (it's `habits.js`, `communities.js`, `challenge.js`) except billing (`stripeRoutes.js`) — check the existing file before assuming a name.
@@ -117,7 +125,7 @@ Key design decision: **streak/completion state is never stored on `Habit` itself
 Three independent axes, all enforced **server-side** (frontend gating is UX-only, never trust it):
 
 1. **Authentication** (`requireAuth`): every route except `/api/user/login`, `/api/user/signup`, and the Stripe webhook requires a valid `Authorization: Bearer <jwt>` header.
-2. **Subscription tier** (`User.subscription`: `free` | `premium`) and **account type** (`User.accountType`: `user` | `manager`). Managers are created directly in the DB, never through signup. `hasChallengeAccountAccess` / the inline check in `requireCommunityCreatorAcsess.js` both use the same rule: `accountType === 'manager' || subscription === 'premium'` gates community/challenge *creation*. Regular free users can join communities/challenges and track personal habits without limit.
+2. **Subscription tier** (`User.subscription`: `free` | `premium`) and **account type** (`User.accountType`: `user` | `manager`). Managers are created directly in the DB, never through signup. `hasChallengeAccountAccess` / the inline check in `requireCommunityCreatorAccess.js` both use the same rule: `accountType === 'manager' || subscription === 'premium'` gates community/challenge *creation*. Regular free users can join communities/challenges and track personal habits without limit.
 3. **Ownership / membership**: personal habits require `habit.user === req.user._id`; challenge habit actions require an `accepted`/`joined` `ChallengeParticipation`; community/challenge *management* (create/delete) additionally requires being the community's `createdBy` or a membership with `role` in `admin`/`creator` (see `hasCommunityManagementAccess` in `requireChallengeCreatorAccess.js`).
 
 When adding a new mutating route, decide which of these three axes apply and reuse the existing middleware (`requireAuth`, `requireChallengeCreatorAccess`/`requireChallengeDeleteAccess`, `requireCommunityCreatorAccess`) rather than re-implementing the checks inline.
@@ -154,6 +162,15 @@ All routes are prefixed as mounted in `server.js`. `🔒` = behind `requireAuth`
 | POST | `/api/communities/:id/join` 🔒 | — | `joinCommunity` (idempotent upsert; private communities → `pending`) |
 | DELETE | `/api/communities/:id/leave` 🔒 | — | `leaveCommunity` |
 | DELETE | `/api/communities/:id` 🔒 | `requireCommunityCreatorAccess` + ownership check in controller | `deleteCommunity` |
+| GET | `/api/communities/:id/invite` 🔒 | creator (checked in controller) | `getInviteCode` — invite-link code for the community |
+| POST | `/api/communities/invite/:code/join` 🔒 | — | `joinCommunityByInvite` — join a (private) community via invite link |
+| GET | `/api/communities/:id/members` 🔒 | admin/creator (checked in controller) | `getCommunityMembers` |
+| PATCH | `/api/communities/:id/members/:membershipId` 🔒 | creator (checked in controller) | `updateCommunityMemberRole` — promote/demote members |
+| GET / POST | `/api/communities/:id/posts` 🔒 | creating requires admin/creator (checked in controller) | `getCommunityPosts` / `createCommunityPost` |
+| PATCH / DELETE | `/api/communities/:id/posts/:postId` 🔒 | admin/creator (checked in controller) | `updateCommunityPost` / `deleteCommunityPost` |
+| GET | `/api/manager/overview` 🔒 | premium/manager tier + `accountType === 'manager'` | `managerController.getManagerOverview` |
+| GET | `/api/manager/communities/:id/stats` 🔒 | as above | `getManagerCommunityStats` |
+| GET | `/api/manager/challenges/:id/adherence` 🔒 | as above | `getManagerChallengeAdherence` |
 | POST | `/api/billing/create-checkout-session` 🔒 | — | `stripeController.createCheckoutSession` |
 | POST | `/api/billing/create-portal-session` 🔒 | — | `createPortalSession` |
 | POST | `/api/billing/schedule-cancellation` 🔒 | — | `scheduleSubscriptionCancellation` |
@@ -169,6 +186,6 @@ There are no routes yet for challenge *habits* management (adding/removing habit
 - **Ownership checks**: always filter Mongoose queries by the owning field (`{ _id: id, user: req.user._id }`) rather than fetching by id alone and checking afterward — this is both the existing style and avoids leaking a 200 with someone else's data before the check runs.
 - **Cascading deletes**: when a parent document is deleted, explicitly clean up dependents with `Promise.all([...deleteMany...])` (see `deleteHabit`, `deleteChallenge`, `deleteCommunity`) — there is no Mongoose middleware or DB-level cascade.
 - **Dates/periods**: never compare raw `Date` fields across days without going through `periodUtils.js`'s helpers. If frontend logic needs the same computation, mirror it in `Frontend/src/pages/app/Progress/analytics.js` rather than duplicating ad hoc.
-- **Config**: add new secrets/URLs to `config.js` with a `process.env.X || '<dev fallback>'` pattern (see `STRIPE_*` keys) so Docker Compose can override them without breaking non-Docker local dev.
+- **Config**: add new values to `config.js`. Secrets are read from `process.env` only (add them to `REQUIRED_SECRETS` and `.env.example`, never with a committed fallback); non-secret settings may use a `process.env.X || '<default>'` pattern (see the `STRIPE_*_PRICE_ID` keys).
 - **Direct password reset is demo-only**: `POST /api/user/forgot-password` returns the plaintext one-time token to the browser, so knowledge of an email address is sufficient to take over that account. `DIRECT_PASSWORD_RESET` defaults to enabled outside production and disabled in production. Do not enable it for a real deployment without restoring an ownership-verification channel such as email.
 - After changing routes/models/permissions, update the tables above in this file.
