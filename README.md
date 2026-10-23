@@ -108,4 +108,4 @@ habitum/
 | Maximilian Michel | |
 | nicksalfeld | |
 
-My own focus in the project: the app shell and navigation (layout, sidebar, header), the landing page, login and signup, the profile and billing pages, and consolidating the two original course repositories into this monorepo.
+My own focus in the project: the app shell and navigation (layout, sidebar, header), the landing page, login and signup, and the profile and billing pages.
